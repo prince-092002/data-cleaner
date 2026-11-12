@@ -1,4 +1,5 @@
-"""Backend settings. Override with environment variables (DC_STORAGE_DIR, DC_CORS_ORIGINS)."""
+"""Backend settings. Override with environment variables (DC_STORAGE_DIR, DC_CORS_ORIGINS,
+DC_MAX_UPLOAD_MB)."""
 
 from __future__ import annotations
 
@@ -17,7 +18,7 @@ def _default_origins() -> list[str]:
 @dataclass
 class Settings:
     storage_dir: Path = field(default_factory=lambda: Path(os.environ.get("DC_STORAGE_DIR", "storage")))
-    max_upload_bytes: int = 50 * MB
+    max_upload_bytes: int = field(default_factory=lambda: int(os.environ.get("DC_MAX_UPLOAD_MB", "50")) * MB)
     ttl_hours: int = 24
     cleanup_interval_seconds: int = 3600
     cors_origins: list[str] = field(default_factory=_default_origins)

@@ -1,5 +1,5 @@
-import { useRef, useState, type DragEvent } from 'react'
-import { ApiError, startProfile, uploadDataset } from '@/api/client'
+import { useEffect, useRef, useState, type DragEvent } from 'react'
+import { ApiError, getHealth, startProfile, uploadDataset } from '@/api/client'
 import type { UploadResponse } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAppState } from '@/state/AppState'
 
-export const MAX_BYTES = 50 * 1024 * 1024
+export const DEFAULT_MAX_MB = 50          // until the server says otherwise
 export const SAMPLES = [
   { file: 'sales_orders_messy.csv', label: 'Sales orders (CSV)' },
   { file: 'customers_messy.xlsx', label: 'Customers (Excel)' },
@@ -15,12 +15,14 @@ export const SAMPLES = [
 ]
 
 /** Friendly client-side check only; the server stays the authority. */
-export function validateFile(file: File): string | null {
+export function validateFile(file: File, maxMb = DEFAULT_MAX_MB): string | null {
   const name = file.name.toLowerCase()
   if (!name.endsWith('.csv') && !name.endsWith('.xlsx')) {
     return 'Only .csv and .xlsx files are supported.'
   }
-  if (file.size > MAX_BYTES) return 'This file is larger than 50 MB. Please choose a smaller file.'
+  if (file.size > maxMb * 1024 * 1024) {
+    return `This file is larger than ${maxMb} MB. Please choose a smaller file.`
+  }
   return null
 }
 
@@ -31,6 +33,9 @@ export function formatSize(bytes: number): string {
 }
 
 function messageOf(e: unknown): string {
+  if (e instanceof ApiError && e.code === 'file_too_large') {
+    return `${e.message} Please choose a smaller file.`
+  }
   if (e instanceof ApiError) return e.message
   return 'Something went wrong. Please try again.'
 }
@@ -44,12 +49,25 @@ export function UploadScreen() {
   const [busy, setBusy] = useState<null | 'upload' | 'profile'>(null)
   const [error, setError] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
+  const [maxMb, setMaxMb] = useState(DEFAULT_MAX_MB)
+
+  useEffect(() => {
+    let live = true
+    getHealth()
+      .then((h) => {
+        if (live && h && h.max_upload_mb > 0) setMaxMb(h.max_upload_mb)
+      })
+      .catch(() => {})                // keep the default; the server still enforces its limit
+    return () => {
+      live = false
+    }
+  }, [])
 
   const sheet = upload?.sheets[sheetIdx] ?? null
 
   async function doUpload(file: File) {
     setError(null)
-    const problem = validateFile(file)
+    const problem = validateFile(file, maxMb)
     if (problem) {
       setError(problem)
       return
@@ -122,7 +140,7 @@ export function UploadScreen() {
         <CardTitle>
           <h2>Upload your file</h2>
         </CardTitle>
-        <CardDescription>Choose a CSV or Excel (.xlsx) file, 50 MB or smaller.</CardDescription>
+        <CardDescription>Choose a CSV or Excel (.xlsx) file, {maxMb} MB or smaller.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <div

@@ -433,12 +433,14 @@ Error body for every non-2xx response:
 | 400 | `invalid_request` | bad body, unknown sheet, unknown proposal id |
 | 404 | `not_found` | unknown dataset or job, or files already deleted |
 | 409 | `not_ready` | profile or results requested before the job finished; clean requested before profile |
-| 413 | `file_too_large` | upload over 50 MB |
+| 413 | `file_too_large` | upload over the limit (`DC_MAX_UPLOAD_MB`, default 50) |
 | 415 | `unsupported_file_type` | not `.csv` or `.xlsx` (checked by extension **and** content sniffing) |
 | 422 | `unreadable_file` | file passes type checks but cannot be parsed, or is empty |
 | 500 | `internal_error` | unexpected server error (no internal details in the message) |
 
-A failed job's `error.code` is one of `unreadable_file`, `invalid_request`, `internal_error`, or `interrupted` (the server restarted while the job was queued or running).
+A failed job's `error.code` is one of `unreadable_file`, `invalid_request`, `internal_error`, `interrupted` (the server restarted while the job was queued or running), or `superseded` (a newer profile or clean job was started for the same dataset, so this job's result was discarded).
+
+`GET /api/health` returns `{"status": "ok", "max_upload_mb": 50}`; the website uses `max_upload_mb` for its own check and text.
 
 ### 8.1 `POST /api/datasets` (upload)
 
@@ -488,7 +490,9 @@ Body = `Decisions`:
 {"approved": ["sug_..."], "rejected": ["sug_..."], "edited": [{"id": "sug_...", "params": {"dayfirst": false}}]}
 ```
 
-Response `202`: `{"job_id": "uuid"}`. The job id is also the `run_id`. Starting a new profile job deletes the previous profile, plan, results and output files for that dataset.
+Response `202`: `{"job_id": "uuid"}`. The job id is also the `run_id`.
+
+**Generations (M6).** Every new profile or clean job increases the dataset's `generation` and clears its results (a profile job also clears the profile). A job saves its result with one guarded `UPDATE ... WHERE id = :id AND generation = :g`; if a newer job has started, nothing is saved and the job ends `failed` / `superseded`. An old job can never overwrite a newer profile or result.
 
 ### 8.6 `GET /api/datasets/{id}/results`
 
@@ -512,8 +516,8 @@ Query params for the change log table: `limit` (default 100, max 500), `offset`,
 
 ### 8.8 Jobs table (SQLModel)
 
-`Job`: `id` (UUID4, pk), `dataset_id`, `type`, `status`, `progress_pct` (int), `current_step` (str), `error_code`, `error_message`, `created_at`, `updated_at`.
-`Dataset`: `id` (UUID4, pk), `filename`, `file_type`, `size_bytes`, `sheet`, `header_row`, `created_at`, `expires_at`.
+`Job`: `id` (UUID4, pk), `dataset_id`, `type`, `status`, `progress_pct` (int), `current_step` (str), `error_code`, `error_message`, `generation` (int), `created_at`, `updated_at`.
+`Dataset`: `id` (UUID4, pk), `filename`, `file_type`, `size_bytes`, `sheet`, `header_row`, `created_at`, `expires_at`, `generation` (int), `profile_json` (DatasetProfile or null), `results_json` (CleanResult or null), `results_run_id` (clean job whose folder holds the downloads, or null).
 
 ---
 
@@ -525,15 +529,16 @@ storage/
   {dataset_id}/
     original.csv | original.xlsx   # never modified
     inspection.json                # sheets and header rows found at upload
-    profile.json
-    plan.json
-    results.json
-    clean.csv  clean.xlsx  report.html  recipe.yaml  changelog.csv
+    runs/{run_id}/                 # one folder per clean job (M6)
+      plan.json
+      clean.csv  clean.xlsx  report.html  recipe.yaml  changelog.csv
 ```
+
+The profile and results are stored in the `Dataset` row (section 8.8), not as files. Downloads come from `runs/{results_run_id}/`. When a clean job's result is saved, the other run folders of that dataset are deleted; a superseded or failed clean job deletes its own folder.
 
 - `clean.csv`: UTF-8, comma-delimited, header = column `name`s, no `_row_id`. `clean.xlsx`: one sheet named `clean`, numbers/dates/booleans written as real Excel types.
 - A cleanup task runs at startup and every hour: deletes any dataset folder and its database rows where `expires_at` (upload time + 24 hours) has passed. An expired dataset answers `404` even before the task has run. Folders with no database row are removed once they are over an hour old.
-- The upload limit is enforced twice: from the declared `Content-Length` before the body is read, and again while streaming to disk.
+- The upload limit (`DC_MAX_UPLOAD_MB`, default 50) is enforced twice: by an ASGI layer that counts body bytes as they arrive (refusing at once from a declared `Content-Length`, otherwise stopping as soon as the body passes the limit plus 1 MB of form overhead, so chunked uploads with no `Content-Length` are also refused before the form is parsed), and again on the file bytes while streaming to disk.
 - Stored file names are fixed (above). User-supplied filenames are never used as paths.
 
 ## 10. Frontend rules and sample data (added after M4)

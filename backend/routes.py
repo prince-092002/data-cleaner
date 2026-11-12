@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from sqlmodel import Session
 
 from backend import errors
-from backend.db import Dataset, Job, iso, utcnow
+from backend.db import Dataset, Job, iso, start_generation, utcnow
 from backend.jobs import Context, run_clean_job, run_profile_job
 from backend.storage import DOWNLOADS, TooLarge, is_uuid, looks_like
 from engine import pipeline
@@ -54,10 +54,13 @@ def _dataset(ctx: Context, dataset_id: str) -> Dataset:
 
 
 def _new_job(ctx: Context, dataset_id: str, job_type: str) -> str:
+    """Start a new generation of the dataset and a job that belongs to it, in one transaction."""
     now = utcnow()
     job_id = str(uuid.uuid4())
     with Session(ctx.engine) as session:
-        session.add(Job(id=job_id, dataset_id=dataset_id, type=job_type, created_at=now, updated_at=now))
+        generation = start_generation(session, dataset_id, clear_profile=job_type == "profile")
+        session.add(Job(id=job_id, dataset_id=dataset_id, type=job_type, generation=generation,
+                        created_at=now, updated_at=now))
         session.commit()
     return job_id
 
@@ -153,9 +156,7 @@ def start_profile(
         session.commit()
     dataset.sheet, dataset.header_row = sheet["name"], header_row
 
-    # A new profile replaces the old one and anything cleaned from it.
-    for name in ("profile.json", "plan.json", "results.json", *DOWNLOADS):
-        ctx.storage.file(dataset_id, name).unlink(missing_ok=True)
+    # A new profile replaces the old one and anything cleaned from it (a new generation).
     job_id = _new_job(ctx, dataset_id, "profile")
     background.add_task(run_profile_job, ctx, job_id, dataset)
     return {"job_id": job_id}
@@ -184,11 +185,10 @@ def get_job(request: Request, job_id: str):
 @router.get("/datasets/{dataset_id}/profile")
 def get_profile(request: Request, dataset_id: str):
     ctx = _ctx(request)
-    _dataset(ctx, dataset_id)
-    path = ctx.storage.file(dataset_id, "profile.json")
-    if not path.exists():
+    dataset = _dataset(ctx, dataset_id)
+    if dataset.profile_json is None:
         raise errors.not_ready("The profile is not ready yet. Start a profile job and wait for it to finish.")
-    return {"dataset_id": dataset_id, **_read_json(path)}
+    return {"dataset_id": dataset_id, **json.loads(dataset.profile_json)}
 
 
 # --------------------------------------------------------------------------- clean
@@ -197,18 +197,18 @@ def get_profile(request: Request, dataset_id: str):
 def start_clean(request: Request, dataset_id: str, decisions: Decisions, background: BackgroundTasks):
     ctx = _ctx(request)
     dataset = _dataset(ctx, dataset_id)
-    path = ctx.storage.file(dataset_id, "profile.json")
-    if not path.exists():
+    if dataset.profile_json is None:
         raise errors.not_ready("Profile the file before cleaning it.")
-    profile = DatasetProfile.model_validate_json(path.read_text(encoding="utf-8"))
+    profile = DatasetProfile.model_validate_json(dataset.profile_json)
     try:
         plan = pipeline.build_plan(profile, decisions)
     except PlanError as exc:
         raise errors.invalid_request(exc.message)
 
-    ctx.storage.file(dataset_id, "plan.json").write_text(plan.model_dump_json(), encoding="utf-8")
-    ctx.storage.file(dataset_id, "results.json").unlink(missing_ok=True)
     job_id = _new_job(ctx, dataset_id, "clean")
+    run_dir = ctx.storage.run_dir(dataset_id, job_id)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "plan.json").write_text(plan.model_dump_json(), encoding="utf-8")
     background.add_task(run_clean_job, ctx, job_id, dataset, plan)
     return {"job_id": job_id}
 
@@ -241,11 +241,11 @@ def get_results(
     change_type: str | None = None,
 ):
     ctx = _ctx(request)
-    _dataset(ctx, dataset_id)
-    path = ctx.storage.file(dataset_id, "results.json")
-    if not path.exists():
+    dataset = _dataset(ctx, dataset_id)
+    if dataset.results_json is None:
         raise errors.not_ready("The results are not ready yet. Start a clean job and wait for it to finish.")
-    result = _read_json(path)
+    result = json.loads(dataset.results_json)
+    run_dir = ctx.storage.run_dir(dataset_id, dataset.results_run_id)
     given = {"rule_id": rule_id, "column": column, "action": action, "change_type": change_type}
     filters = {k: v for k, v in given.items() if v}
     return {
@@ -255,7 +255,7 @@ def get_results(
         "after": result["after"],
         "columns": result["columns"],
         "summary": result["summary"],
-        "changes": _changes(ctx.storage.file(dataset_id, "changelog.csv"), filters, limit, offset),
+        "changes": _changes(run_dir / "changelog.csv", filters, limit, offset),
         "downloads": list(DOWNLOADS),
         "warnings": result["warnings"],
     }
@@ -269,9 +269,9 @@ def download(request: Request, dataset_id: str, name: str):
     dataset = _dataset(ctx, dataset_id)
     if name not in DOWNLOADS:
         raise errors.not_found("This download")
-    path = ctx.storage.file(dataset_id, name)
-    if not path.exists() or not ctx.storage.file(dataset_id, "results.json").exists():
+    if dataset.results_json is None:
         raise errors.not_ready("This file is not ready yet. Clean the file first.")
+    path = ctx.storage.run_dir(dataset_id, dataset.results_run_id) / name
     suffix, media_type = DOWNLOADS[name]
     stem = Path(dataset.filename).stem or "data"
     return FileResponse(path, media_type=media_type, filename=stem + suffix)

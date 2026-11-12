@@ -59,6 +59,11 @@ function jsonPost<T>(path: string, body: unknown): Promise<T> {
 
 const enc = encodeURIComponent
 
+/** GET /api/health: also tells the website the upload limit. */
+export function getHealth(): Promise<{ status: string; max_upload_mb: number }> {
+  return request('/health')
+}
+
 export function uploadDataset(file: File): Promise<UploadResponse> {
   const form = new FormData()
   form.append('file', file)

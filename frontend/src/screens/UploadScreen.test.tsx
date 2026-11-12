@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, startProfile, uploadDataset } from '@/api/client'
+import { ApiError, getHealth, startProfile, uploadDataset } from '@/api/client'
 import type { UploadResponse } from '@/api/types'
 import { AppStateProvider } from '@/state/AppState'
 import { UploadScreen } from './UploadScreen'
@@ -16,7 +16,7 @@ vi.mock('@/api/client', () => {
       this.code = code
     }
   }
-  return { ApiError, uploadDataset: vi.fn(), startProfile: vi.fn() }
+  return { ApiError, uploadDataset: vi.fn(), startProfile: vi.fn(), getHealth: vi.fn() }
 })
 
 const rows = (n: number) => Array.from({ length: n }, (_, i) => [`h${i}`, `v${i}`])
@@ -44,6 +44,7 @@ const input = () => screen.getByLabelText('Choose a CSV or Excel file') as HTMLI
 
 beforeEach(() => {
   vi.resetAllMocks()
+  vi.mocked(getHealth).mockResolvedValue({ status: 'ok', max_upload_mb: 50 })
 })
 
 describe('UploadScreen', () => {
@@ -61,6 +62,28 @@ describe('UploadScreen', () => {
     await user.upload(input(), big)
     expect(await screen.findByRole('alert')).toHaveTextContent('50 MB')
     expect(uploadDataset).not.toHaveBeenCalled()
+  })
+
+  it('uses the upload limit the server reports', async () => {
+    vi.mocked(getHealth).mockResolvedValue({ status: 'ok', max_upload_mb: 4 })
+    const user = setup()
+    expect(await screen.findByText(/4 MB or smaller/)).toBeInTheDocument()
+    const big = new File(['x'], 'big.csv')
+    Object.defineProperty(big, 'size', { value: 5 * 1024 * 1024 })
+    await user.upload(input(), big)
+    expect(await screen.findByRole('alert')).toHaveTextContent('larger than 4 MB')
+    expect(uploadDataset).not.toHaveBeenCalled()
+  })
+
+  it('explains a server-side size rejection', async () => {
+    vi.mocked(uploadDataset).mockRejectedValue(
+      new ApiError(413, 'file_too_large', 'Files must be 4 MB or smaller.'),
+    )
+    const user = setup()
+    await user.upload(input(), new File(['x'], 'a.csv'))
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Files must be 4 MB or smaller.')
+    expect(alert).toHaveTextContent('Please choose a smaller file')
   })
 
   it('shows server error messages', async () => {

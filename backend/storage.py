@@ -48,6 +48,19 @@ class Storage:
     def file(self, dataset_id: str, name: str) -> Path:
         return self.dataset_dir(dataset_id) / name
 
+    def run_dir(self, dataset_id: str, run_id: str) -> Path:
+        """Output folder of one clean job: {dataset}/runs/{run_id}/."""
+        if not is_uuid(run_id):
+            raise ValueError("invalid run id")
+        return self.dataset_dir(dataset_id) / "runs" / run_id
+
+    def delete_runs_except(self, dataset_id: str, keep: str | None) -> None:
+        runs = self.dataset_dir(dataset_id) / "runs"
+        if runs.is_dir():
+            for folder in runs.iterdir():
+                if folder.name != keep:
+                    shutil.rmtree(folder, ignore_errors=True)
+
     def save_upload(self, dataset_id: str, file_type: str, stream: BinaryIO, max_bytes: int) -> int:
         """Stream the upload to disk, stopping as soon as it exceeds max_bytes."""
         folder = self.dataset_dir(dataset_id)

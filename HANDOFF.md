@@ -8,17 +8,16 @@ Data Cleaner is a website where a user uploads a messy CSV or Excel file; the sy
 
 ## Current position
 - **Phase:** 1, milestone M6 (Fix, Evaluate, Ship). Plan: Part A fixes (Steps 1-6), Part B performance and honest evaluation (7-9), Part C ship on GitHub + Vercel (10-15).
-- **Step:** M6 Step 3 (Fixes screen redesign) done and committed. Waiting for the owner's "go" for Step 4.
+- **Step:** M6 Step 4 (reviewer bugs) done and committed. Waiting for the owner's "go" for Step 5.
 
-## Last milestone summary (M6 Step 3, 2026-11-12)
-- Fixes screen: "Automatic merges" section with Undo/Redo per value (undo all = fix rejected); then "Whole table" and one section per column. Tier 2 cards list each merge with its reason. "Approve all safe fixes" still skips every category merge.
-- New "Left alone" list per column: values a rule saw but did not change, with count and reason. Engine: `Rule.left_alone()` and `Proposal.left_alone` (CONTRACT 2.1, 2.4, 10).
-- Progress label now "Applying <rule label>" as written (was lower-cased).
-- Checked live at 375 px (no overflow, 44 px Undo buttons) and by keyboard (Tab, Enter toggles Undo/Redo, focus ring visible). README screenshot `desktop-3-fixes.jpg` replaced.
-- Design pass: ui-ux-pro-max searches gave no specific match for undo, so the project's shadcn components and general accessibility rules were used; web-design-guidelines review found one fix ("Starting…" ellipsis). The frontend-design skill is not installed in this environment.
-- `.claude/launch.json` added (backend on 8000, frontend on 5173).
+## Last milestone summary (M6 Step 4, 2026-11-12)
+- Stale jobs: each dataset has a `generation`, bumped by every new profile or clean job. Jobs save with one guarded UPDATE (`WHERE generation = :g`); a late old job ends `failed` / `superseded` and saves nothing. Profile and results now live in the Dataset row; clean outputs in `runs/{run_id}/`.
+- Upload cap: an ASGI layer counts body bytes as they arrive and answers 413 as soon as the limit is passed, also with no Content-Length. Proven on raw ASGI: the old code read all 129 chunks, the new one stops early. Limit from `DC_MAX_UPLOAD_MB` (default 50); `/api/health` reports it.
+- Upload screen reads the limit from `/api/health` and explains a 413 ("... Please choose a smaller file.").
+- Old local `storage/app.db` (pre-M6 columns) is rebuilt automatically on startup; its data is temporary anyway.
+- CONTRACT 8, 8.5, 8.8 and 9 updated.
 
-Tests: **264 Python passed, 54 frontend passed**, build OK.
+Tests: **270 Python passed, 56 frontend passed**, build OK.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -70,6 +69,9 @@ Tests: **264 Python passed, 54 frontend passed**, build OK.
 - 2026-11-12 (M6.2) Owner decision: Tier 1 prefers an existing Title Case spelling, else the most frequent. It never invents a spelling, so acronyms such as USA stay as written.
 - 2026-11-12 (M6.3) Left-alone values come from a separate `Rule.left_alone()` hook, not from params, so recipes stay clean. A rule whose dry run changes nothing makes no proposal, so its left-alone values are not shown.
 - 2026-11-12 (M6.3) Headings stay in sentence case to match the rest of the site (the guidelines prefer Title Case).
+- 2026-11-12 (M6.4) Generation counter is bumped by clean jobs too, so the newest clean wins when two overlap. Profile and results moved from files into the Dataset row so the save is one guarded UPDATE (also fits Postgres in Step 12).
+- 2026-11-12 (M6.4) A run folder is never deleted while it might be written: old folders go when a newer clean is saved or at the 24-hour cleanup.
+- 2026-11-12 (M6.4) The streaming cap allows 1 MB of multipart overhead on top of the file limit; the exact file-size check stays in `save_upload`.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
@@ -80,8 +82,6 @@ Tests: **264 Python passed, 54 frontend passed**, build OK.
 - Outlier recall 66.7%: a salary of 1 sits inside the IQR fence (by design). Duplicate and "(123)" misses were answer-key errors, fixed in M6.1.
 - README evaluation table and the "(123)" / duplicates explanation are stale until M6 Step 8.
 - Uniqueness can fall about 0.1 point on free-text columns that count as key candidates (Chicago sample). Candidate fix: exclude long free text from key candidates.
-- Reviewer, medium: starting a new profile while a job is still running can let the old job write results after the cleanup (section 8.5). The UI blocks this in one browser; the API does not.
-- Reviewer, low: the upload size limit is checked after FastAPI has spooled the upload to a temp file; an upload without Content-Length skips the early check. (Step label fixed in M6.3.)
 - Large files: 47.5 MB takes about 3.5 minutes and 2 GB of memory; peak memory is 40 to 50 times the file size. Change records are held in memory.
 - Jobs run in the API process; two big files at once slow each other.
 - Change-log filter on column fires a request per keystroke (no debounce); the change log re-reads `changelog.csv` on every page request.
@@ -89,8 +89,8 @@ Tests: **264 Python passed, 54 frontend passed**, build OK.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. M6 Step 4: reviewer bugs (generation guard for stale jobs; streaming upload cap with DC_MAX_UPLOAD_MB).
-2. Steps 5-6 of Part A, then Part B and Part C as in the M6 plan.
+1. M6 Step 5: name casing suggestions (suggest only; cut and defer if it runs long).
+2. Step 6 (Part A checkpoint, tag phase1-m6a), then Part B and Part C as in the M6 plan.
 3. After M6 ships: BA documents and demo video, then Phase 2.
 
 ## How to run
@@ -103,7 +103,7 @@ python sample_data/make_samples.py                   # regenerate the 3 sample f
 uvicorn backend.main:app --reload --port 8000        # backend (API docs at /docs)
 cd frontend && npm install && npm run dev            # frontend on port 5173; npm run test -- --run
 ```
-The existing `.venv` has all Python dependencies. Storage location can be changed with `DC_STORAGE_DIR`; allowed browser origins with `DC_CORS_ORIGINS`.
+The existing `.venv` has all Python dependencies. Storage location can be changed with `DC_STORAGE_DIR`; allowed browser origins with `DC_CORS_ORIGINS`; upload limit with `DC_MAX_UPLOAD_MB`.
 
 ## Milestone log
 - 2026-11-11 | M0 Setup | Done. Structure, CLAUDE.md, CONTRACT.md v1.0, 5 agents, README skeleton, BA placeholders. No tests (no code).
@@ -116,3 +116,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-12 | M6 Step 1 Diagnosis | Done. 16 duplicate and 4 "(123)" misses were answer-key errors (fixed); 1 outlier inside the fence. 243 Python + 50 frontend tests passing.
 - 2026-11-12 | M6 Step 2 Region, Quantity, money | Done. Category Tier 1/2, fixed-width leading zeros, money 2 decimals, demo regression test. 260 Python + 50 frontend tests passing.
 - 2026-11-12 | M6 Step 3 Fixes screen | Done. Grouped by column, automatic merges with Undo, left-alone lists, label fix, 375 px and keyboard checked. 264 Python + 54 frontend tests passing.
+- 2026-11-12 | M6 Step 4 Reviewer bugs | Done. Generation guard for stale jobs, streaming upload cap (DC_MAX_UPLOAD_MB), UI limit from /api/health. 270 Python + 56 frontend tests passing.
