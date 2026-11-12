@@ -31,7 +31,7 @@ def test_keeps_120_rows(cleaned):
 
 def test_region_has_four_values(cleaned):
     regions = {r["region"] for r in cleaned[1] if r["region"]}
-    assert len(regions) == 4, sorted(regions)
+    assert regions == {"North", "South", "East", "West"}, sorted(regions)
 
 
 def test_quantity_has_one_format(cleaned):

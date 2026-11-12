@@ -117,6 +117,16 @@ def test_tier1_merges_case_accent_and_space_variants_into_most_frequent_spelling
     }
 
 
+def test_tier1_prefers_an_existing_title_case_spelling():
+    assert P.merge_case_variants({"west": 17, "WEST": 7, "West": 5}) == {"west": "West", "WEST": "West"}
+    assert P.merge_case_variants({"New York": 2, "new york": 9}) == {"new york": "New York"}
+
+
+def test_tier1_keeps_the_most_frequent_spelling_when_no_title_case_exists():
+    assert P.merge_case_variants({"USA": 50, "usa": 5}) == {"usa": "USA"}
+    assert P.merge_case_variants({"west": 9, "WEST": 3}) == {"WEST": "west"}
+
+
 def test_tier1_leaves_typos_and_distinct_values_alone():
     assert P.merge_case_variants({"North": 9, "Nrth": 2, "Type 1": 3, "Type 2": 3}) == {}
 

@@ -11,14 +11,14 @@ Data Cleaner is a website where a user uploads a messy CSV or Excel file; the sy
 - **Step:** M6 Step 2 (Region, Quantity, money decimals) done and committed. Waiting for the owner's "go" for Step 3.
 
 ## Last milestone summary (M6 Step 2, 2026-11-12)
-- `standardize_categories` now makes two proposals per column. Tier 1 (auto): case, accent and space variants go to the most frequent spelling. Tier 2 (suggest): abbreviations and typos, with a reason per merge (abbreviation map, one letter away, letters in order). Ties are never merged (N stays apart from NE and NW).
+- `standardize_categories` now makes two proposals per column. Tier 1 (auto): case, accent and space variants go to an existing Title Case spelling if there is one, otherwise the most frequent spelling (owner decision). Tier 2 (suggest): abbreviations and typos, with a reason per merge (abbreviation map, one letter away, letters in order). Ties are never merged (N stays apart from NE and NW).
 - Leading zeros mean "id" only at one fixed width (zip 02134) or with an id-like name (now includes sku). "03" in Quantity becomes 3; "03" no longer counts as standard form.
 - Money columns (any currency symbol) get 2 decimals by padding only; clean.xlsx uses format 0.00.
-- `sample_data/messy_orders_demo.csv` copied in (owner approved); `tests/engine/test_demo_orders.py`: 120 rows, 4 Region values, one Quantity format, 2 decimals.
+- `sample_data/messy_orders_demo.csv` copied in (owner approved); `tests/engine/test_demo_orders.py`: 120 rows, Region exactly North/South/East/West, one Quantity format, 2 decimals.
 - Sales sample: "Wset" -> "West" now caught (+9 changes). Evaluation unchanged: recall 99.9%, precision 100%, 0 damaged cells.
 - CONTRACT 2.1, 2.2, 2.3, 3 and 4.2 updated to match.
 
-Tests: **260 Python passed, 50 frontend passed**.
+Tests: **262 Python passed, 50 frontend passed**.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -67,12 +67,12 @@ Tests: **260 Python passed, 50 frontend passed**.
 - 2026-11-12 (M6.2) The old rapidfuzz ratio clustering and short-value guard are replaced by the Tier 2 tests. Side effect: "Cat" -> "Cats" style pairs can now be suggested (one letter away); they are suggestions only.
 - 2026-11-12 (M6.2) Tier 2 targets must have more rows than the value they absorb; values are processed largest first, so merges never chain.
 - 2026-11-12 (M6.2) "Fixed width" = every number in the column has the same length. Money = any value with a currency symbol (not the column name). standardize_categories and coerce_numeric bumped to 1.1.0.
+- 2026-11-12 (M6.2) Owner decision: Tier 1 prefers an existing Title Case spelling, else the most frequent. It never invents a spelling, so acronyms such as USA stay as written.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Ambiguous dates default to month-first if approved without editing; the UI forces a Day first / Month first click before Approve.
-- **Open question:** Tier 1 picks the most frequent spelling, so the demo file ends up with `west`, `east`, `north`, `South` (4 values, mixed case). A "prefer Title Case on ties or near-ties" rule would need the owner's decision.
 - The evaluation still treats short category typos as "not fixable by design" (9 entries) although Tier 2 now fixes them; fix in Step 8 with the new metrics.
 - The 500-distinct cap for Tier 2 is never reached in practice: the category test (<= 50 distinct) runs first.
 - Outlier recall 66.7%: a salary of 1 sits inside the IQR fence (by design). Duplicate and "(123)" misses were answer-key errors, fixed in M6.1.

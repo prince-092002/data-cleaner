@@ -346,6 +346,11 @@ def category_key(value: str) -> str:
     return "".join(ch for ch in text if not unicodedata.combining(ch)).casefold()
 
 
+def _is_title_case(value: str) -> bool:
+    """"West", "New York"; not "WEST", "USA" or "west"."""
+    return value == value.title() and value != value.upper()
+
+
 def _variant_groups(counts: dict[str, int]) -> dict[str, tuple[str, int, list[str]]]:
     """key -> (most frequent tidy spelling, total count, raw values in the group)."""
     groups: dict[str, dict[str, int]] = {}
@@ -356,7 +361,9 @@ def _variant_groups(counts: dict[str, int]) -> dict[str, tuple[str, int, list[st
         tidy_counts: dict[str, int] = {}
         for value, count in members.items():
             tidy_counts[tidy_text(value)] = tidy_counts.get(tidy_text(value), 0) + count
-        canonical = min(tidy_counts, key=lambda v: (-tidy_counts[v], v))
+        title = [v for v in tidy_counts if _is_title_case(v)]
+        pool = title or list(tidy_counts)        # prefer an existing Title Case spelling
+        canonical = min(pool, key=lambda v: (-tidy_counts[v], v))
         out[key] = (canonical, sum(members.values()), sorted(members))
     return out
 
