@@ -44,6 +44,7 @@ class Candidate:            # "this rule wants to act here"
     confidence: float | None
     force_suggest: bool     # e.g. ambiguous dates
     note: str | None        # extra sentence for the proposal description
+    auto_safe: bool         # only removes differences of case, accents or spacing (added M6)
 
 class Rule:
     id: str                 # e.g. "coerce_numeric"
@@ -78,6 +79,7 @@ Rules for rules:
 - `apply` fills only `rule_id`, `rule_version`, `row_id`, `column`, `change_type`, `old_value`, `new_value`. The pipeline stamps `run_id`, `action`, `timestamp`.
 - `_row_id` must be preserved on every surviving row.
 - Mode resolution, done by the pipeline, not the rule:
+  0. A candidate with `auto_safe` starts as `auto` instead of the rule's `default_mode`, and step 2 does not apply to it.
   1. If the rule reports a `confidence`: `< 0.80` drop the proposal; `0.80 to < 0.98` mode = `suggest`; `>= 0.98` mode = `default_mode`.
   2. If `is_destructive` and the mode is `auto`, it stays `auto` only for the rules marked auto in the table below (these remove only provably empty or identical data). Otherwise it becomes `suggest`.
 
@@ -95,7 +97,7 @@ Rules for rules:
 | 6 | `parse_dates` | column | auto | no | high | share of non-null values that parse as dates; forced to suggest if day/month order is ambiguous |
 | 7 | `standardize_booleans` | column | auto | no | medium | none (triggers only when all non-null values are known boolean tokens) |
 | 8 | `remove_exact_duplicate_rows` | table | auto | yes (identical only) | high | none |
-| 9 | `standardize_categories` | column | suggest | yes | medium | lowest rapidfuzz similarity in the cluster / 100 |
+| 9 | `standardize_categories` | column | suggest (Tier 1: auto) | yes | medium | none |
 | 10 | `flag_outliers` | column | flag | no | medium | none |
 
 ### 2.3 Behaviour and params per rule
@@ -106,11 +108,11 @@ Rules for rules:
 | `drop_empty_rows_and_columns` | Removes rows and columns where every cell is null or a null token | `{"drop_rows": true, "drop_columns": true}` |
 | `trim_and_normalize_text` | Trim, collapse inner whitespace, remove zero-width/control/non-breaking chars, Unicode NFC, `ftfy.fix_text` | `{}` |
 | `standardize_null_tokens` | Null tokens become `null` | `{"tokens": [...]}` |
-| `coerce_numeric` | Strip `$ £ € ,` and spaces, `%` (value kept as written, e.g. `45%` becomes `45`), `(123)` becomes `-123`. Output is a plain decimal string. **Never triggers** on a column where any value has a leading zero (e.g. `00123`, not `0.5`) or whose name looks like an id, zip, postal, phone, code, account or ssn | `{"decimal": ".", "thousands": ","}` |
+| `coerce_numeric` | Strip `$ £ € ,` and spaces, `%` (value kept as written, e.g. `45%` becomes `45`), `(123)` becomes `-123`, a stray leading zero is dropped (`03` becomes `3`). Output is a plain decimal string. **Money columns** (any value written with a currency symbol) get exactly 2 decimals by padding only (`741.8` becomes `741.80`; `1.234` is never rounded), and clean.xlsx shows them with format `0.00`. **Never triggers** on an id column: one whose numbers have leading zeros and all share one fixed width (zip `02134`), or whose name looks like an id, zip, postal, phone, code, sku, account or ssn | `{"decimal": ".", "thousands": ","}`, plus `"decimals": 2` for money columns |
 | `parse_dates` | Output `YYYY-MM-DD` (or `YYYY-MM-DDTHH:MM:SS` when a time is present). Ambiguous when every value has day <= 12 and month <= 12 | `{"dayfirst": bool}`; user may edit `dayfirst` |
 | `standardize_booleans` | `yes/no, y/n, true/false, t/f, 1/0, on/off` (any case) become `true` / `false` | `{"true_tokens": [...], "false_tokens": [...]}` |
 | `remove_exact_duplicate_rows` | Keeps the first occurrence (lowest `_row_id`), compares all columns except `_row_id` | `{}` |
-| `standardize_categories` | Only on low-cardinality text columns (<= 50 distinct and distinct/non-null <= 0.2). Clusters spellings with rapidfuzz (`fuzz.ratio` >= 85 after casefold; values whose digits differ are never merged; short-value guard: if either value has fewer than 5 characters the merge needs a similarity >= 95 or one of the two must be on the built-in reference list `north, south, east, west, usa, uk, eu, yes, no, male, hr, it`), maps each cluster to its most common member | `{"mapping": {old_value: new_value}}`; user may edit the mapping |
+| `standardize_categories` | Only on low-cardinality text columns (<= 50 distinct and distinct/non-null <= 0.2). Two proposals per column, worked out on distinct values and mapped back to rows. **Tier 1 (auto, `auto_safe`):** values that differ only by case, accents or whitespace (NFKC, accents removed, casefold) become the most frequent spelling. **Tier 2 (suggest):** abbreviations and typos. A value is mapped to a target only when ALL hold: same first letter; the target has at least 3 rows, at least 5% of the column and more rows than the value; digits are the same; and one piece of evidence: the built-in abbreviation map (`N S E W NE NW SE SW` to the compass words), Damerau-Levenshtein distance 1 (a swap counts as 1), or the value's letters appear in order in the target and cover at least 50% of it. Evidence ranks abbreviation > distance 1 > letters in order; the best target must be strictly better than every other, so a value equally close to two targets (`N` to `NE` and `NW`) is never merged. Skipped above 500 distinct values. Each merge carries a plain-language reason | Tier 1 `{"tier": 1, "mapping": {...}}`; Tier 2 `{"tier": 2, "mapping": {...}, "reasons": {old_value: text}}`; user may edit the mapping |
 | `flag_outliers` | Numeric columns with >= 20 non-null values. Adds `<column>_outlier_flag` (`true`/`false`) for values outside `Q1 - k*IQR .. Q3 + k*IQR`. Never removes or changes a value | `{"k": 1.5}`; user may edit `k` |
 
 ### 2.4 Proposal
@@ -197,7 +199,7 @@ Rules for rules:
 ```
 
 - `inferred_type`: `integer` | `decimal` | `date` | `datetime` | `boolean` | `category` | `text` | `id` | `empty`.
-- Type inference, first match wins: `empty` (no values) · `date`/`datetime` (>= 0.80 of non-null values parse as dates) · `boolean` (>= 0.80 are boolean tokens, and at least as many as parse as numbers) · `id` (>= 0.80 look numeric **and** a leading zero is present or the name is id-like, see `coerce_numeric`) · `integer`/`decimal` (>= 0.80 parse as numbers) · `category` (meets the `standardize_categories` cardinality test) · `text`. `type_confidence` is that share (1.0 for `id`, `category`, `text`, `empty`).
+- Type inference, first match wins: `empty` (no values) · `date`/`datetime` (>= 0.80 of non-null values parse as dates) · `boolean` (>= 0.80 are boolean tokens, and at least as many as parse as numbers) · `id` (>= 0.80 look numeric **and** either leading zeros at one fixed width or an id-like name, see `coerce_numeric`) · `integer`/`decimal` (>= 0.80 parse as numbers) · `category` (meets the `standardize_categories` cardinality test) · `text`. `type_confidence` is that share (1.0 for `id`, `category`, `text`, `empty`).
 - `null_count` counts real nulls **and** null tokens. Percentages are 0 to 100, one decimal.
 - `min`, `max` are strings; `mean`, `median` are numbers or `null` (numeric types only).
 - `top_values`: up to 10. `samples`: up to 5 distinct raw non-null values. `format_patterns`: up to 5, where digits become `9`, letters `A`, everything else kept.
@@ -230,7 +232,7 @@ Let `n` = rows, `nn` = non-null values (nulls include null tokens).
 | Validity | share of `nn` that parse as the column's `inferred_type`. For `text`, `category`, `id`: share with no control characters, replacement characters (U+FFFD) or mojibake detected by ftfy |
 | Consistency | share of `nn` written in the column's **most common format**. Format = `format_pattern` for dates/numbers/ids, token pair for booleans, cluster canonical value for categories; for text: no leading/trailing/repeated whitespace |
 | Uniqueness | key candidates: `distinct / nn`. All other columns: dataset row uniqueness `1 - duplicate_row_count / n` |
-| Conformity | `0.2 * header_ok + 0.8 * (values in the standard form / (nn + null-token cells))`. `header_ok` = 1 if `source_name` is already unique snake_case. Standard form: ISO 8601 for dates, plain decimal string for numbers, `true`/`false` for booleans, trimmed NFC text with no null tokens for everything else |
+| Conformity | `0.2 * header_ok + 0.8 * (values in the standard form / (nn + null-token cells))`. `header_ok` = 1 if `source_name` is already unique snake_case. Standard form: ISO 8601 for dates, plain decimal string with no leading zero for numbers (`03` is not standard), `true`/`false` for booleans, trimmed NFC text with no null tokens for everything else |
 
 Consistency asks "do the values agree with each other?"; Conformity asks "do they match the target standard?". A column entirely in `dd/mm/yyyy` is 100% consistent and 0% conforming.
 

@@ -10,13 +10,21 @@ from engine import parsing as P
 from engine.rules.base import Candidate, Rule, columns_with
 
 
-def to_plain_number(value: str) -> str:
+def to_plain_number(value: str, decimals: int | None = None) -> str:
     parsed = P.parse_number(value)
-    return parsed.canonical if parsed else value      # cannot fix -> leave unchanged
+    if parsed is None:
+        return value                                  # cannot fix -> leave unchanged
+    text = parsed.canonical
+    if decimals:                                      # pad only, never round
+        whole, _, frac = text.partition(".")
+        if len(frac) < decimals:
+            text = f"{whole}.{frac.ljust(decimals, '0')}"
+    return text
 
 
 class CoerceNumeric(Rule):
     id = "coerce_numeric"
+    version = "1.1.0"
     default_mode = "auto"
     severity = "high"
     label = "Convert to plain numbers"
@@ -34,5 +42,13 @@ class CoerceNumeric(Rule):
             for c in cols
         ]
 
+    def prepare(self, df, column, params):
+        """Money columns (any value written with a currency symbol) are written with 2 decimals."""
+        values = df.get_column(column).drop_nulls().to_list()
+        if any((p := P.parse_number(v)) and any(c in p.style for c in "$£€") for v in values):
+            return {**params, "decimals": 2}, None
+        return params, None
+
     def apply(self, df, column, params):
-        return self.map_values(df, column, to_plain_number)
+        decimals = params.get("decimals")
+        return self.map_values(df, column, lambda v: to_plain_number(v, decimals))

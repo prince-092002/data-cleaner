@@ -10,7 +10,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-from rapidfuzz import fuzz
+from rapidfuzz.distance import OSA
 
 # --------------------------------------------------------------------------- nulls / whitespace
 
@@ -46,7 +46,7 @@ def has_whitespace_issue(value: str) -> bool:
 # --------------------------------------------------------------------------- headers
 
 ID_NAME_TOKENS = frozenset(
-    {"id", "zip", "zipcode", "postal", "postcode", "phone", "code", "account", "ssn"}
+    {"id", "zip", "zipcode", "postal", "postcode", "phone", "code", "account", "ssn", "sku"}
 )
 
 
@@ -126,7 +126,8 @@ def parse_number(value: str) -> NumberParse | None:
     if (m["s1"] or m["s2"]) == "-":
         negative = True
     int_raw = m["int"] or "0"
-    int_part = int_raw.replace(",", "")
+    int_digits = int_raw.replace(",", "")
+    int_part = int_digits.lstrip("0") or "0"          # "03" -> "3"
     frac = m["frac"] or ""
     canonical = ("-" if negative else "") + int_part + frac
     style = "".join(
@@ -145,9 +146,17 @@ def parse_number(value: str) -> NumberParse | None:
         canonical=canonical,
         value=float(canonical),
         style=style,
-        leading_zero=len(int_part) > 1 and int_part[0] == "0",
+        leading_zero=len(int_digits) > 1 and int_digits[0] == "0",
         is_integer=not frac,
     )
+
+
+def leading_zeros_mean_id(nums: dict[str, NumberParse]) -> bool:
+    """Leading zeros make a column an id only when every number has the same width
+    (zip 02134, padded 00017). A stray "03" among 1, 2, 3 is just a number."""
+    if not any(p.leading_zero for p in nums.values()):
+        return False
+    return len({len(strip_hidden(v).strip()) for v in nums}) == 1
 
 
 # --------------------------------------------------------------------------- booleans
@@ -324,7 +333,6 @@ def decide_date_order(parsed: dict[str, tuple[DateParse, int]]) -> DateOrder:
 
 CATEGORY_MAX_DISTINCT = 50
 CATEGORY_MAX_RATIO = 0.2
-CATEGORY_MIN_SCORE = 85.0  # one dropped letter in a 5-letter word scores 88.9
 _DIGITS_RE = re.compile(r"\d+")
 
 
@@ -332,67 +340,114 @@ def looks_categorical(distinct: int, non_null: int) -> bool:
     return 0 < distinct <= CATEGORY_MAX_DISTINCT and distinct / non_null <= CATEGORY_MAX_RATIO
 
 
-def _cat_key(value: str) -> str:
-    return tidy_text(value).casefold()
+def category_key(value: str) -> str:
+    """Tier 1 key: NFKC, accents removed, casefolded, whitespace tidied."""
+    text = unicodedata.normalize("NFKD", unicodedata.normalize("NFKC", tidy_text(value)))
+    return "".join(ch for ch in text if not unicodedata.combining(ch)).casefold()
 
 
-SHORT_VALUE_LEN = 5          # values shorter than this are risky to merge ("Cat" / "Cats")
-SHORT_VALUE_MIN_SCORE = 95.0
-# Known short categories. A short value may be merged into one of these at the normal
-# threshold ("Nrth" -> "north"); otherwise it needs a similarity of at least 95.
-SHORT_REFERENCE = frozenset({
-    "north", "south", "east", "west", "usa", "uk", "eu", "yes", "no", "male", "hr", "it",
-})
-
-
-def _short_value_ok(rep: str, key: str, score: float) -> bool:
-    """Guard for short values: merge only on a reference-list match or a score of 95+."""
-    if min(len(rep), len(key)) >= SHORT_VALUE_LEN:
-        return True
-    return score >= SHORT_VALUE_MIN_SCORE or rep in SHORT_REFERENCE or key in SHORT_REFERENCE
-
-
-def cluster_categories(counts: dict[str, int]) -> tuple[dict[str, str], float]:
-    """Group spellings of the same category.
-
-    Returns (mapping raw value -> canonical value, lowest similarity used 0-100).
-    The canonical value is the most common tidy spelling in the cluster.
-    Values that differ in their digits ("Type 1" / "Type 2") are never merged.
-    """
-    by_key: dict[str, dict[str, int]] = {}
+def _variant_groups(counts: dict[str, int]) -> dict[str, tuple[str, int, list[str]]]:
+    """key -> (most frequent tidy spelling, total count, raw values in the group)."""
+    groups: dict[str, dict[str, int]] = {}
     for value, count in counts.items():
-        by_key.setdefault(_cat_key(value), {})[value] = count
-    keys = sorted(by_key, key=lambda k: (-sum(by_key[k].values()), k))
-
-    clusters: list[list[str]] = []          # lists of keys; first key is the representative
-    min_score = 100.0
-    for key in keys:
-        best, best_score = None, 0.0
-        for cluster in clusters:
-            rep = cluster[0]
-            if _DIGITS_RE.findall(rep) != _DIGITS_RE.findall(key):
-                continue
-            score = fuzz.ratio(rep, key)
-            if score >= CATEGORY_MIN_SCORE and score > best_score and _short_value_ok(rep, key, score):
-                best, best_score = cluster, score
-        if best is None:
-            clusters.append([key])
-        else:
-            best.append(key)
-            min_score = min(min_score, best_score)
-
-    mapping: dict[str, str] = {}
-    for cluster in clusters:
+        groups.setdefault(category_key(value), {})[value] = count
+    out = {}
+    for key, members in groups.items():
         tidy_counts: dict[str, int] = {}
-        for key in cluster:
-            for value, count in by_key[key].items():
-                tidy = tidy_text(value)
-                tidy_counts[tidy] = tidy_counts.get(tidy, 0) + count
+        for value, count in members.items():
+            tidy_counts[tidy_text(value)] = tidy_counts.get(tidy_text(value), 0) + count
         canonical = min(tidy_counts, key=lambda v: (-tidy_counts[v], v))
-        for key in cluster:
-            for value in by_key[key]:
-                mapping[value] = canonical
-    return mapping, min_score
+        out[key] = (canonical, sum(members.values()), sorted(members))
+    return out
+
+
+def merge_case_variants(counts: dict[str, int]) -> dict[str, str]:
+    """Tier 1 (automatic): values that differ only by case, accents or whitespace are mapped to
+    the most frequent spelling. Returns only the values that change."""
+    return {
+        value: canonical
+        for canonical, _, members in _variant_groups(counts).values()
+        for value in members
+        if value != canonical
+    }
+
+
+CATEGORY_TIER2_MAX_DISTINCT = 500
+CATEGORY_TARGET_MIN_COUNT = 3
+CATEGORY_TARGET_MIN_SHARE = 0.05
+# Common abbreviations -> the full value they stand for (compared without spaces, dots, hyphens).
+CATEGORY_ABBREVIATIONS = {
+    "n": "north", "s": "south", "e": "east", "w": "west",
+    "ne": "northeast", "nw": "northwest", "se": "southeast", "sw": "southwest",
+}
+_NON_ALNUM_RE = re.compile(r"[\W_]+")
+
+
+def _letters(key: str) -> str:
+    return _NON_ALNUM_RE.sub("", key)
+
+
+def _in_order(short: str, long: str) -> bool:
+    it = iter(long)
+    return all(ch in it for ch in short)
+
+
+def _evidence(src: str, tgt: str, src_text: str, tgt_text: str) -> tuple[int, str] | None:
+    """How strongly src looks like a short form or typo of tgt: (strength, reason) or None."""
+    a, b = _letters(src), _letters(tgt)
+    if not a or not b or a[0] != b[0] or _DIGITS_RE.findall(src) != _DIGITS_RE.findall(tgt):
+        return None
+    if CATEGORY_ABBREVIATIONS.get(a) == b:
+        return 3, f'"{src_text}" is a common abbreviation of "{tgt_text}"'
+    if OSA.distance(src, tgt) == 1:
+        return 2, f'"{src_text}" is one letter away from "{tgt_text}" (missing, extra, changed or swapped)'
+    if len(a) < len(b) and len(a) / len(b) >= 0.5 and _in_order(a, b):
+        return 1, f'the letters of "{src_text}" appear in order in "{tgt_text}"'
+    return None
+
+
+def suggest_category_merges(counts: dict[str, int]) -> dict[str, tuple[str, str]]:
+    """Tier 2 (suggestions): abbreviations and typos of an established value.
+
+    A value is mapped to a target only when the target has at least 3 rows and 5% of the
+    column, more rows than the value, the same first letter, and the evidence (abbreviation map,
+    one-letter difference, or letters in order covering half the target) is strictly stronger
+    than for any other target. Works on Tier 1 groups, so every spelling of the value moves.
+    Returns raw value -> (target spelling, reason).
+    """
+    groups = _variant_groups(counts)
+    if len(groups) > CATEGORY_TIER2_MAX_DISTINCT:
+        return {}
+    total = sum(n for _, n, _ in groups.values())
+    order = sorted(groups, key=lambda k: (-groups[k][1], k))
+    targets: list[str] = []
+    out: dict[str, tuple[str, str]] = {}
+    for key in order:
+        canonical, n, members = groups[key]
+        found = [
+            (ev, t) for t in targets
+            if groups[t][1] > n and (ev := _evidence(key, t, canonical, groups[t][0]))
+        ]
+        if found:
+            best = max(ev[0] for ev, _ in found)
+            winners = [(ev, t) for ev, t in found if ev[0] == best]
+            if len(winners) == 1:
+                (_, reason), t = winners[0]
+                for value in members:
+                    out[value] = (groups[t][0], reason)
+                continue
+        if n >= CATEGORY_TARGET_MIN_COUNT and n / total >= CATEGORY_TARGET_MIN_SHARE:
+            targets.append(key)
+    return out
+
+
+def cluster_categories(counts: dict[str, int]) -> dict[str, str]:
+    """Both tiers together: raw value -> the value it would end up as (itself if unchanged).
+    Used by the profiler to score consistency."""
+    mapping = {v: v for v in counts}
+    mapping.update(merge_case_variants(counts))
+    mapping.update({v: t for v, (t, _) in suggest_category_merges(counts).items()})
+    return mapping
 
 
 # --------------------------------------------------------------------------- patterns

@@ -8,17 +8,17 @@ Data Cleaner is a website where a user uploads a messy CSV or Excel file; the sy
 
 ## Current position
 - **Phase:** 1, milestone M6 (Fix, Evaluate, Ship). Plan: Part A fixes (Steps 1-6), Part B performance and honest evaluation (7-9), Part C ship on GitHub + Vercel (10-15).
-- **Step:** M6 Step 1 (diagnosis) done and committed. Waiting for the owner's "go" for Step 2.
+- **Step:** M6 Step 2 (Region, Quantity, money decimals) done and committed. Waiting for the owner's "go" for Step 3.
 
-## Last milestone summary (M6 Step 1, 2026-11-12)
-- `evaluation/DIAGNOSIS.md` and `evaluation/diagnose.py` classify every missed duplicate and outlier.
-- Duplicates: all 16 misses were answer-key errors (copy inserted above its source; the rule keeps the first row and removed the other). Key fixed in `make_samples.py`; sample files unchanged, only `ground_truth.csv`.
-- Outliers: the one miss (salary 1) is inside the IQR fence (-8,875 to 188,125). Method unchanged.
-- "(123)" amounts: key now expects -123, matching CONTRACT 2.3.
-- messy_orders_demo.csv (in the owner's Downloads, not the repo): the Region suggestion was created but never approved; its mapping was also too weak. Quantity is typed `id` because of "03".
-- Recall on fixable errors is now 99.9% (1,741 of 1,742), precision 100%, 0 damaged cells. No engine change. README still shows M5 numbers until Step 8.
+## Last milestone summary (M6 Step 2, 2026-11-12)
+- `standardize_categories` now makes two proposals per column. Tier 1 (auto): case, accent and space variants go to the most frequent spelling. Tier 2 (suggest): abbreviations and typos, with a reason per merge (abbreviation map, one letter away, letters in order). Ties are never merged (N stays apart from NE and NW).
+- Leading zeros mean "id" only at one fixed width (zip 02134) or with an id-like name (now includes sku). "03" in Quantity becomes 3; "03" no longer counts as standard form.
+- Money columns (any currency symbol) get 2 decimals by padding only; clean.xlsx uses format 0.00.
+- `sample_data/messy_orders_demo.csv` copied in (owner approved); `tests/engine/test_demo_orders.py`: 120 rows, 4 Region values, one Quantity format, 2 decimals.
+- Sales sample: "Wset" -> "West" now caught (+9 changes). Evaluation unchanged: recall 99.9%, precision 100%, 0 damaged cells.
+- CONTRACT 2.1, 2.2, 2.3, 3 and 4.2 updated to match.
 
-Tests: **243 Python passed, 50 frontend passed**.
+Tests: **260 Python passed, 50 frontend passed**.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -63,12 +63,18 @@ Tests: **243 Python passed, 50 frontend passed**.
 
 - 2026-11-12 (M6.1) Answer key: duplicate_row goes on every later identical row, not on the inserted copy. Why: the rule keeps the first occurrence; 16 "misses" were correct removals of the other row.
 - 2026-11-12 (M6.1) Answer key: parentheses_negative expects -x (CONTRACT 2.3). Engine unchanged.
+- 2026-11-12 (M6.2) Tier 1 category merges are auto through a new `Candidate.auto_safe` flag, so the rule stays one of the 10 and stays destructive for Tier 2.
+- 2026-11-12 (M6.2) The old rapidfuzz ratio clustering and short-value guard are replaced by the Tier 2 tests. Side effect: "Cat" -> "Cats" style pairs can now be suggested (one letter away); they are suggestions only.
+- 2026-11-12 (M6.2) Tier 2 targets must have more rows than the value they absorb; values are processed largest first, so merges never chain.
+- 2026-11-12 (M6.2) "Fixed width" = every number in the column has the same length. Money = any value with a currency symbol (not the column name). standardize_categories and coerce_numeric bumped to 1.1.0.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Ambiguous dates default to month-first if approved without editing; the UI forces a Day first / Month first click before Approve.
-- Category clustering misses swapped letters and short typos (under 5 characters need a reference-list match or 95+ similarity).
+- **Open question:** Tier 1 picks the most frequent spelling, so the demo file ends up with `west`, `east`, `north`, `South` (4 values, mixed case). A "prefer Title Case on ties or near-ties" rule would need the owner's decision.
+- The evaluation still treats short category typos as "not fixable by design" (9 entries) although Tier 2 now fixes them; fix in Step 8 with the new metrics.
+- The 500-distinct cap for Tier 2 is never reached in practice: the category test (<= 50 distinct) runs first.
 - Outlier recall 66.7%: a salary of 1 sits inside the IQR fence (by design). Duplicate and "(123)" misses were answer-key errors, fixed in M6.1.
 - README evaluation table and the "(123)" / duplicates explanation are stale until M6 Step 8.
 - Uniqueness can fall about 0.1 point on free-text columns that count as key candidates (Chicago sample). Candidate fix: exclude long free text from key candidates.
@@ -81,8 +87,8 @@ Tests: **243 Python passed, 50 frontend passed**.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. M6 Step 2: Region tiers (auto case/accent/space merges, suggested abbreviations and typos), Quantity "03" coercion, money decimals, messy_orders_demo.csv as a regression test (the owner needs to supply the file or approve copying it from Downloads into the repo).
-2. Steps 3-6 of Part A, then Part B and Part C as in the M6 plan.
+1. M6 Step 3: Fixes screen redesign (group by column with reasons, automatic merges with Undo, "Left alone" list, step label capital letter).
+2. Steps 4-6 of Part A, then Part B and Part C as in the M6 plan.
 3. After M6 ships: BA documents and demo video, then Phase 2.
 
 ## How to run
@@ -106,3 +112,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-11 | Pre-M5 fixes | Done. Safe-approve rule, job lock, ground truth, messier sales sample (78.3, target missed), category guard, encoding fix. 228 Python + 46 frontend tests passing. Tagged phase1-m4.
 - 2026-11-11 | M5 Evaluation, timing, review, README | Done. 239 Python + 50 frontend tests passing. Recall 98.8%, precision 100%, 0 damaged cells. Tagged phase1-m5.
 - 2026-11-12 | M6 Step 1 Diagnosis | Done. 16 duplicate and 4 "(123)" misses were answer-key errors (fixed); 1 outlier inside the fence. 243 Python + 50 frontend tests passing.
+- 2026-11-12 | M6 Step 2 Region, Quantity, money | Done. Category Tier 1/2, fixed-width leading zeros, money 2 decimals, demo regression test. 260 Python + 50 frontend tests passing.

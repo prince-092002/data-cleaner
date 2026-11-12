@@ -108,32 +108,65 @@ def test_date_order_ambiguous():
     assert not _order(["2024-04-03"]).ambiguous
 
 
-def test_cluster_categories_merges_spellings_to_most_common():
-    counts = {"North": 50, "north": 4, "NORTH": 3, "Nrth": 2, "South": 40, "South ": 3}
-    mapping, score = P.cluster_categories(counts)
-    assert {mapping[v] for v in ("North", "north", "NORTH", "Nrth")} == {"North"}
-    assert mapping["South "] == "South"
-    assert 80 <= score <= 100
+# ---- Tier 1: case, accents, whitespace (automatic)
+
+def test_tier1_merges_case_accent_and_space_variants_into_most_frequent_spelling():
+    counts = {"North": 50, "north": 4, "NORTH": 3, "South": 40, "South ": 3, "Café": 6, "cafe": 2, "CAFÉ": 1}
+    assert P.merge_case_variants(counts) == {
+        "north": "North", "NORTH": "North", "South ": "South", "cafe": "Café", "CAFÉ": "Café",
+    }
 
 
-def test_cluster_categories_keeps_distinct_values_apart():
-    mapping, _ = P.cluster_categories({"Type 1": 5, "Type 2": 5, "Male": 9, "Female": 9, "East": 7, "West": 7})
-    assert len(set(mapping.values())) == 6
+def test_tier1_leaves_typos_and_distinct_values_alone():
+    assert P.merge_case_variants({"North": 9, "Nrth": 2, "Type 1": 3, "Type 2": 3}) == {}
 
 
-def test_short_values_need_reference_match_or_score_95():
-    # "Cats" vs "Cat" scores 85.7 but neither is a known category: not merged
-    mapping, _ = P.cluster_categories({"Cats": 20, "Cat": 9})
-    assert mapping["Cat"] == "Cat" and mapping["Cats"] == "Cats"
-    # a 4-letter typo of a reference value ("Sout" of "South") is still merged
-    mapping, _ = P.cluster_categories({"South": 30, "Sout": 2})
-    assert mapping["Sout"] == "South"
-    # a 4-letter non-reference pair scoring 95+ is merged (identical after normalisation)
-    mapping, _ = P.cluster_categories({"Blue": 10, "blue": 3})
-    assert mapping["blue"] == "Blue"
-    # values of 5+ characters are unaffected by the guard
-    mapping, _ = P.cluster_categories({"Green": 20, "Gren": 1, "Greeen": 2})
-    assert mapping["Greeen"] == "Green"
+# ---- Tier 2: abbreviations and typos (suggestions)
+
+def _targets(counts):
+    return {v: t for v, (t, _) in P.suggest_category_merges(counts).items()}
+
+
+def test_tier2_maps_abbreviations_and_typos_to_established_values():
+    counts = {"North": 20, "South": 20, "East": 20, "West": 20,
+              "Wst": 3, "Sth": 3, "Eest": 3, "Nrth": 2, "N.": 2, "Wset": 1}
+    assert _targets(counts) == {
+        "Wst": "West", "Sth": "South", "Eest": "East", "Nrth": "North", "N.": "North", "Wset": "West",
+    }
+
+
+def test_tier2_gives_a_reason_for_each_merge():
+    merges = P.suggest_category_merges({"North": 20, "N.": 2, "Nrth": 2, "Sth": 2, "South": 20})
+    assert "abbreviation" in merges["N."][1]
+    assert "one letter" in merges["Nrth"][1]
+    assert "in order" in merges["Sth"][1]
+
+
+def test_tier2_never_merges_a_value_equally_close_to_two_targets():
+    assert _targets({"NE": 20, "NW": 20, "N": 2}) == {}
+
+
+def test_tier2_needs_same_first_letter():
+    assert _targets({"West": 20, "Est": 2}) == {}
+
+
+def test_tier2_target_must_have_3_rows_and_5_percent():
+    assert _targets({"North": 2, "Nrth": 1}) == {}                    # target under 3 rows
+    assert _targets({"Other": 200, "North": 3, "Nrth": 1}) == {}      # target under 5%
+
+
+def test_tier2_keeps_values_whose_digits_differ():
+    assert _targets({"Type 1": 20, "Type 2": 2}) == {}
+
+
+def test_tier2_skips_columns_with_more_than_500_distinct_values():
+    counts = {f"v{i:04d}x": 1 for i in range(501)} | {"North": 600, "Nrth": 2}
+    assert _targets(counts) == {}
+
+
+def test_cluster_categories_combines_both_tiers():
+    mapping = P.cluster_categories({"North": 20, "north": 3, "Nrth": 2, "South": 20})
+    assert mapping == {"North": "North", "north": "North", "Nrth": "North", "South": "South"}
 
 
 def test_format_pattern():

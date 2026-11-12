@@ -157,7 +157,7 @@ def test_profile_job_and_result(client):
     assert profile["source"]["filename"] == SALES.name          # the uploaded name, not "original.csv"
     assert profile["row_count"] == 433 and len(profile["columns"]) == 10
     assert profile["quality"]["overall"] == 78.3
-    assert len(profile["proposals"]) == 23
+    assert len(profile["proposals"]) == 24          # region: Tier 1 (auto) and Tier 2 (suggest)
     assert {"id", "rule_id", "mode", "severity", "rows_affected", "samples"} <= set(profile["proposals"][0])
 
 
@@ -252,7 +252,7 @@ def test_clean_job_and_results(client):
     assert results["summary"]["rows_after"] == 400
     assert results["downloads"] == DOWNLOADS
     changes = results["changes"]
-    assert changes["total"] == results["summary"]["total_changes"] == 1339
+    assert changes["total"] == results["summary"]["total_changes"] == 1348   # M6.2: +9 "Wset" -> "West"
     assert (changes["limit"], changes["offset"], len(changes["items"])) == (100, 0, 100)
     first = changes["items"][0]
     assert list(first) == ["run_id", "rule_id", "rule_version", "row_id", "column", "change_type",

@@ -161,6 +161,43 @@ def test_coerce_numeric_never_triggers_on_ids():
     assert [c.column for c in triggers("coerce_numeric", data)] == ["amount"]
 
 
+def test_money_columns_get_two_decimals_without_changing_any_value():
+    values = ["$741.8", "12", "$5", "1.234", "$1,200.50"] * 5
+    rule = RULES_BY_ID["coerce_numeric"]
+    cand = triggers("coerce_numeric", {"amount": values})[0]
+    params, _ = rule.prepare(frame({"amount": values}), "amount", cand.params)
+    assert params["decimals"] == 2
+    out, _ = run("coerce_numeric", frame({"amount": values}), "amount", params)
+    assert out["amount"].to_list()[:5] == ["741.80", "12.00", "5.00", "1.234", "1200.50"]   # never rounded
+
+
+def test_columns_without_currency_symbols_keep_their_decimals():
+    values = ["1,234.5", "7", "3.25"] * 7
+    rule = RULES_BY_ID["coerce_numeric"]
+    cand = triggers("coerce_numeric", {"weight": values})[0]
+    params, _ = rule.prepare(frame({"weight": values}), "weight", cand.params)
+    assert "decimals" not in params
+    out, _ = run("coerce_numeric", frame({"weight": values}), "weight", params)
+    assert out["weight"].to_list()[:3] == ["1234.5", "7", "3.25"]
+
+
+def test_coerce_numeric_turns_a_stray_leading_zero_into_a_number():
+    values = ["1", "2", "3", "03", "4", "5"] * 5
+    cands = triggers("coerce_numeric", {"Quantity": values})
+    assert [c.column for c in cands] == ["Quantity"]
+    out, _ = run("coerce_numeric", frame({"Quantity": values}), "Quantity", cands[0].params)
+    assert set(out["Quantity"].to_list()) == {"1", "2", "3", "4", "5"}
+
+
+def test_leading_zeros_stay_text_when_width_is_fixed_or_name_is_id_like():
+    zips = ["02134", "10001", "94105", "60614", "00501"] * 6     # one fixed width: text
+    skus = ["0012", "7", "345", "0001", "88"] * 6                 # mixed width, but name says code
+    data = {"zip_or_not": zips, "SKU": skus}
+    assert triggers("coerce_numeric", data) == []
+    prof = profile_dataframe(frame(data), SOURCE)
+    assert [c.inferred_type for c in prof.columns] == ["id", "id"]
+
+
 def test_coerce_numeric_confidence_is_share_of_numbers():
     data = {"amount": [f"${i}" for i in range(19)] + ["unknown"]}
     cand = triggers("coerce_numeric", data)[0]
@@ -227,18 +264,29 @@ def test_remove_exact_duplicate_rows_keeps_first():
 
 # --------------------------------------------------------------------------- 9 categories
 
-def test_standardize_categories():
-    values = ["North"] * 20 + ["north", "NORTH", "Nrth"] + ["South"] * 20 + ["East"] * 10 + ["West"] * 10
-    df = frame({"region": values})
+REGION = ["North"] * 20 + ["north", "NORTH", "Nrth"] + ["South"] * 20 + ["East"] * 10 + ["West"] * 10
+
+
+def test_standardize_categories_tier1_case_variants_are_automatic():
     rule = RULES_BY_ID["standardize_categories"]
-    cand = triggers("standardize_categories", {"region": values})[0]
-    params, confidence = rule.prepare(df, "region", cand.params)
-    assert params["mapping"] == {"NORTH": "North", "Nrth": "North", "north": "North"}
-    assert 0.80 <= confidence < 0.98
-    assert rule.is_destructive and resolve_mode(rule, confidence) == "suggest"
+    cands = triggers("standardize_categories", {"region": REGION})
+    assert [c.params["tier"] for c in cands] == [1, 2]
+    tier1 = cands[0]
+    params, confidence = rule.prepare(frame({"region": REGION}), "region", tier1.params)
+    assert params == {"tier": 1, "mapping": {"NORTH": "North", "north": "North"}}
+    assert resolve_mode(rule, confidence, auto_safe=tier1.auto_safe) == "auto"
+
+
+def test_standardize_categories_tier2_typos_are_suggestions_with_reasons():
+    rule = RULES_BY_ID["standardize_categories"]
+    tier2 = triggers("standardize_categories", {"region": REGION})[1]
+    df = frame({"region": REGION})
+    params, confidence = rule.prepare(df, "region", tier2.params)
+    assert params["mapping"] == {"Nrth": "North"}
+    assert "one letter" in params["reasons"]["Nrth"]
+    assert resolve_mode(rule, confidence, auto_safe=tier2.auto_safe) == "suggest"
     out, records = run("standardize_categories", df, "region", params)
-    assert set(out["region"].to_list()) == {"North", "South", "East", "West"}
-    assert len(records) == 3
+    assert len(records) == 1 and out["region"][22] == "North"
 
 
 def test_standardize_categories_accepts_an_edited_mapping():

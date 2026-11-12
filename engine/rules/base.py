@@ -28,6 +28,7 @@ class Candidate:
     confidence: float | None = None
     force_suggest: bool = False
     note: str | None = None          # extra sentence for the proposal description
+    auto_safe: bool = False          # only removes differences of case, accents or spacing: may run auto
 
 
 class Rule:
@@ -122,9 +123,14 @@ def proposal_id(rule_id: str, column: str | None, params: dict) -> str:
     return "sug_" + digest[:12]
 
 
-def resolve_mode(rule: Rule, confidence: float | None, force_suggest: bool = False) -> str | None:
-    """auto / suggest / flag, or None when the proposal must be dropped (confidence < 0.80)."""
-    mode = rule.default_mode
+def resolve_mode(
+    rule: Rule, confidence: float | None, force_suggest: bool = False, auto_safe: bool = False
+) -> str | None:
+    """auto / suggest / flag, or None when the proposal must be dropped (confidence < 0.80).
+
+    auto_safe: the candidate only removes differences of case, accents or spacing, so it starts
+    as auto even for a destructive rule (CONTRACT 2.1)."""
+    mode = "auto" if auto_safe else rule.default_mode
     if confidence is not None:
         if confidence < SUGGEST_THRESHOLD:
             return None
@@ -132,6 +138,6 @@ def resolve_mode(rule: Rule, confidence: float | None, force_suggest: bool = Fal
             mode = "suggest"
     if force_suggest and mode == "auto":
         mode = "suggest"
-    if rule.is_destructive and mode == "auto" and not rule.auto_when_destructive:
+    if rule.is_destructive and mode == "auto" and not (rule.auto_when_destructive or auto_safe):
         mode = "suggest"
     return mode

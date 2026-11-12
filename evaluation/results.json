@@ -9,7 +9,7 @@
     "unmatched": 0
   },
   "precision": 100.0,
-  "neutral_changes": 715,
+  "neutral_changes": 985,
   "false_positive_changes": 0,
   "files": {
     "sales_orders_messy.csv": {
@@ -26,7 +26,7 @@
         "overall": 78.3,
         "completeness": 63.0,
         "validity": 98.0,
-        "consistency": 80.8,
+        "consistency": 80.5,
         "uniqueness": 93.6,
         "conformity": 52.4
       },
@@ -42,7 +42,7 @@
         "overall": 13.7,
         "completeness": 8.3,
         "validity": 0.5,
-        "consistency": 17.7,
+        "consistency": 18.0,
         "uniqueness": 6.4,
         "conformity": 46.4
       },
@@ -76,7 +76,7 @@
           "row_correct": 25
         },
         "standardize_categories": {
-          "on_injected": 87
+          "on_injected": 96
         },
         "flag_outliers": {
           "on_injected": 3
@@ -131,7 +131,8 @@
           "on_injected": 55
         },
         "coerce_numeric": {
-          "on_injected": 27
+          "neutral": 23,
+          "on_injected": 28
         },
         "parse_dates": {
           "on_injected": 58
@@ -202,7 +203,8 @@
           "on_injected": 12
         },
         "coerce_numeric": {
-          "on_injected": 47
+          "neutral": 247,
+          "on_injected": 49
         },
         "parse_dates": {
           "on_injected": 306
@@ -373,8 +375,8 @@
       "injected": 328,
       "fixed": 328,
       "recall": 100.0,
-      "cell_changes_on_injected": 211,
-      "neutral": 0,
+      "cell_changes_on_injected": 214,
+      "neutral": 270,
       "false_positives": 0,
       "precision": 100.0,
       "row_or_column_correct": 0,
@@ -417,7 +419,7 @@
       "injected": 193,
       "fixed": 193,
       "recall": 100.0,
-      "cell_changes_on_injected": 186,
+      "cell_changes_on_injected": 195,
       "neutral": 0,
       "false_positives": 0,
       "precision": 100.0,

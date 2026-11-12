@@ -21,8 +21,9 @@ HR = SAMPLES / "hr_survey_messy.csv"
 FILES = ["clean.csv", "clean.xlsx", "report.html", "recipe.yaml", "changelog.csv"]
 
 
-def _prop(profile, rule_id, column=None):
-    return next(p for p in profile.proposals if p.rule_id == rule_id and p.column == column)
+def _prop(profile, rule_id, column=None, tier=None):
+    return next(p for p in profile.proposals if p.rule_id == rule_id and p.column == column
+                and (tier is None or p.params.get("tier") == tier))
 
 
 def _changelog(out_dir):
@@ -54,7 +55,8 @@ def test_proposals_follow_rule_order_and_modes(hr_profile):
     order = [ORDER[p.rule_id] for p in hr_profile.proposals]
     assert order == sorted(order)
     assert _prop(hr_profile, "parse_dates", "start_date").mode == "suggest"          # ambiguous
-    assert _prop(hr_profile, "standardize_categories", "department").mode == "suggest"
+    assert _prop(hr_profile, "standardize_categories", "department", tier=1).mode == "auto"     # case only
+    assert _prop(hr_profile, "standardize_categories", "department", tier=2).mode == "suggest"  # typos
     assert _prop(hr_profile, "flag_outliers", "salary").mode == "flag"
     assert _prop(hr_profile, "coerce_numeric", "salary").mode == "auto"
     assert _prop(hr_profile, "remove_exact_duplicate_rows").rows_affected == 6
@@ -92,7 +94,7 @@ def test_plan_defaults_run_auto_and_flag_but_not_suggestions(hr_profile):
 
 def test_plan_approve_reject_and_edit(hr_profile):
     dates = _prop(hr_profile, "parse_dates", "start_date")
-    cats = _prop(hr_profile, "standardize_categories", "department")
+    cats = _prop(hr_profile, "standardize_categories", "department", tier=2)
     trim = _prop(hr_profile, "trim_and_normalize_text", "manager")
     plan = pipeline.build_plan(
         hr_profile,

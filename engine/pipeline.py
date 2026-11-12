@@ -109,7 +109,7 @@ def _propose(df: pl.DataFrame, prof: DatasetProfile) -> list[Proposal]:
                 continue
             params, confidence = rule.prepare(df, cand.column, dict(cand.params))
             confidence = cand.confidence if confidence is None else confidence
-            mode = resolve_mode(rule, confidence, cand.force_suggest)
+            mode = resolve_mode(rule, confidence, cand.force_suggest, cand.auto_safe)
             if mode is None:
                 continue
             new_df, records = rule.apply(df, cand.column, params)
@@ -235,15 +235,25 @@ def _typed(value: str | None, itype: str):
     return value
 
 
-def _write_xlsx(df: pl.DataFrame, types: dict[str, str], path: Path) -> None:
+def _write_xlsx(df: pl.DataFrame, types: dict[str, str], path: Path, money: set[str] = frozenset()) -> None:
     from openpyxl import Workbook
+    from openpyxl.cell import WriteOnlyCell
 
     wb = Workbook(write_only=True)
     ws = wb.create_sheet("clean")
     ws.append(df.columns)
     kinds = [types.get(c, "text") for c in df.columns]
+    is_money = [c in money for c in df.columns]
     for row in df.iter_rows():
-        ws.append([_typed(v, k) for v, k in zip(row, kinds)])
+        cells = []
+        for v, k, m in zip(row, kinds, is_money):
+            value = _typed(v, k)
+            if m and isinstance(value, (int, float)):
+                cell = WriteOnlyCell(ws, value=float(value))
+                cell.number_format = "0.00"            # money: shown with 2 decimals
+                value = cell
+            cells.append(value)
+        ws.append(cells)
     wb.save(path)
 
 
@@ -332,7 +342,9 @@ def clean(
     report(88, "Writing files")
     output = df.drop(ROW_ID)
     output.write_csv(out_dir / "clean.csv")
-    _write_xlsx(output, {c.name: c.inferred_type for c in after.columns}, out_dir / "clean.xlsx")
+    money = {current.get(s.column, s.column) for s in steps
+             if s.rule_id == "coerce_numeric" and s.params.get("decimals")}
+    _write_xlsx(output, {c.name: c.inferred_type for c in after.columns}, out_dir / "clean.xlsx", money)
     _changelog.write_csv(records, out_dir / "changelog.csv")
     saved = _recipe.from_plan(approved_plan, loaded.source, name=recipe_name)
     _recipe.save(saved, out_dir / "recipe.yaml")

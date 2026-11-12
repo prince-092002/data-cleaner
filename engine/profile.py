@@ -90,7 +90,7 @@ def profile_column(
     date_n = sum(values[v] for v in iso)
 
     share = (lambda k: k / nn) if nn else (lambda k: 0.0)
-    leading_zero = any(p.leading_zero for p in nums.values())
+    leading_zero = P.leading_zeros_mean_id(nums)
 
     # ---- type inference (CONTRACT.md section 3)
     if nn == 0:
@@ -126,7 +126,7 @@ def profile_column(
         for v, p in nums.items():
             styles[p.style] += values[v]
         consistent_n = max(styles.values())
-        standard_n = sum(values[v] for v in nums if P.PLAIN_NUMBER_RE.match(v))
+        standard_n = sum(values[v] for v, p in nums.items() if v == p.canonical)   # "03" is not standard
         expanded = sorted(x for v, p in nums.items() for x in [p.value] * values[v])
         vmin, vmax = _fmt_num(expanded[0]), _fmt_num(expanded[-1])
         mean = round(statistics.fmean(expanded), 4)
@@ -173,7 +173,7 @@ def profile_column(
         tidy_n = sum(c for v, c in values.items() if v == P.tidy_text(v))
         standard_n = tidy_n
         if itype == "category":
-            mapping, _ = P.cluster_categories(values)
+            mapping = P.cluster_categories(values)
             consistent_n = sum(c for v, c in values.items() if mapping[v] == v)
             issue("inconsistent_categories", "medium",
                   "The same category is spelled in different ways", nn - consistent_n)

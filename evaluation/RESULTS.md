@@ -20,7 +20,7 @@ Recall = fixed / scored, where scored excludes not-fixable-by-design and out-of-
 | sales_orders_messy.csv | overall | 78.3 | 92.0 | 13.7 |
 | sales_orders_messy.csv | completeness | 63.0 | 71.3 | 8.3 |
 | sales_orders_messy.csv | validity | 98.0 | 98.5 | 0.5 |
-| sales_orders_messy.csv | consistency | 80.8 | 98.5 | 17.7 |
+| sales_orders_messy.csv | consistency | 80.5 | 98.5 | 18.0 |
 | sales_orders_messy.csv | uniqueness | 93.6 | 100.0 | 6.4 |
 | sales_orders_messy.csv | conformity | 52.4 | 98.8 | 46.4 |
 | customers_messy.xlsx | overall | 91.5 | 99.2 | 7.7 |
@@ -81,11 +81,11 @@ Recall = fixed / scored, where scored excludes not-fixable-by-design and out-of-
 | drop_empty_rows_and_columns | 11 | 11 | 100.0 | 0 | 0 | 0 | n/a | 11 / 1 |
 | trim_and_normalize_text | 407 | 407 | 100.0 | 407 | 0 | 0 | 100.0 | 0 / 0 |
 | standardize_null_tokens | 413 | 413 | 100.0 | 401 | 0 | 0 | 100.0 | 0 / 0 |
-| coerce_numeric | 328 | 328 | 100.0 | 211 | 0 | 0 | 100.0 | 0 / 0 |
+| coerce_numeric | 328 | 328 | 100.0 | 214 | 270 | 0 | 100.0 | 0 / 0 |
 | parse_dates | 155 | 155 | 100.0 | 461 | 0 | 0 | 100.0 | 0 / 0 |
 | standardize_booleans | 193 | 193 | 100.0 | 179 | 715 | 0 | 100.0 | 0 / 0 |
 | remove_exact_duplicate_rows | 36 | 36 | 100.0 | 0 | 0 | 0 | n/a | 36 / 0 |
-| standardize_categories | 193 | 193 | 100.0 | 186 | 0 | 0 | 100.0 | 0 / 0 |
+| standardize_categories | 193 | 193 | 100.0 | 195 | 0 | 0 | 100.0 | 0 / 0 |
 | flag_outliers | 3 | 2 | 66.7 | 5 | 0 | 0 | 100.0 | 0 / 0 |
 
 Row/column removals are not data cells, so they are shown separately. Changes on the *_outlier_flag column count against the base column.
