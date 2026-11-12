@@ -57,7 +57,26 @@ Each agent works alone on one task, reads CONTRACT.md first, reads only the file
 ```bash
 python -m venv .venv && .venv/Scripts/activate      # Windows
 pip install -e ".[backend,dev]"
-pytest -q                                           # engine + API tests
-uvicorn backend.main:app --reload --port 8000       # from M3
-cd frontend && npm install && npm run dev           # from M4
+pytest -q                                           # engine + API tests (239, ~80 s; some are marked slow but still run by default)
+pytest tests/engine/test_rules.py -q                # one file
+pytest tests/engine/test_rules.py::test_name -q     # one test
+pytest -q -m "not slow"                             # skip the 1-2 minute tests
+python sample_data/make_samples.py                  # regenerate the 3 messy samples + ground_truth.csv
+python evaluation/run_evaluation.py                 # recall / precision / damaged-cell evaluation
+uvicorn backend.main:app --reload --port 8000       # API docs at /docs
+cd frontend && npm install && npm run dev           # port 5173, proxies /api to 8000
+cd frontend && npm run test -- --run                # Vitest (one file: npm run test -- --run src/screens/FixesScreen.test.tsx)
+cd frontend && npm run lint                         # oxlint
+cd frontend && npm run build                        # tsc -b && vite build
 ```
+Env vars: `DC_STORAGE_DIR` (default `./storage`), `DC_CORS_ORIGINS`.
+
+## Architecture (the parts that span files)
+- **Pipeline is the only engine surface.** `engine/pipeline.py` exposes `inspect` → `profile` → `build_plan` → `clean` (CONTRACT section 7). `backend/routes.py` and `backend/jobs.py` call only these.
+- **Two-pass flow.** `profile()` runs a dry run of every rule's candidates in registry order (`engine/rules/registry.py`) to produce `Proposal`s with true `rows_affected` and before/after samples. The user's decisions go through `build_plan()` to an `ApprovedPlan`, which `clean()` replays, writing the clean file, change log CSV, recipe YAML and HTML report.
+- **Shared parsing.** `engine/parsing.py` holds the value parsers used by both the profiler and the rules so they cannot disagree. Add parsing logic there, not in a single rule.
+- **Rules** live one per file in `engine/rules/`, share `engine/rules/base.py`, and may define an optional `prepare(df, column, params)` for params that depend on data (date order, category mapping).
+- **Data conventions:** empty cells are null at ingest, Excel values are read as text, and columns keep the uploaded header until `normalize_headers` runs.
+- **Backend:** upload → `POST /profile` job → `POST /clean` job; jobs are rows in SQLite polled via `GET /api/jobs/{id}`. Starting a new profile deletes the dataset's old results; expired datasets (24 h) return 404.
+- **Frontend:** six screens in `frontend/src/screens/` driven by `state/AppState.tsx`; all HTTP goes through `api/client.ts` with types in `api/types.ts`. Bundled "Try a sample file" copies in `frontend/public/samples/` must match `sample_data/` (guarded by `tests/engine/test_frontend_samples.py`).
+- **CONTRACT changes:** when a contract decision changes, record it under "Decisions made" in HANDOFF.md with the reason.
