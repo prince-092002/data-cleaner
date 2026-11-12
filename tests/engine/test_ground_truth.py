@@ -91,3 +91,41 @@ def test_every_entry_points_at_a_real_row_and_column(ground_truth, tables):
 @pytest.mark.parametrize("file_name", FILES)
 def test_each_file_has_injected_errors(ground_truth, file_name):
     assert sum(r["file"] == file_name for r in ground_truth) > 0
+
+
+def test_parentheses_negative_expects_a_negative_number(ground_truth):
+    """CONTRACT 2.3: "(123)" means -123, so the expected clean value is negative."""
+    entries = [r for r in ground_truth if r["error_type"] == "parentheses_negative"]
+    assert entries
+    bad = [r for r in entries if r["original_value"] != "-" + r["injected_value"].strip("()")]
+    assert not bad, f"{len(bad)} entries expect the wrong sign, first: {bad[:1]}"
+
+
+def _data_rows(out_dir: Path, file_name: str) -> list[tuple]:
+    path = out_dir / file_name
+    if file_name.endswith(".xlsx"):
+        ws = openpyxl.load_workbook(path)["Customers"]
+        return [tuple(c.value for c in row) for row in ws.iter_rows(min_row=4)]
+    encoding, delimiter = ("cp1252", ";") if file_name.startswith("sales") else ("utf-8-sig", ",")
+    with open(path, encoding=encoding, newline="") as fh:
+        return [tuple(r) for r in list(csv.reader(fh, delimiter=delimiter))[1:]]
+
+
+@pytest.mark.parametrize("file_name", FILES)
+def test_duplicate_row_labels_the_later_copy(out_dir, ground_truth, file_name):
+    """remove_exact_duplicate_rows keeps the first occurrence, so the key must label the later ones:
+    every labelled row has an identical row above it, and every row with an identical row above
+    it (other than empty rows) is labelled."""
+    rows = _data_rows(out_dir, file_name)
+    labelled = {int(r["row"]) for r in ground_truth
+                if r["file"] == file_name and r["error_type"] == "duplicate_row"}
+    seen: set[tuple] = set()
+    expected = set()
+    for n, row in enumerate(rows, 1):
+        if all(v in (None, "") for v in row):
+            continue
+        if row in seen:
+            expected.add(n)
+        seen.add(row)
+    assert labelled == expected, (f"labelled but first copy: {sorted(labelled - expected)}; "
+                                  f"later copy not labelled: {sorted(expected - labelled)}")

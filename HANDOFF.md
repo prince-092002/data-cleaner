@@ -7,28 +7,18 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1 (MVP) complete. All milestones M0 to M5 done.
-- **Milestone:** M5 finished, committed and tagged `phase1-m5`. Waiting for the owner.
-- **Next:** owner decides on Phase 2 or polish. Candidate fixes are under Open questions and known issues.
+- **Phase:** 1, milestone M6 (Fix, Evaluate, Ship). Plan: Part A fixes (Steps 1-6), Part B performance and honest evaluation (7-9), Part C ship on GitHub + Vercel (10-15).
+- **Step:** M6 Step 1 (diagnosis) done and committed. Waiting for the owner's "go" for Step 2.
 
-## Last milestone summary (M5, 2026-11-11)
-- Success criteria replaced: per-dimension lift, recall on injected errors, zero damaged cells (CONTRACT section 11, README).
-- Results screen shows overall + five dimensions with before, after and change. Profile screen shows detected encoding and delimiter, with a note for windows-1252.
-- Fourth sample: Chicago Food Inspections, 5,000 real rows, outside the ground-truth evaluation (`sample_data/DATASETS.md`). Before 95.7, after 99.4.
-- Evaluation (`evaluation/run_evaluation.py`, `evaluation/RESULTS.md`): recall 98.8% (1,721 of 1,742 fixable), precision 100%, damaged cells 0.
-- Timing (`evaluation/TIMING.md`): 100k rows 23 s, 405 MB; 47.5 MB file (872k rows) 201 s, 2.0 GB.
-- Mobile (375 px) and keyboard-only run through the whole flow: no page overflow, logical tab order, visible focus rings, Enter starts cleaning. One bug found and fixed (clipped text on Upload). 6 screenshots in `docs/screenshots/`.
-- Bug found by the check: the website's bundled sales sample was a stale copy; resynced and guarded by `tests/engine/test_frontend_samples.py`.
-- Reviewer pass: no high findings; fixed duplicate React keys on null `row_id`; rest listed below.
+## Last milestone summary (M6 Step 1, 2026-11-12)
+- `evaluation/DIAGNOSIS.md` and `evaluation/diagnose.py` classify every missed duplicate and outlier.
+- Duplicates: all 16 misses were answer-key errors (copy inserted above its source; the rule keeps the first row and removed the other). Key fixed in `make_samples.py`; sample files unchanged, only `ground_truth.csv`.
+- Outliers: the one miss (salary 1) is inside the IQR fence (-8,875 to 188,125). Method unchanged.
+- "(123)" amounts: key now expects -123, matching CONTRACT 2.3.
+- messy_orders_demo.csv (in the owner's Downloads, not the repo): the Region suggestion was created but never approved; its mapping was also too weak. Quantity is typed `id` because of "03".
+- Recall on fixable errors is now 99.9% (1,741 of 1,742), precision 100%, 0 damaged cells. No engine change. README still shows M5 numbers until Step 8.
 
-Tests: **239 Python passed, 50 frontend passed**, frontend build OK.
-
-| File | Before | After | Recall | Damaged cells |
-|---|---|---|---|---|
-| sales_orders_messy.csv | 78.3 | 92.0 | 98.9% | 0 |
-| customers_messy.xlsx | 91.5 | 99.2 | 98.7% | 0 |
-| hr_survey_messy.csv | 86.3 | 96.1 | 98.6% | 0 |
-| chicago_food_inspections.csv (no ground truth) | 95.7 | 99.4 | n/a | n/a |
+Tests: **243 Python passed, 50 frontend passed**.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -71,11 +61,16 @@ Tests: **239 Python passed, 50 frontend passed**, frontend build OK.
 - 2026-11-11 (M5) The real public dataset (Chicago) is outside the ground-truth evaluation. Its test tolerates a 0.5-point uniqueness drop because of the free-text key-candidate artifact; engine left unchanged.
 - 2026-11-11 (M5) Reviewer findings on job overwrite and streaming size check were not fixed in M5 (demo scope); logged as known issues.
 
+- 2026-11-12 (M6.1) Answer key: duplicate_row goes on every later identical row, not on the inserted copy. Why: the rule keeps the first occurrence; 16 "misses" were correct removals of the other row.
+- 2026-11-12 (M6.1) Answer key: parentheses_negative expects -x (CONTRACT 2.3). Engine unchanged.
+- 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
+
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Ambiguous dates default to month-first if approved without editing; the UI forces a Day first / Month first click before Approve.
 - Category clustering misses swapped letters and short typos (under 5 characters need a reference-list match or 95+ similarity).
-- Weakest recall: exact duplicates 55.6% (copies that carry a missing value the original lacks stop being identical), outliers 66.7% (one extreme value inside the IQR fence), "(123)" amounts become -123 by contract while the ground truth expected +123.
+- Outlier recall 66.7%: a salary of 1 sits inside the IQR fence (by design). Duplicate and "(123)" misses were answer-key errors, fixed in M6.1.
+- README evaluation table and the "(123)" / duplicates explanation are stale until M6 Step 8.
 - Uniqueness can fall about 0.1 point on free-text columns that count as key candidates (Chicago sample). Candidate fix: exclude long free text from key candidates.
 - Reviewer, medium: starting a new profile while a job is still running can let the old job write results after the cleanup (section 8.5). The UI blocks this in one browser; the API does not.
 - Reviewer, low: the upload size limit is checked after FastAPI has spooled the upload to a temp file; an upload without Content-Length skips the early check. `engine/pipeline.py` lowercases the step label ("Applying <rule label>" in section 7).
@@ -86,11 +81,9 @@ Tests: **239 Python passed, 50 frontend passed**, frontend build OK.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-Nothing is queued. Options for the owner, in rough order of value:
-1. Fix the two reviewer findings (job overwrite after re-profile; streaming size check).
-2. Exclude long free text from key candidates; recheck the Chicago uniqueness score.
-3. Add the Chicago file as a fourth "Try a sample file" button.
-4. Phase 2 scope (to be defined by the owner in the BRD).
+1. M6 Step 2: Region tiers (auto case/accent/space merges, suggested abbreviations and typos), Quantity "03" coercion, money decimals, messy_orders_demo.csv as a regression test (the owner needs to supply the file or approve copying it from Downloads into the repo).
+2. Steps 3-6 of Part A, then Part B and Part C as in the M6 plan.
+3. After M6 ships: BA documents and demo video, then Phase 2.
 
 ## How to run
 ```bash
@@ -112,3 +105,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-11 | M4 Website | Done. 41 frontend tests passing, build OK. Live flow checked in the browser (sales sample 83.1 -> 96.6). Reviewer findings fixed.
 - 2026-11-11 | Pre-M5 fixes | Done. Safe-approve rule, job lock, ground truth, messier sales sample (78.3, target missed), category guard, encoding fix. 228 Python + 46 frontend tests passing. Tagged phase1-m4.
 - 2026-11-11 | M5 Evaluation, timing, review, README | Done. 239 Python + 50 frontend tests passing. Recall 98.8%, precision 100%, 0 damaged cells. Tagged phase1-m5.
+- 2026-11-12 | M6 Step 1 Diagnosis | Done. 16 duplicate and 4 "(123)" misses were answer-key errors (fixed); 1 outlier inside the fence. 243 Python + 50 frontend tests passing.

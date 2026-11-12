@@ -1,9 +1,9 @@
 {
   "headline": {
     "scored": 1742,
-    "fixed": 1721,
-    "missed": 21,
-    "recall": 98.8,
+    "fixed": 1741,
+    "missed": 1,
+    "recall": 99.9,
     "not_fixable": 1310,
     "out_of_scope": 5,
     "unmatched": 0
@@ -15,9 +15,9 @@
     "sales_orders_messy.csv": {
       "headline": {
         "scored": 1151,
-        "fixed": 1138,
-        "missed": 13,
-        "recall": 98.9
+        "fixed": 1151,
+        "missed": 0,
+        "recall": 100.0
       },
       "precision": 100.0,
       "rows_before": 433,
@@ -73,8 +73,7 @@
           "on_injected": 90
         },
         "remove_exact_duplicate_rows": {
-          "row_correct": 16,
-          "row_wrong": 9
+          "row_correct": 25
         },
         "standardize_categories": {
           "on_injected": 87
@@ -87,9 +86,9 @@
     "customers_messy.xlsx": {
       "headline": {
         "scored": 298,
-        "fixed": 294,
-        "missed": 4,
-        "recall": 98.7
+        "fixed": 298,
+        "missed": 0,
+        "recall": 100.0
       },
       "precision": 100.0,
       "rows_before": 257,
@@ -142,8 +141,7 @@
           "on_injected": 58
         },
         "remove_exact_duplicate_rows": {
-          "row_wrong": 4,
-          "row_correct": 1
+          "row_correct": 5
         },
         "standardize_categories": {
           "on_injected": 55
@@ -156,9 +154,9 @@
     "hr_survey_messy.csv": {
       "headline": {
         "scored": 293,
-        "fixed": 289,
-        "missed": 4,
-        "recall": 98.6
+        "fixed": 292,
+        "missed": 1,
+        "recall": 99.7
       },
       "precision": 100.0,
       "rows_before": 306,
@@ -214,8 +212,7 @@
           "on_injected": 31
         },
         "remove_exact_duplicate_rows": {
-          "row_wrong": 3,
-          "row_correct": 3
+          "row_correct": 6
         },
         "standardize_categories": {
           "on_injected": 44
@@ -253,8 +250,7 @@
       "not_fixable": 1
     },
     "duplicate_row": {
-      "fixed": 20,
-      "missed": 16
+      "fixed": 36
     },
     "empty_column": {
       "fixed": 1
@@ -303,8 +299,7 @@
       "missed": 1
     },
     "parentheses_negative": {
-      "missed": 4,
-      "fixed": 1
+      "fixed": 5
     },
     "percent_symbol": {
       "fixed": 58
@@ -376,8 +371,8 @@
     },
     "coerce_numeric": {
       "injected": 328,
-      "fixed": 324,
-      "recall": 98.8,
+      "fixed": 328,
+      "recall": 100.0,
       "cell_changes_on_injected": 211,
       "neutral": 0,
       "false_positives": 0,
@@ -409,14 +404,14 @@
     },
     "remove_exact_duplicate_rows": {
       "injected": 36,
-      "fixed": 20,
-      "recall": 55.6,
+      "fixed": 36,
+      "recall": 100.0,
       "cell_changes_on_injected": 0,
       "neutral": 0,
       "false_positives": 0,
       "precision": null,
-      "row_or_column_correct": 20,
-      "row_or_column_wrong": 16
+      "row_or_column_correct": 36,
+      "row_or_column_wrong": 0
     },
     "standardize_categories": {
       "injected": 193,
@@ -502,193 +497,13 @@
   },
   "missed": [
     {
-      "file": "sales_orders_messy.csv",
-      "row": 57,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 69,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 107,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 119,
-      "column": "Amount (USD)",
-      "error_type": "parentheses_negative",
-      "original": "4027.35",
-      "injected": "(4027.35)",
-      "method": "output '-4027.35', expected '4027.35'"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 153,
-      "column": "Amount (USD)",
-      "error_type": "parentheses_negative",
-      "original": "3279.95",
-      "injected": "(3279.95)",
-      "method": "output '-3279.95', expected '3279.95'"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 154,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 203,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 234,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 250,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 271,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 281,
-      "column": "Amount (USD)",
-      "error_type": "parentheses_negative",
-      "original": "1081.61",
-      "injected": "(1081.61)",
-      "method": "output '-1081.61', expected '1081.61'"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 295,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "sales_orders_messy.csv",
-      "row": 418,
-      "column": "Amount (USD)",
-      "error_type": "parentheses_negative",
-      "original": "4911.32",
-      "injected": "(4911.32)",
-      "method": "output '-4911.32', expected '4911.32'"
-    },
-    {
-      "file": "customers_messy.xlsx",
-      "row": 12,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "customers_messy.xlsx",
-      "row": 36,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "customers_messy.xlsx",
-      "row": 40,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "customers_messy.xlsx",
-      "row": 227,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "hr_survey_messy.csv",
-      "row": 22,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "hr_survey_messy.csv",
-      "row": 44,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
-      "file": "hr_survey_messy.csv",
-      "row": 112,
-      "column": "",
-      "error_type": "duplicate_row",
-      "original": "",
-      "injected": "",
-      "method": "row kept: no identical row after cleaning"
-    },
-    {
       "file": "hr_survey_messy.csv",
       "row": 207,
       "column": "Salary",
       "error_type": "outlier",
       "original": "44000",
       "injected": "1",
-      "method": "flagged by flag_outliers"
+      "method": "not flagged: value inside the IQR fence"
     }
   ],
   "false_positive_examples": []

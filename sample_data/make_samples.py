@@ -143,7 +143,21 @@ def _overwrite(row: Row, idx: int, column: str, value, error_type: str) -> None:
     row.errs.append((column, error_type, _txt(original), _txt(value)))
 
 
+def _label_duplicates(rows: list[Row]) -> None:
+    """A copy can be inserted above the row it was copied from. remove_exact_duplicate_rows keeps
+    the first occurrence, so the duplicate_row label belongs on every later identical row."""
+    seen: set[tuple] = set()
+    for row in rows:
+        row.errs = [e for e in row.errs if e[1] != "duplicate_row"]
+        if all(v in (None, "") for v in row):
+            continue
+        if tuple(row) in seen:
+            row.errs.append(("", "duplicate_row", "", ""))
+        seen.add(tuple(row))
+
+
 def _records(file_name: str, rows: list[Row]) -> list[tuple]:
+    _label_duplicates(rows)
     return [(file_name, n, col, tag, orig, inj)
             for n, row in enumerate(rows, 1) for col, tag, orig, inj in row.errs]
 
@@ -190,7 +204,7 @@ def make_sales(rng: random.Random, out_dir: Path) -> list[tuple]:
         amount_txt, found = _pick(rng, [
             (f"{amount:.2f}", 45),
             (f"${amount:,.2f}", 15, _currency_tags(amount), None),
-            (f"({amount:.2f})", 2, "parentheses_negative", None),
+            (f"({amount:.2f})", 2, "parentheses_negative", f"-{amount:.2f}"),  # CONTRACT 2.3: (x) = -x
             (f" {amount:.2f} ", 4, "extra_whitespace", None),
             ("N/A", 5, "null_token", None),
             ("TBD", 3, "null_token", None),
