@@ -118,7 +118,8 @@ def _propose(df: pl.DataFrame, prof: DatasetProfile) -> list[Proposal]:
                 continue
             df = new_df
             row_ids = {r.row_id for r in records if r.row_id is not None}
-            description = rule.explain + (f" {cand.note}" if cand.note else "")
+            # A candidate with its own title is a different kind of fix: its note is the whole story.
+            description = " ".join(x for x in (None if cand.title else rule.explain, cand.note) if x)
             proposals.append(
                 Proposal(
                     id=proposal_id(rule.id, cand.column, params),
@@ -129,7 +130,7 @@ def _propose(df: pl.DataFrame, prof: DatasetProfile) -> list[Proposal]:
                     severity=rule.severity,
                     is_destructive=rule.is_destructive,
                     confidence=confidence,
-                    title=rule.label + (f": {cand.column}" if cand.column else ""),
+                    title=(cand.title or rule.label) + (f": {cand.column}" if cand.column else ""),
                     description=description,
                     rows_affected=len(row_ids) if row_ids else len(records),
                     params=params,

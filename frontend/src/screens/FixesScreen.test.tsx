@@ -73,6 +73,12 @@ const proposals = [
     editable_params: ['dayfirst'],
   }),
   prop({ id: 'g', title: 'Trim', severity: 'medium' }),
+  prop({
+    id: 'n',
+    title: 'Name capitals',
+    column: 'customer_name',
+    params: { name_case: true, mapping: { 'JOHN SMITH': 'John Smith' } },
+  }),
 ]
 const profile = {
   proposals,
@@ -124,7 +130,7 @@ describe('FixesScreen', () => {
   it('groups fixes by column', () => {
     setup()
     const col = (name: string) =>
-      screen.getByRole('region', { name: new RegExp(`^Column ${name}`) })
+      screen.getByRole('region', { name: new RegExp(`^Column ${name} \\(`) })
     expect(within(col('c')).getAllByTestId('proposal-card')).toHaveLength(5)
     expect(within(col('amb')).getByRole('heading', { name: 'Ambiguous dates' })).toBeInTheDocument()
     expect(within(col('region')).getByRole('heading', { name: 'Categories' })).toBeInTheDocument()
@@ -191,6 +197,7 @@ describe('FixesScreen', () => {
     await u.click(screen.getByRole('button', { name: 'Approve all safe fixes' }))
     expect(status('Dates')).toBe('Approved')
     expect(status('Trim')).toBe('Approved')
+    expect(status('Name capitals')).toBe('Undecided (will not run)')
     expect(status('Categories')).toBe('Undecided (will not run)')
     expect(status('Ambiguous dates')).toBe('Undecided (will not run)')
     expect(status('Dedupe')).toBe('Undecided (will not run)')

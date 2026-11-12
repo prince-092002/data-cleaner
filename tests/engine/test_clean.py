@@ -87,6 +87,13 @@ def test_proposals_list_values_left_alone_with_a_reason():
     assert {"soon", "31/02/2024"} <= {x.value for x in dates.left_alone}
 
 
+def test_name_casing_proposal_describes_itself_not_the_trim_rule():
+    profile = pipeline.profile(SALES)
+    names = next(p for p in profile.proposals if p.params.get("name_case"))
+    assert names.mode == "suggest" and names.title.startswith("Give names normal capital letters")
+    assert "words stay the same" not in names.description and "John O'Brien" in names.description
+
+
 def test_no_coerce_proposal_for_id_columns():
     profile = pipeline.profile(SALES)
     assert not [p for p in profile.proposals if p.rule_id == "coerce_numeric" and p.column == "zip_code"]
@@ -194,7 +201,7 @@ def test_changelog_schema_and_stamping(sales_run):
     assert {r["action"] for r in rows} == {"auto", "approved"}
     assert all(re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", r["timestamp"]) for r in rows)
     approved = {r["rule_id"] for r in rows if r["action"] == "approved"}
-    assert approved == {"standardize_categories", "coerce_numeric", "parse_dates"}
+    assert approved == {"standardize_categories", "coerce_numeric", "parse_dates", "trim_and_normalize_text"}
     assert {r["change_type"] for r in rows} == {
         "cell", "row_removed", "column_removed", "header_renamed", "column_added",
     }

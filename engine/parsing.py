@@ -93,6 +93,70 @@ def is_id_like_name(name: str) -> bool:
     return any(tok in ID_NAME_TOKENS for tok in _snake(name).split("_"))
 
 
+# --------------------------------------------------------------------------- person names
+
+_NAME_TOKENS = frozenset({"name", "surname", "firstname", "lastname", "fullname"})
+_NOT_PERSON_TOKENS = frozenset({"file", "user", "product", "company", "business", "brand", "item",
+                                "host", "domain", "sheet", "table", "column", "field",
+                                "dba", "aka", "facility", "vendor", "supplier", "merchant",
+                                "store", "shop", "restaurant", "org", "organization", "school"})
+_PARTICLES = frozenset({"van", "de", "von"})
+_NUMERALS = frozenset({"ii", "iii", "iv"})
+_BUSINESS_RE = re.compile(r"\b(llc|inc|ltd|corp)\.?$", re.IGNORECASE)
+NAME_BUSINESS_MAX_SHARE = 0.20
+
+
+def is_name_column(name: str) -> bool:
+    tokens = set(_snake(name).split("_"))
+    return bool(tokens & _NAME_TOKENS) and not tokens & _NOT_PERSON_TOKENS
+
+
+def _name_part(part: str) -> str:
+    low = part.lower()
+    if "'" in low:                                              # O'Brien, D'Angelo
+        return "'".join(_name_part(p) for p in low.split("'"))
+    if low.startswith("mc") and len(low) > 2:                   # McDonald
+        return "Mc" + low[2].upper() + low[3:]
+    rest = low[3:]
+    if low.startswith("mac") and len(rest) >= 4 and rest[0] not in "aeiouhky":   # MacDonald, not Machado
+        return "Mac" + rest[0].upper() + rest[1:]
+    return low[:1].upper() + low[1:]
+
+
+def proper_name(value: str) -> str:
+    """JOHN O'BRIEN -> John O'Brien; keeps van/de/von lower case and II/III/IV upper case."""
+    words = tidy_text(value).split(" ")
+    out = []
+    for i, word in enumerate(words):
+        low = word.lower()
+        if i > 0 and low in _PARTICLES:
+            out.append(low)
+        elif low in _NUMERALS:
+            out.append(low.upper())
+        else:
+            out.append("-".join(_name_part(p) for p in word.split("-")))
+    return " ".join(out)
+
+
+def name_case_mapping(counts: dict[str, int]) -> dict[str, str]:
+    """Only values written ALL CAPS or all lower case; mixed case (O'Brien, deShawn) is left alone.
+    Returns {} when more than 20% of values look like business names (LLC, Inc, Ltd, Corp)."""
+    total = sum(counts.values())
+    business = sum(n for v, n in counts.items() if _BUSINESS_RE.search(tidy_text(v)))
+    if not total or business / total > NAME_BUSINESS_MAX_SHARE:
+        return {}
+    out = {}
+    for value in sorted(counts):
+        text = tidy_text(value)
+        if text.upper() == text.lower():                        # no letters
+            continue
+        if text == text.upper() or text == text.lower():
+            new = proper_name(text)
+            if new != value:
+                out[value] = new
+    return out
+
+
 # --------------------------------------------------------------------------- numbers
 
 _NUM_RE = re.compile(

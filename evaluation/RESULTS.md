@@ -79,7 +79,7 @@ Recall = fixed / scored, where scored excludes not-fixable-by-design and out-of-
 |---|---|---|---|---|---|---|---|---|
 | normalize_headers | 3 | 3 | 100.0 | 0 | 0 | 0 | n/a | 0 / 0 |
 | drop_empty_rows_and_columns | 11 | 11 | 100.0 | 0 | 0 | 0 | n/a | 11 / 1 |
-| trim_and_normalize_text | 407 | 407 | 100.0 | 407 | 0 | 0 | 100.0 | 0 / 0 |
+| trim_and_normalize_text | 407 | 407 | 100.0 | 455 | 0 | 0 | 100.0 | 0 / 0 |
 | standardize_null_tokens | 413 | 413 | 100.0 | 401 | 0 | 0 | 100.0 | 0 / 0 |
 | coerce_numeric | 328 | 328 | 100.0 | 214 | 270 | 0 | 100.0 | 0 / 0 |
 | parse_dates | 155 | 155 | 100.0 | 461 | 0 | 0 | 100.0 | 0 / 0 |

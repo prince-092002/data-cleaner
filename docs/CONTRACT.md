@@ -45,6 +45,7 @@ class Candidate:            # "this rule wants to act here"
     force_suggest: bool     # e.g. ambiguous dates
     note: str | None        # extra sentence for the proposal description
     auto_safe: bool         # only removes differences of case, accents or spacing (added M6)
+    title: str | None       # proposal title instead of the rule label (added M6, name casing)
 
 class Rule:
     id: str                 # e.g. "coerce_numeric"
@@ -110,7 +111,7 @@ Rules for rules:
 |---|---|---|
 | `normalize_headers` | snake_case, strip, ASCII-fold, empty header becomes `column_<n>`, duplicates get `_2`, `_3` | `{"mapping": {current dataframe column: name}}` |
 | `drop_empty_rows_and_columns` | Removes rows and columns where every cell is null or a null token | `{"drop_rows": true, "drop_columns": true}` |
-| `trim_and_normalize_text` | Trim, collapse inner whitespace, remove zero-width/control/non-breaking chars, Unicode NFC, `ftfy.fix_text` | `{}` |
+| `trim_and_normalize_text` | Trim, collapse inner whitespace, remove zero-width/control/non-breaking chars, Unicode NFC, `ftfy.fix_text`. **Name casing (M6, always a suggestion, `force_suggest`):** a second candidate on person-name columns (header has a `name`, `surname`, `firstname`, `lastname` or `fullname` token and no business word such as file, user, product, company, dba, aka, vendor, store). Only values written ALL CAPS or all lower case change (`JOHN O'BRIEN` becomes `John O'Brien`); mixed case is left alone. Keeps `Mc`, `Mac` (only before a consonant other than h, k, y, so `Machado` stays), `O'`, lower-case `van`, `de`, `von` after the first word, and `II`, `III`, `IV`. Skipped when more than 20% of values end in LLC, Inc, Ltd or Corp | `{}`; name casing `{"name_case": true, "mapping": {old: new}}` |
 | `standardize_null_tokens` | Null tokens become `null` | `{"tokens": [...]}` |
 | `coerce_numeric` | Strip `$ £ € ,` and spaces, `%` (value kept as written, e.g. `45%` becomes `45`), `(123)` becomes `-123`, a stray leading zero is dropped (`03` becomes `3`). Output is a plain decimal string. **Money columns** (any value written with a currency symbol) get exactly 2 decimals by padding only (`741.8` becomes `741.80`; `1.234` is never rounded), and clean.xlsx shows them with format `0.00`. **Never triggers** on an id column: one whose numbers have leading zeros and all share one fixed width (zip `02134`), or whose name looks like an id, zip, postal, phone, code, sku, account or ssn | `{"decimal": ".", "thousands": ","}`, plus `"decimals": 2` for money columns |
 | `parse_dates` | Output `YYYY-MM-DD` (or `YYYY-MM-DDTHH:MM:SS` when a time is present). Ambiguous when every value has day <= 12 and month <= 12 | `{"dayfirst": bool}`; user may edit `dayfirst` |
@@ -543,7 +544,7 @@ The profile and results are stored in the `Dataset` row (section 8.8), not as fi
 
 ## 10. Frontend rules and sample data (added after M4)
 
-- **Approve all safe fixes** approves a proposal only if it is not destructive, its mode is not `flag`, its rule is not `standardize_categories`, and it is not a `parse_dates` proposal on a column with the `ambiguous_dates` issue. Category merges and ambiguous dates need an explicit choice by the user (for dates: day-first or month-first). Auto and flag proposals still run unless rejected; suggest proposals run only if approved (section 7).
+- **Approve all safe fixes** approves a proposal only if it is not destructive, its mode is not `flag`, its rule is not `standardize_categories`, it is not name casing (`params.name_case`), and it is not a `parse_dates` proposal on a column with the `ambiguous_dates` issue. Category merges and ambiguous dates need an explicit choice by the user (for dates: day-first or month-first). Auto and flag proposals still run unless rejected; suggest proposals run only if approved (section 7).
 - **Fixes screen layout (M6):** Tier 1 category merges are shown in an "Automatic merges" section with an Undo per value. Undo removes that value from the proposal's mapping (sent as an edit); undoing every value rejects the proposal. The other proposals are grouped as "Whole table" (no column) and one section per column, each with its `left_alone` values. Tier 2 merges show each value's reason.
 - **One job at a time per browser session:** the UI disables "Start cleaning" and the stepper while a profile or clean job runs.
 - **Encoding detection:** when charset-normalizer guesses a Latin-script single-byte encoding other than windows-1252 (iso8859-2/4/9/10/13/14/16, cp1254, cp1257) the file is read as windows-1252 if it decodes cleanly; Cyrillic, Greek and Arabic guesses are kept.

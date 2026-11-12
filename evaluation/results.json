@@ -57,7 +57,7 @@
           "row_correct": 9
         },
         "trim_and_normalize_text": {
-          "on_injected": 240
+          "on_injected": 288
         },
         "standardize_null_tokens": {
           "on_injected": 389
@@ -353,7 +353,7 @@
       "injected": 407,
       "fixed": 407,
       "recall": 100.0,
-      "cell_changes_on_injected": 407,
+      "cell_changes_on_injected": 455,
       "neutral": 0,
       "false_positives": 0,
       "precision": 100.0,

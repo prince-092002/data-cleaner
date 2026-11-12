@@ -29,6 +29,7 @@ class Candidate:
     force_suggest: bool = False
     note: str | None = None          # extra sentence for the proposal description
     auto_safe: bool = False          # only removes differences of case, accents or spacing: may run auto
+    title: str | None = None         # proposal title instead of the rule label (one rule, two kinds of fix)
 
 
 class Rule:

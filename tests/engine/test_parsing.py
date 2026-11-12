@@ -195,3 +195,38 @@ def test_format_pattern():
 
 def test_tidy_text():
     assert P.tidy_text("  José  García​ ") == "José García"
+
+
+# ---- name casing (M6 step 5, suggestions only)
+
+@pytest.mark.parametrize("raw, expected", [
+    ("JOHN SMITH", "John Smith"),
+    ("bob smith", "Bob Smith"),
+    ("JOHN O'BRIEN", "John O'Brien"),
+    ("mary mcdonald", "Mary McDonald"),
+    ("ANGUS MACDONALD", "Angus MacDonald"),
+    ("ANA MACHADO", "Ana Machado"),             # "Mac" only before a likely second capital
+    ("LUDWIG VAN BEETHOVEN", "Ludwig van Beethoven"),
+    ("ROBERTO DE NIRO", "Roberto de Niro"),
+    ("HENRY FORD II", "Henry Ford II"),
+    ("JAMES SMITH III", "James Smith III"),
+    ("ANNE-MARIE DUPONT", "Anne-Marie Dupont"),
+])
+def test_proper_name(raw, expected):
+    assert P.proper_name(raw) == expected
+
+
+def test_name_case_changes_only_all_caps_or_all_lowercase_values():
+    counts = {"JOHN SMITH": 2, "bob smith": 1, "Mary McDonald": 3, "deShawn Lee": 1, "O'Brien": 1}
+    assert P.name_case_mapping(counts) == {"JOHN SMITH": "John Smith", "bob smith": "Bob Smith"}
+
+
+def test_name_case_skips_columns_full_of_business_names():
+    counts = {"ACME LLC": 1, "GLOBEX INC": 1, "JOHN SMITH": 3}           # 2 of 5 rows = 40%
+    assert P.name_case_mapping(counts) == {}
+
+
+def test_name_like_columns():
+    assert all(P.is_name_column(n) for n in ["customer_name", "Full Name", "surname", "first_name"])
+    assert not any(P.is_name_column(n) for n in ["filename", "file_name", "username", "city", "product_name",
+                                               "dba_name", "aka_name", "vendor_name", "facility_name"])

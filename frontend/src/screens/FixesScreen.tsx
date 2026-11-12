@@ -44,13 +44,15 @@ export function statusLabel(status: Status, mode: Proposal['mode']): string {
 
 /**
  * "Safe" rule for "Approve all safe fixes": not destructive, not flag-only, not a category
- * merge (judgment call) and not an ambiguous-date parse (needs an explicit order choice).
+ * merge or name casing (judgment calls) and not an ambiguous-date parse (needs an explicit
+ * order choice).
  */
 export function isSafe(p: Proposal, ambiguous = false): boolean {
   return (
     !p.is_destructive &&
     p.mode !== 'flag' &&
     p.rule_id !== 'standardize_categories' &&
+    p.params.name_case !== true &&
     !(p.rule_id === 'parse_dates' && ambiguous)
   )
 }
@@ -555,8 +557,8 @@ export function FixesScreen() {
             Approve all safe fixes
           </Button>
           <p id="safe-desc" className="mt-1 text-xs text-slate-600">
-            Excludes category merges, ambiguous dates, destructive and flag-only fixes, which need
-            an explicit choice.
+            Excludes category merges, name capitals, ambiguous dates, destructive and flag-only
+            fixes, which need an explicit choice.
           </p>
         </div>
       </div>

@@ -157,7 +157,7 @@ def test_profile_job_and_result(client):
     assert profile["source"]["filename"] == SALES.name          # the uploaded name, not "original.csv"
     assert profile["row_count"] == 433 and len(profile["columns"]) == 10
     assert profile["quality"]["overall"] == 78.3
-    assert len(profile["proposals"]) == 24          # region: Tier 1 (auto) and Tier 2 (suggest)
+    assert len(profile["proposals"]) == 25          # region Tier 1 + Tier 2, customer_name casing
     assert {"id", "rule_id", "mode", "severity", "rows_affected", "samples"} <= set(profile["proposals"][0])
 
 
@@ -252,7 +252,7 @@ def test_clean_job_and_results(client):
     assert results["summary"]["rows_after"] == 400
     assert results["downloads"] == DOWNLOADS
     changes = results["changes"]
-    assert changes["total"] == results["summary"]["total_changes"] == 1348   # M6.2: +9 "Wset" -> "West"
+    assert changes["total"] == results["summary"]["total_changes"] == 1396   # M6.2: +9 "Wset" -> "West"; M6.5: +48 name capitals
     assert (changes["limit"], changes["offset"], len(changes["items"])) == (100, 0, 100)
     first = changes["items"][0]
     assert list(first) == ["run_id", "rule_id", "rule_version", "row_id", "column", "change_type",
@@ -270,7 +270,7 @@ def test_change_log_filters_and_paging(client):
     assert all(isinstance(i["row_id"], int) for i in dates["items"])
 
     approved = client.get(url, params={"action": "approved"}).json()["changes"]
-    assert {i["rule_id"] for i in approved["items"]} == {"coerce_numeric", "parse_dates"}
+    assert {i["rule_id"] for i in approved["items"]} <= {"coerce_numeric", "parse_dates", "trim_and_normalize_text"}   # first page only
 
     both = client.get(url, params={"column": "region", "change_type": "cell", "action": "auto"}).json()["changes"]
     assert both["total"] > 0 and {i["column"] for i in both["items"]} == {"region"}

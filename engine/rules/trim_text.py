@@ -5,7 +5,7 @@ from __future__ import annotations
 import ftfy
 
 from engine import parsing as P
-from engine.rules.base import Candidate, Rule, columns_with
+from engine.rules.base import Candidate, Rule, columns_with, value_counts
 
 
 def clean_text(value: str) -> str:
@@ -30,7 +30,27 @@ class TrimAndNormalizeText(Rule):
 
     def trigger(self, profile):
         cols = columns_with(profile, issues=("whitespace", "hidden_characters", "encoding_damage"))
-        return [Candidate(column=c.name) for c in cols]
+        out = [Candidate(column=c.name) for c in cols]
+        # Name casing (M6): a suggestion only, on person-name columns.
+        for c in columns_with(profile, types=("text", "category")):
+            if P.is_name_column(c.name):
+                out.append(Candidate(
+                    column=c.name, params={"name_case": True, "mapping": {}}, force_suggest=True,
+                    title="Give names normal capital letters",
+                    note=("Names written all in capitals or all in lower case get normal capitals "
+                          "(JOHN O'BRIEN becomes John O'Brien). Names with mixed capitals are left alone."),
+                ))
+        return out
+
+    def prepare(self, df, column, params):
+        if not params.get("name_case"):
+            return params, None
+        return {**params, "mapping": P.name_case_mapping(value_counts(df, column))}, None
 
     def apply(self, df, column, params):
+        if params.get("name_case"):
+            mapping = params.get("mapping", {})
+            if not mapping:
+                return df, []
+            return self.map_values(df, column, lambda v: mapping.get(v, mapping.get(P.tidy_text(v), v)))
         return self.map_values(df, column, clean_text)

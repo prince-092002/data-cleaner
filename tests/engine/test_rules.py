@@ -130,6 +130,22 @@ def test_trim_keeps_curly_quotes():
     assert records == [] and out["t"][0] == "don’t stop"
 
 
+def test_name_casing_is_a_suggestion_on_name_columns_only():
+    names = ["JOHN SMITH", "Mary McDonald", "bob o'brien", "Ann Lee"] * 5
+    rule = RULES_BY_ID["trim_and_normalize_text"]
+    cands = [c for c in triggers("trim_and_normalize_text", {"customer_name": names, "city": names})
+             if c.params.get("name_case")]
+    assert [c.column for c in cands] == ["customer_name"]
+    cand = cands[0]
+    assert cand.title and "capital" in cand.title.lower()
+    assert resolve_mode(rule, cand.confidence, cand.force_suggest) == "suggest"
+    params, _ = rule.prepare(frame({"customer_name": names}), "customer_name", cand.params)
+    assert params["mapping"] == {"JOHN SMITH": "John Smith", "bob o'brien": "Bob O'Brien"}
+    out, records = run("trim_and_normalize_text", frame({"customer_name": names}), "customer_name", params)
+    assert out["customer_name"].to_list()[:4] == ["John Smith", "Mary McDonald", "Bob O'Brien", "Ann Lee"]
+    assert len(records) == 10
+
+
 # --------------------------------------------------------------------------- 4 null tokens
 
 def test_standardize_null_tokens():

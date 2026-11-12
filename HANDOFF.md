@@ -8,16 +8,15 @@ Data Cleaner is a website where a user uploads a messy CSV or Excel file; the sy
 
 ## Current position
 - **Phase:** 1, milestone M6 (Fix, Evaluate, Ship). Plan: Part A fixes (Steps 1-6), Part B performance and honest evaluation (7-9), Part C ship on GitHub + Vercel (10-15).
-- **Step:** M6 Step 4 (reviewer bugs) done and committed. Waiting for the owner's "go" for Step 5.
+- **Step:** M6 Step 5 (name casing) done and committed. Waiting for the owner's "go" for Step 6 (Part A checkpoint).
 
-## Last milestone summary (M6 Step 4, 2026-11-12)
-- Stale jobs: each dataset has a `generation`, bumped by every new profile or clean job. Jobs save with one guarded UPDATE (`WHERE generation = :g`); a late old job ends `failed` / `superseded` and saves nothing. Profile and results now live in the Dataset row; clean outputs in `runs/{run_id}/`.
-- Upload cap: an ASGI layer counts body bytes as they arrive and answers 413 as soon as the limit is passed, also with no Content-Length. Proven on raw ASGI: the old code read all 129 chunks, the new one stops early. Limit from `DC_MAX_UPLOAD_MB` (default 50); `/api/health` reports it.
-- Upload screen reads the limit from `/api/health` and explains a 413 ("... Please choose a smaller file.").
-- Old local `storage/app.db` (pre-M6 columns) is rebuilt automatically on startup; its data is temporary anyway.
-- CONTRACT 8, 8.5, 8.8 and 9 updated.
+## Last milestone summary (M6 Step 5, 2026-11-12)
+- Name casing is a suggestion-only second candidate of `trim_and_normalize_text` (still 10 rules), titled "Give names normal capital letters". Only ALL CAPS or all lower-case values change; mixed case is left alone. Handles Mc, Mac (not Machado), O', van/de/von, II/III/IV. Skipped when over 20% of values end in LLC, Inc, Ltd or Corp.
+- Person-name columns only: a name token and no business word. Live check on the Chicago file caught `dba_name` / `aka_name` (business names, 4,700 rows each); those words are now excluded.
+- Never in "Approve all safe fixes" (UI and CONTRACT 10). New `Candidate.title`; a titled candidate's description is its own note.
+- Sales sample: 48 upper/lower-case names fixed when approved; evaluation unchanged (recall 99.9%, precision 100%, 0 damaged cells, 0 false positives).
 
-Tests: **270 Python passed, 56 frontend passed**, build OK.
+Tests: **286 Python passed, 56 frontend passed**, build OK.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -72,12 +71,14 @@ Tests: **270 Python passed, 56 frontend passed**, build OK.
 - 2026-11-12 (M6.4) Generation counter is bumped by clean jobs too, so the newest clean wins when two overlap. Profile and results moved from files into the Dataset row so the save is one guarded UPDATE (also fits Postgres in Step 12).
 - 2026-11-12 (M6.4) A run folder is never deleted while it might be written: old folders go when a newer clean is saved or at the 24-hour cleanup.
 - 2026-11-12 (M6.4) The streaming cap allows 1 MB of multipart overhead on top of the file limit; the exact file-size check stays in `save_upload`.
+- 2026-11-12 (M6.5) Name casing lives in rule 3 as a forced suggestion, not an 11th rule (CLAUDE.md: exactly 10 rules).
+- 2026-11-12 (M6.5) "Mac" gets a second capital only before a consonant other than h, k or y, so Machado and Mackenzie stay as normal words; MacArthur becomes Macarthur (accepted: suggestion only).
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Ambiguous dates default to month-first if approved without editing; the UI forces a Day first / Month first click before Approve.
-- The evaluation still treats short category typos as "not fixable by design" (9 entries) although Tier 2 now fixes them; fix in Step 8 with the new metrics.
+- The evaluation still treats short category typos (9) and name case variants as "not fixable by design" although Tier 2 and name casing now fix them; fix in Step 8 with the new metrics.
 - The 500-distinct cap for Tier 2 is never reached in practice: the category test (<= 50 distinct) runs first.
 - Outlier recall 66.7%: a salary of 1 sits inside the IQR fence (by design). Duplicate and "(123)" misses were answer-key errors, fixed in M6.1.
 - README evaluation table and the "(123)" / duplicates explanation are stale until M6 Step 8.
@@ -89,8 +90,8 @@ Tests: **270 Python passed, 56 frontend passed**, build OK.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. M6 Step 5: name casing suggestions (suggest only; cut and defer if it runs long).
-2. Step 6 (Part A checkpoint, tag phase1-m6a), then Part B and Part C as in the M6 plan.
+1. M6 Step 6: Part A checkpoint (full test run, messy_orders_demo.csv before/after through the engine, tag phase1-m6a).
+2. Part B (Steps 7-9) and Part C (Steps 10-15) as in the M6 plan.
 3. After M6 ships: BA documents and demo video, then Phase 2.
 
 ## How to run
@@ -117,3 +118,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-12 | M6 Step 2 Region, Quantity, money | Done. Category Tier 1/2, fixed-width leading zeros, money 2 decimals, demo regression test. 260 Python + 50 frontend tests passing.
 - 2026-11-12 | M6 Step 3 Fixes screen | Done. Grouped by column, automatic merges with Undo, left-alone lists, label fix, 375 px and keyboard checked. 264 Python + 54 frontend tests passing.
 - 2026-11-12 | M6 Step 4 Reviewer bugs | Done. Generation guard for stale jobs, streaming upload cap (DC_MAX_UPLOAD_MB), UI limit from /api/health. 270 Python + 56 frontend tests passing.
+- 2026-11-12 | M6 Step 5 Name casing | Done. Suggest-only name capitals with Mc/Mac/O'/particles/numerals, business-name guard, excluded from approve-all-safe. 286 Python + 56 frontend tests passing.
