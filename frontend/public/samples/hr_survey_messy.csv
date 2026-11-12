@@ -1,0 +1,307 @@
+﻿Employee ID,Department,Start Date,Salary,Remote,Satisfaction,Comments,Comments,,Manager
+E0001,Finance,12/02/2017,88000,Y,1,,,,
+E0002,Marketing,06/05/2024,60000,Y,1,Needs better tooling,,,Ava Smith
+E0003,Sales,05/12/2018,139000,N,4,CafÃ© area is too small,,,Ava Lefèvre
+E0004,Human Resources,12/11/2020,"$118,000",N,1,"Flexible hours, remote friendly",,x,José O'Brien
+E0005,Marketing,07/02/2020,83000,Y,,CafÃ© area is too small,,x,Zoë Brown
+E0006,Engineering,05/11/2016,74000,Y,2,"Flexible hours, remote friendly",,x,Noah Novak
+E0007,HR,10/06/2023,102000,N,4,CafÃ© area is too small,,x,Wei Silva
+E0008,Sales,08/07/2020,96000,y,2,I donâ€™t get enough feedback,,,Wei Åberg
+E0009,Engineering,07/12/2017,97000,Y,5,"Great team, good benefits",,,Anna Lefèvre
+E0010,Markting,11/12/2021,88000,N,5,,,,
+E0011,HR,10/03/2017,64000,Y,1,CafÃ© area is too small,,,Priya García
+E0012,Engineering,10/06/2024,76000,N,1,CafÃ© area is too small,,,Chloé Smith
+E0013,engineering ,06/04/2024,,Y,4,,,x,Chloé Brown
+E0014,Finance,05/12/2024,96000,Y,4,,,,Mia Tanaka
+E0015,Sales,06/04/2021,94000,n,?,"Flexible hours, remote friendly",,,Iñaki Smith
+E0016,Sales,06/11/2020,96000,Y,5,"Great team, good benefits",,x,Chloé Brown
+E0017,Sales,11/08/2015,128000,Y,2,Needs better tooling,,x,Zoë Silva
+E0018,Engineering,09/12/2023,9999999,N,5,"Great team, good benefits",,,Søren Novak
+E0019,HR,02/10/2018,120000,N,5,I donâ€™t get enough feedback,,x,Lucas Rossi
+E0020,HR,11/09/2017,66000,N,3,"Great team, good benefits",,,Wei Lefèvre
+E0021,Finance,12/08/2021,57000,Y,2,"Great team, good benefits",,,Ava Khan
+E0036,engineering ,07/02/2019,71000,N,2,I donâ€™t get enough feedback,,,Omar Khan
+E0022,Finance,09/05/2024,86000,Y,4,"Flexible hours, remote friendly",,,Anna Schröder
+E0023,SALES,08/01/2024,NULL,N,2,Needs better tooling,,,Søren Lefèvre
+E0024,Finance,10/04/2024,69000,N,,,,,
+E0025,HR,06/09/2015,87000,n,,,,,Wei Lefèvre
+E0026,Sales,03/05/2022,133000,Y,3,"Great team, good benefits",,,José Lefèvre
+E0027,Finance,05/04/2019,43000,Y,4,"Great team, good benefits",,,Omar Khan
+E0028,Sales,11/08/2021,97000,N,2,,,,Renée Khan
+E0029,Finance,04/10/2021,76000,N,4,"Flexible hours, remote friendly",,,Chloé Tanaka
+E0030,Engineering,02/01/2016,45000,Y,1,I donâ€™t get enough feedback,,,Zoë Dubois
+E0031,Engineering,02/08/2020,"$99,000",y,2,,,,Liam Novak
+E0032,Marketing,07/06/2022,"$134,000",Y,4,"Flexible hours, remote friendly",,,Sofía Nuñez
+E0033,Sales,11/12/2015,"$124,000",Y,4,,,,Zoë Khan
+E0034,SALES,01/09/2016,135000,Y,5,Needs better tooling,,,José Schröder
+E0035,Enginering,05/04/2017,58000,Y,1,Needs better tooling,,,Mia Schröder
+E0036,engineering ,07/02/2019,71000,N,2,I donâ€™t get enough feedback,,,Omar Khan
+E0037,Sales,01/12/2019,134000,Y,4,"Great team, good benefits",,,Ethan Lefèvre
+E0038,Marketing,01/07/2021,94000,Y,5,"Great team, good benefits",,x,Renée Brown
+E0039,Enginering,07/08/2022,"$135,000",Y,4,,,x,Chloé Peña 
+E0040,Sales,03/03/2023,105000,N,,"Flexible hours, remote friendly",,,Priya Novak 
+E0041,Finance,06/09/2018,50000,N,2,Needs better tooling,,,Lucas Nuñez
+E0042,Engineering,12/05/2021,"119,000",Y,3,,,,Søren Smith
+E0209,Finance,01/03/2024,101000,N,2,I donâ€™t get enough feedback,,,Sofía Khan
+E0043,engineering ,08/10/2017,98000,N,2,,,,Priya Lefèvre
+E0044,Finance,12/12/2023,120000,Y,4,CafÃ© area is too small,,,Chloé Brown
+E0045,Finance,05/03/2021,137000,Y,4,"Great team, good benefits",,,
+E0046,Marketing,02/10/2019,125000,Y,2,,,,José Dubois
+E0047,Human Resources,09/06/2017,120000,N,2,"Flexible hours, remote friendly",,,Ava Nuñez 
+E0048,Human Resources,05/01/2016,93000,N,2,CafÃ© area is too small,,,Iñaki Tanaka
+E0049,Sales,10/12/2016,108000,Y,3,"Great team, good benefits",,x,Lucas Khan
+E0050,Engineering,07/11/2016,"$115,000",Y,5,"Flexible hours, remote friendly",,,Priya Khan
+E0051,Engineering,11/01/2016,66000,Y,1,,,,Priya Khan
+E0052,engineering ,10/08/2019,122000,N,5,,,,Zoë Åberg
+E0053,Sales,03/10/2019,136000,Y,3,"Flexible hours, remote friendly",,,Ethan Dubois
+E0054,Human Resources,01/12/2020,"$106,000",N,3,,,,Anna O'Brien
+E0055,Finance,05/02/2015,90000,n,?,"Flexible hours, remote friendly",,,Müller Lefèvre
+E0056,HR,01/01/2019,NULL,N,3,CafÃ© area is too small,,,Mia García
+E0057,SALES,02/01/2020,103000,N,5,"Flexible hours, remote friendly",,,Iñaki Nuñez 
+E0058,Marketing,10/08/2019,99000,Y,1,I donâ€™t get enough feedback,,x,Iñaki Khan
+E0059,HR,10/04/2020,120000,Y,4,Needs better tooling,,,Noah Åberg
+E0060,engineering ,10/01/2015,"$74,000",N,5,,,,Zoë García 
+E0061,Marketing,04/05/2017,119000,Y,5,CafÃ© area is too small,,,Liam Åberg 
+E0062,Finance,11/06/2020,55000,N,3,"Great team, good benefits",,,Sofía Peña
+E0063,Engineering,04/03/2018,61000,Y,3,Needs better tooling,,,Mia Brown
+E0064,Engineering,01/06/2023,124000,y,1,"Flexible hours, remote friendly",,,Jürgen Nuñez
+E0065,Sales,07/06/2020,96000,Y,5,,,,Jürgen Lefèvre
+E0066,finance,10/06/2018,"$64,000",N,5,"Great team, good benefits",,,Ethan Peña
+E0067,Sales,08/10/2019,107000,Y,3,CafÃ© area is too small,,,Priya Brown
+E0068,Engineering,05/07/2022,"$95,000",Y,3,Needs better tooling,,,Renée Silva
+E0069,Finance,04/04/2023,"$136,000",N,2,,,,Renée Tanaka
+E0070,Enginering,06/01/2015,56000,n,3,"Flexible hours, remote friendly",,x,Lucas García
+E0071,SALES,01/07/2020,51000,y,3,,,,Omar García
+E0072,HR,01/08/2016,85000,Y,3,"Flexible hours, remote friendly",,,José Khan
+E0073,Finance,03/03/2017,101000,y,4,"Flexible hours, remote friendly",,,Iñaki Tanaka
+E0074,HR,07/10/2020,97000,N,1,,,,Ava Tanaka
+E0075,Marketing,11/02/2020,67000,N,?,,,,Jürgen Schröder 
+E0076,Engineering,11/11/2017,"48,000",N,4,"Flexible hours, remote friendly",,,Renée Tanaka
+E0077,Marketing,06/12/2015,85000,N,3,,,,Priya Brown
+E0078,Marketing,10/06/2016,112000,N,1,I donâ€™t get enough feedback,,,Iñaki Rossi
+E0079,engineering ,08/03/2023,"72,000",N,2,,,,José Khan
+E0080,Sales,05/04/2021,138000,Y,1,,,,Sofía Novak
+E0081,Marketing,11/01/2015,112000,y,3,CafÃ© area is too small,,,Søren García
+E0082,Marketing,01/08/2022,126000,Y,,I donâ€™t get enough feedback,,,Anna García
+E0083,Finance,10/12/2021,110000,N,2,,,,Müller Tanaka 
+E0084,SALES,04/05/2021,107000,Y,2,I donâ€™t get enough feedback,,,Emma Novak
+E0085,Engineering,07/04/2019,133000,N,1,Needs better tooling,,,Mia Khan
+E0086,HR,10/11/2021,135000,N,,,,,Søren Smith
+E0087,Marketing,11/01/2023,44000,Y,1,I donâ€™t get enough feedback,,,José Rossi
+E0088,HR,06/12/2022,"$113,000",Y,3,,,x,Noah O'Brien 
+E0089,HR,08/02/2019,45000,N,2,,,,Omar Lefèvre
+E0090,Engineering,09/10/2015,111000,Y,2,,,,Jürgen García
+E0091,Sales,02/10/2015,126000,Y,4,"Flexible hours, remote friendly",,,Noah Peña
+E0092,Human Resources,04/12/2022,126000,N,4,,,,
+E0093,Sales,01/10/2020,91000,N,3,,,,Emma Rossi
+E0094,Engineering,02/12/2019,53000,Y,5,,,,Emma Novak 
+E0095,Enginering,11/01/2018,110000,Y,1,,,,Chloé Nuñez
+E0096,Finance,12/02/2015,118000,N,2,Needs better tooling,,,Renée García
+E0097,Sales,05/08/2017,"47,000",N,?,CafÃ© area is too small,,,Zoë Smith 
+E0098,HR,09/08/2018,"$64,000",Y,5,I donâ€™t get enough feedback,,x,Zoë Smith
+E0099,Marketing,09/09/2022,"$76,000",Y,?,,,,Sofía Schröder
+E0100,Engineering,08/11/2020,42000,y,5,,,,Chloé Åberg 
+E0101,finance,03/04/2019,66000,N,?,,,,Sofía Nuñez
+E0102,HR,03/10/2022,,Y,2,CafÃ© area is too small,,,Sofía Nuñez
+E0103,finance,05/07/2015,66000,Y,,"Great team, good benefits",,,Jürgen Nuñez
+E0104,Sales,09/12/2021,"75,000",N,4,Needs better tooling,,,Emma Tanaka
+E0105,Marketing,06/06/2023,113000,N,5,"Great team, good benefits",,,Sofía O'Brien
+E0106,HR,09/05/2019,48000,N,2,,,,Chloé Brown
+E0107,Marketing,04/10/2021,71000,y,2,I donâ€™t get enough feedback,,,Chloé Lefèvre
+E0108,Sales,06/10/2017,"93,000",N,3,,,,Mia Tanaka
+E0109,Markting,07/12/2020,75000,N,4,Needs better tooling,,,Müller Rossi
+E0242,Marketing,10/03/2021,104000,N,5,"Flexible hours, remote friendly",,,Anna Rossi
+E0110,HR,10/07/2016,99000,N,5,I donâ€™t get enough feedback,,,Anna Brown
+E0111,HR,05/07/2016,108000,Y,1,,,,José Tanaka
+E0112,Human Resources,08/11/2024,100000,N,4,,,,Noah Brown
+E0113,Finance,03/01/2019,105000,n,5,,,,
+E0114,Marketing,06/11/2016,51000,N,,Needs better tooling,,,Lucas Nuñez
+E0115,Marketing,09/11/2015,70000,Y,1,CafÃ© area is too small,,,Zoë Tanaka 
+E0116,engineering ,01/07/2022,95000,N,4,Needs better tooling,,,Mia Nuñez
+E0117,Marketing,10/12/2020,105000,Y,1,CafÃ© area is too small,,,Anna Rossi
+E0118,Marketing,06/05/2022,45000,Y,4,Needs better tooling,,x,Omar Schröder
+E0119,Sales,03/08/2018,"$73,000",N,5,"Great team, good benefits",,,José Schröder
+E0120,Finance,10/07/2022,"$98,000",Y,4,Needs better tooling,,,Chloé Tanaka 
+E0121,Markting,11/08/2021,74000,N,5,"Flexible hours, remote friendly",,,Omar Brown
+E0122,finance,03/06/2017,75000,Y,4,,,,Wei Peña 
+E0123,Engineering,03/06/2023,"$86,000",Y,4,"Flexible hours, remote friendly",,,Müller García
+E0124,Engineering,04/12/2018,81000,N,4,"Great team, good benefits",,,Noah García 
+E0125,finance,09/10/2024,76000,N,1,CafÃ© area is too small,,,Anna Brown
+E0126,Engineering,03/06/2017,132000,N,,,,,Müller O'Brien
+E0127,Sales,04/07/2017,46000,N,1,,,,Liam Khan
+E0128,finance,07/09/2018,104000,N,5,,,,Zoë Brown
+E0129,Sales,09/12/2016,58000,Y,5,I donâ€™t get enough feedback,,,Omar Åberg
+E0130,Sales,09/11/2022,108000,n,,,,,Liam Dubois
+E0131,Finance,08/11/2019,,N,5,,,x,Wei Khan
+E0132,finance,11/02/2016,113000,N,3,Needs better tooling,,x,Noah Khan
+E0133,HR,02/03/2024,75000,N,5,CafÃ© area is too small,,,José Schröder
+E0134,Enginering,09/02/2022,55000,N,5,,,,Zoë Khan
+E0135,Sales,02/04/2015,124000,Y,1,,,x,Chloé Tanaka
+E0136,Engineering,08/05/2023,135000,N,3,CafÃ© area is too small,,,Ava Smith
+E0137,HR,12/08/2022,86000,N,2,,,,Zoë Dubois
+E0138,Sales,05/02/2019,"$107,000",Y,2,,,,Søren Schröder
+E0139,Finance,09/12/2016,75000,Y,1,I donâ€™t get enough feedback,,,Priya O'Brien
+E0140,Sales,12/05/2017,62000,Y,3,CafÃ© area is too small,,x,José Peña
+E0141,Finance,01/11/2019,"$90,000",Y,2,Needs better tooling,,,Müller Nuñez
+E0142,Sales,06/09/2017,52000,Y,2,"Great team, good benefits",,,
+E0143,Finance,12/01/2020,139000,y,5,,,,Omar Lefèvre
+E0144,Engineering,02/09/2020,91000,Y,5,"Great team, good benefits",,,Zoë Brown
+E0145,Markting,08/09/2021,53000,Y,5,Needs better tooling,,,Mia Peña
+E0146,HR,09/07/2024,"$57,000",Y,4,CafÃ© area is too small,,x,
+E0147,HR,11/07/2019,136000,Y,5,,,,Chloé Peña
+E0148,Marketing,02/12/2015,74000,N,5,,,,Ava Åberg
+E0149,Sales,07/03/2017,129000,Y,2,"Flexible hours, remote friendly",,,Chloé Åberg
+E0150,Marketing,01/11/2016,72000,N,5,I donâ€™t get enough feedback,,,Jürgen Khan
+E0151,Finance,04/07/2023,135000,Y,3,,,,Ethan Dubois
+E0152,engineering ,11/02/2020,137000,N,4,,,,Søren Lefèvre
+E0153,Sales,08/12/2017,128000,y,2,,,,Lucas Silva
+E0154,Marketing,11/07/2020,62000,Y,2,,,x,José O'Brien
+E0155,Engineering,01/03/2017,100000,Y,2,,,,Renée Lefèvre 
+E0156,SALES,04/08/2016,87000,N,2,"Great team, good benefits",,x,Emma Silva 
+E0157,HR,03/12/2020,"$117,000",Y,1,,,x,Søren Åberg
+E0158,Finance,02/12/2015,,N,,CafÃ© area is too small,,,Ethan Nuñez
+E0159,HR,09/05/2023,108000,Y,2,Needs better tooling,,,Müller Khan
+E0160,Engineering,09/03/2015,65000,N,1,I donâ€™t get enough feedback,,,Jürgen Peña 
+E0161,engineering ,06/11/2022,100000,Y,1,,,,Chloé Novak
+E0162,Engineering,12/11/2022,"107,000",Y,1,Needs better tooling,,,Müller Tanaka
+E0163,SALES,05/10/2021,49000,Y,3,,,,Mia Silva
+E0164,Sales,08/10/2016,83000,Y,2,,,,Omar Novak
+E0165,HR,02/09/2015,"$109,000",N,2,,,,Ava Brown
+E0166,Engineering,02/11/2019,61000,N,2,"Great team, good benefits",,x,Anna Åberg
+E0167,Sales,10/12/2020,,Y,4,,,,Wei Dubois
+E0168,HR,03/02/2024,52000,Y,2,"Flexible hours, remote friendly",,,Anna O'Brien 
+E0169,Engineering,01/10/2022,,N,4,I donâ€™t get enough feedback,,,Iñaki Tanaka
+E0170,Sales,07/02/2018,86000,Y,3,"Great team, good benefits",,x,Søren Lefèvre
+E0171,Sales,10/10/2015,135000,N,5,,,,Iñaki Smith
+E0172,Marketing,08/08/2018,137000,n,2,Needs better tooling,,,Noah O'Brien
+E0173,Engineering,02/02/2016,60000,Y,5,Needs better tooling,,,Renée Silva
+E0174,engineering ,01/11/2015,96000,N,?,,,,Liam Khan
+E0175,Marketing,02/03/2023,99000,Y,4,"Flexible hours, remote friendly",,,Mia Schröder
+E0176,HR,10/11/2019,74000,N,1,,,,Priya Peña
+E0177,Sales,04/02/2022,64000,y,3,Needs better tooling,,,Zoë Silva
+E0178,Engineering,09/09/2021,104000,Y,,,,,Sofía García
+E0179,Human Resources,11/11/2015,"$78,000",n,5,"Great team, good benefits",,,Sofía García
+E0180,Finance,12/04/2015,137000,Y,1,,,,Renée Lefèvre
+E0181,Engineering,08/12/2020,100000,Y,3,I donâ€™t get enough feedback,,,Müller Peña
+E0182,Finance,03/10/2024,54000,N,4,CafÃ© area is too small,,x,Jürgen Novak
+E0183,HR,04/02/2018,78000,Y,,Needs better tooling,,,Ethan García
+E0184,HR,09/05/2017,80000,N,2,Needs better tooling,,,Priya Nuñez
+E0185,Human Resources,09/08/2017,40000,N,4,I donâ€™t get enough feedback,,,Noah Nuñez
+E0186,Sales,04/02/2016,96000,N,5,I donâ€™t get enough feedback,,,Iñaki Peña
+E0187,Sales,01/01/2018,135000,N,,Needs better tooling,,,Sofía Tanaka
+E0188,Finance,08/11/2015,51000,Y,3,Needs better tooling,,,Sofía Dubois
+E0189,Engineering,11/01/2017,59000,Y,1,"Flexible hours, remote friendly",,,Iñaki Nuñez
+E0190,Engineering,11/11/2020,128000,Y,4,Needs better tooling,,,Chloé O'Brien
+E0191,Enginering,11/06/2021,,Y,4,,,x,José Rossi
+E0192,Sales,01/11/2016,107000,Y,4,,,,Zoë Schröder
+E0193,Sales,11/12/2015,"$136,000",Y,5,I donâ€™t get enough feedback,,,Omar Smith
+E0194,Finance,09/10/2022,125000,N,2,"Great team, good benefits",,,Iñaki Brown
+E0195,Engineering,09/10/2021,120000,N,3,"Great team, good benefits",,,Lucas Peña
+E0196,Sales,02/03/2019,44000,N,4,CafÃ© area is too small,,,Mia Åberg
+E0197,Markting,04/05/2020,112000,N,5,,,,Sofía García
+E0198,Sales,01/11/2024,129000,Y,4,,,,Omar Brown
+E0199,HR,05/02/2023,56000,N,1,,,x,Omar Khan
+E0200,Marketing,07/09/2022,"$64,000",Y,1,Needs better tooling,,,Mia Rossi
+E0201,Engineering,08/02/2023,129000,Y,5,"Great team, good benefits",,x,Noah Novak
+E0202,Engineering,08/03/2022,73000,Y,4,"Great team, good benefits",,x,Renée Åberg
+E0203,Enginering,12/11/2020,71000,N,,"Flexible hours, remote friendly",,,Priya Nuñez
+E0204,Marketing,09/02/2021,1,Y,2,Needs better tooling,,,Priya Smith 
+E0205,HR,06/08/2024,60000,N,5,,,,Noah Rossi
+E0206,Finance,09/05/2017,57000,n,1,"Great team, good benefits",,,Priya Smith
+E0207,SALES,02/07/2021,54000,Y,5,"Great team, good benefits",,,Ava Dubois
+E0208,finance,03/09/2016,68000,N,1,"Great team, good benefits",,,Renée Lefèvre
+E0209,Finance,01/03/2024,101000,N,2,I donâ€™t get enough feedback,,,Sofía Khan
+E0210,HR,04/01/2018,"$124,000",N,1,Needs better tooling,,,Emma Smith
+E0211,HR,12/07/2024,129000,Y,2,,,,Mia Schröder
+E0079,engineering ,08/03/2023,"72,000",N,2,,,,José Khan
+E0212,Marketing,03/02/2016,72000,Y,5,,,,Wei Rossi
+E0213,Engineering,10/07/2016,"95,000",Y,3,,,,Renée Khan
+E0214,Engineering,04/07/2017,63000,N,,"Flexible hours, remote friendly",,,Omar Novak
+E0215,Engineering,08/03/2018,96000,Y,1,,,,Emma Nuñez
+E0216,Sales,03/03/2018,41000,Y,5,,,,Renée Novak
+E0217,Finance,07/02/2017,63000,N,2,"Flexible hours, remote friendly",,,Anna García
+E0218,finance,04/09/2017,42000,Y,3,,,,José O'Brien
+E0219,Engineering,05/06/2018,102000,Y,2,,,,Sofía Dubois
+E0220,Engineering,02/02/2020,53000,Y,5,"Great team, good benefits",,,Priya Dubois 
+E0221,Finance,03/10/2020,113000,Y,2,,,,Sofía Smith
+E0222,HR,06/05/2022,"$96,000",Y,4,Needs better tooling,,x,Søren Novak
+E0223,Sales,06/12/2023,127000,Y,3,"Great team, good benefits",,,Ethan Lefèvre
+E0224,Sales,06/08/2023,"88,000",Y,2,"Flexible hours, remote friendly",,,Chloé Lefèvre
+E0225,Sales,08/12/2022,"$102,000",n,2,"Great team, good benefits",,,Emma O'Brien
+E0226,Marketing,10/09/2017,"45,000",N,4,"Flexible hours, remote friendly",,,Iñaki García
+E0227,Engineering,08/08/2018,103000,N,4,I donâ€™t get enough feedback,,x,
+E0228,Engineering,05/09/2023,118000,N,?,CafÃ© area is too small,,x,Priya Smith
+E0229,Engineering,12/03/2021,125000,y,4,I donâ€™t get enough feedback,,,Ava García 
+E0230,Sales,11/06/2020,121000,Y,3,CafÃ© area is too small,,,Emma Lefèvre
+E0231,Marketing,12/12/2016,113000,N,3,,,,Wei Tanaka
+E0232,HR,08/08/2015,40000,N,2,"Flexible hours, remote friendly",,,Priya Peña
+E0233,Finance,11/10/2023,"$53,000",N,4,CafÃ© area is too small,,,Ava Peña
+E0234,Engineering,06/06/2022,75000,Y,4,Needs better tooling,,x,Noah Lefèvre 
+E0235,Engineering,05/10/2023,46000,N,1,Needs better tooling,,,Lucas Åberg
+E0236,Engineering,08/10/2019,66000,N,1,I donâ€™t get enough feedback,,,Ava Peña
+E0237,Marketing,10/06/2016,93000,Y,3,,,,Anna Peña
+E0238,SALES,07/02/2024,134000,Y,4,,,,Sofía Dubois
+E0239,Sales,08/10/2015,65000,N,1,Needs better tooling,,,Sofía Smith
+E0240,Finance,05/12/2021,109000,y,,Needs better tooling,,x,Emma Nuñez 
+E0241,Marketing,01/04/2022,138000,N,5,"Flexible hours, remote friendly",,,Ava Smith
+E0242,Marketing,10/03/2021,104000,N,5,"Flexible hours, remote friendly",,,Anna Rossi
+E0243,Finance,12/02/2016,44000,Y,2,"Flexible hours, remote friendly",,,Chloé Schröder
+E0244,HR,01/02/2015,135000,Y,2,,,,Müller Åberg 
+E0245,HR,09/07/2019,43000,Y,2,"Great team, good benefits",,,Iñaki Novak
+E0246,Sales,08/06/2024,43000,Y,5,"Great team, good benefits",,,Sofía Novak
+E0247,HR,05/10/2017,137000,n,1,,,,Chloé Silva
+E0248,Marketing,01/11/2017,"$59,000",y,4,I donâ€™t get enough feedback,,,
+E0249,engineering ,07/07/2023,86000,Y,4,,,,Emma García
+E0250,Sales,01/03/2017,113000,N,2,I donâ€™t get enough feedback,,,Sofía Khan
+E0222,HR,06/05/2022,"$96,000",Y,4,Needs better tooling,,x,Søren Novak
+E0251,Finance,12/05/2016,65000,N,1,,,,Chloé Peña
+E0252,Finance,02/11/2018,51000,Y,4,CafÃ© area is too small,,,Ava Dubois
+E0253,Engineering,05/08/2022,59000,N,2,I donâ€™t get enough feedback,,,Iñaki Peña
+E0254,HR,05/02/2020,114000,N,1,,,,Priya Åberg
+E0255,Sales,03/02/2021,131000,N,5,,,,Müller O'Brien
+E0256,Human Resources,10/07/2017,"$122,000",n,1,"Great team, good benefits",,,Priya Silva
+E0257,HR,07/08/2019,113000,N,4,,,,Ethan Novak 
+E0258,Finance,02/03/2020,49000,N,2,,,,José Smith
+E0259,Finance,10/03/2017,"116,000",Y,4,,,x,Zoë Silva
+E0260,Sales,12/11/2015,98000,N,1,"Flexible hours, remote friendly",,,Wei Schröder
+E0261,Human Resources,09/01/2017,101000,Y,5,I donâ€™t get enough feedback,,,Wei Smith
+E0262,engineering ,05/02/2024,117000,N,2,"Flexible hours, remote friendly",,,Omar García
+E0263,Human Resources,01/07/2016,114000,N,2,,,,Emma Khan
+E0264,Engineering,05/10/2021,120000,Y,2,,,,Anna García
+E0265,finance,07/09/2017,114000,N,1,"Flexible hours, remote friendly",,x,
+E0266,Sales,03/03/2019,136000,N,2,"Great team, good benefits",,x,Müller Novak
+E0267,Human Resources,06/04/2021,"$66,000",Y,1,"Flexible hours, remote friendly",,,Søren Tanaka
+E0268,Engineering,08/12/2018,61000,N,1,"Great team, good benefits",,,Priya Åberg 
+E0269,Marketing,12/04/2018,47000,Y,1,,,,Sofía Brown
+E0270,Finance,12/01/2020,122000,N,5,,,,Ethan Dubois
+E0271,Marketing,04/06/2018,47000,N,2,I donâ€™t get enough feedback,,,Emma Brown
+E0272,Finance,07/10/2018,52000,Y,1,"Great team, good benefits",,,Noah Tanaka
+E0273,Sales,10/01/2017,128000,N,4,Needs better tooling,,,Liam García
+E0274,HR,10/10/2023,43000,N,5,,,,Emma Åberg
+E0275,Marketing,04/11/2018,116000,N,5,Needs better tooling,,,José Smith
+E0276,HR,06/05/2018,138000,N,2,,,,José Khan
+E0277,Sales,06/10/2023,136000,N,2,Needs better tooling,,,Ethan Schröder
+E0278,Sales,05/08/2019,68000,Y,2,,,,José Novak 
+E0279,Marketing,11/04/2020,106000,y,5,"Great team, good benefits",,,Wei Rossi 
+E0280,Sales,02/03/2020,84000,N,5,I donâ€™t get enough feedback,,,Zoë Novak
+E0281,Sales,08/11/2016,105000,N,,,,,Sofía Khan
+E0282,Engineering,07/03/2016,44000,n,2,"Flexible hours, remote friendly",,,Wei O'Brien
+E0283,Human Resources,05/03/2019,69000,Y,3,,,,Priya Åberg
+E0284,Human Resources,04/01/2023,,Y,4,,,,Jürgen Schröder
+E0248,Marketing,01/11/2017,"$59,000",y,4,I donâ€™t get enough feedback,,,
+E0285,HR,07/08/2017,133000,N,1,Needs better tooling,,,Ava García
+E0286,Engineering,01/12/2024,126000,Y,1,"Flexible hours, remote friendly",,,Iñaki Nuñez
+E0287,Finance,09/07/2018,"$40,000",N,5,,,,Jürgen Peña 
+E0288,Sales,09/09/2023,77000,N,5,,,,Anna Khan
+E0289,Finance,02/10/2018,82000,Y,5,,,,Sofía Peña 
+E0290,Sales,01/06/2021,104000,Y,3,"Great team, good benefits",,x,Sofía García
+E0291,SALES,12/06/2021,66000,Y,5,Needs better tooling,,,Mia Dubois
+E0292,Marketing,04/08/2018,48000,Y,3,Needs better tooling,,,Lucas Brown
+E0293,HR,10/04/2022,107000,N,3,,,,Jürgen Silva
+E0294,Marketing,01/08/2016,130000,Y,4,,,,Mia Dubois 
+E0295,Finance,01/12/2016,111000,y,5,CafÃ© area is too small,,,
+E0296,Marketing,02/07/2021,55000,N,?,"Flexible hours, remote friendly",,,Wei Dubois
+E0297,Finance,09/05/2016,53000,n,1,CafÃ© area is too small,,,Zoë Khan
+E0298,Engineering,08/05/2020,108000,Y,1,I donâ€™t get enough feedback,,,Søren Smith
+E0299,Marketing,12/07/2019,78000,N,?,,,,Mia Tanaka 
+E0300,Sales,08/07/2019,67000,N,5,,,,Liam Åberg

@@ -1,0 +1,3058 @@
+file,row,column,error_type,original_value,injected_value
+sales_orders_messy.csv,0, Customer Name ,header_whitespace,Customer Name, Customer Name 
+sales_orders_messy.csv,0,Unnamed,empty_column,,
+sales_orders_messy.csv,0,,non_default_encoding,utf-8,windows-1252
+sales_orders_messy.csv,0,,non_default_delimiter,",",;
+sales_orders_messy.csv,1,Order Date,mixed_date_format,2024-01-13,2024/01/13
+sales_orders_messy.csv,1,Discount %,missing_value,0,
+sales_orders_messy.csv,1,Notes,missing_value,,
+sales_orders_messy.csv,2,Discount %,missing_value,0,
+sales_orders_messy.csv,2,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,2, Customer Name ,missing_value,Liam O'Brien,
+sales_orders_messy.csv,2,Notes,missing_value,,
+sales_orders_messy.csv,3,Order Date,mixed_date_format,2024-06-25,25/06/2024
+sales_orders_messy.csv,3,Amount (USD),extra_whitespace,4039.50, 4039.50 
+sales_orders_messy.csv,3, Customer Name ,missing_value,Ethan Silva,
+sales_orders_messy.csv,3,Notes,missing_value,,
+sales_orders_messy.csv,4,Order ID,missing_value,ORD-00004,
+sales_orders_messy.csv,4,Order Date,invalid_value,2024-05-28,31/02/2024
+sales_orders_messy.csv,4,Amount (USD),missing_value,4279.48,
+sales_orders_messy.csv,4, Customer Name ,missing_value,Mia Dubois,
+sales_orders_messy.csv,4,Notes,missing_value,,
+sales_orders_messy.csv,4,ZIP Code,missing_value,80840,
+sales_orders_messy.csv,5,Amount (USD),null_token,1909.69,?
+sales_orders_messy.csv,5,Region,typo_category,West,Wset
+sales_orders_messy.csv,5,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,5,Notes,missing_value,,
+sales_orders_messy.csv,6,Order ID,extra_whitespace,ORD-00006, ORD-00006
+sales_orders_messy.csv,6,Order Date,missing_value,2024-10-17,
+sales_orders_messy.csv,6,Amount (USD),currency_symbol,1587.10,"$1,587.10"
+sales_orders_messy.csv,6,Amount (USD),number_with_thousands_sep,1587.10,"$1,587.10"
+sales_orders_messy.csv,6,Discount %,null_token,15,N/A
+sales_orders_messy.csv,6,Notes,missing_value,,
+sales_orders_messy.csv,7,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,7,Region,case_variant,East,  east
+sales_orders_messy.csv,7,Notes,extra_whitespace,gift wrap,gift  wrap
+sales_orders_messy.csv,8,Order Date,mixed_date_format,2024-01-06,06/01/2024
+sales_orders_messy.csv,8,Amount (USD),missing_value,590.47,
+sales_orders_messy.csv,8,Discount %,missing_value,10,
+sales_orders_messy.csv,8, Customer Name ,missing_value,Emma García,
+sales_orders_messy.csv,8,ZIP Code,null_token,35522,?
+sales_orders_messy.csv,9,Order ID,missing_value,ORD-00009,
+sales_orders_messy.csv,9,Order Date,missing_value,2024-09-16,
+sales_orders_messy.csv,9,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,9,Notes,missing_value,,
+sales_orders_messy.csv,10,Amount (USD),currency_symbol,1219.54,"$1,219.54"
+sales_orders_messy.csv,10,Amount (USD),number_with_thousands_sep,1219.54,"$1,219.54"
+sales_orders_messy.csv,10,Region,case_variant,East,EAST
+sales_orders_messy.csv,10,Paid?,null_token,,?
+sales_orders_messy.csv,10,Notes,missing_value,,
+sales_orders_messy.csv,11,Amount (USD),currency_symbol,1074.76,"$1,074.76"
+sales_orders_messy.csv,11,Amount (USD),number_with_thousands_sep,1074.76,"$1,074.76"
+sales_orders_messy.csv,11,Discount %,missing_value,5,
+sales_orders_messy.csv,11,Region,null_token,West,?
+sales_orders_messy.csv,11,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,11,Notes,missing_value,,
+sales_orders_messy.csv,12,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,12,Region,case_variant,West,west 
+sales_orders_messy.csv,12, Customer Name ,extra_whitespace,Søren Schröder,Søren  Schröder
+sales_orders_messy.csv,12,Notes,missing_value,,
+sales_orders_messy.csv,12,ZIP Code,missing_value,18342,
+sales_orders_messy.csv,13,Order ID,extra_whitespace,ORD-00013, ORD-00013
+sales_orders_messy.csv,13,Amount (USD),null_token,3927.40,TBD
+sales_orders_messy.csv,13, Customer Name ,extra_whitespace,Zoë Brown,Zoë  Brown
+sales_orders_messy.csv,13,Notes,missing_value,,
+sales_orders_messy.csv,14,Paid?,null_token,,N/A
+sales_orders_messy.csv,14, Customer Name ,missing_value,Emma Peña,
+sales_orders_messy.csv,14,Notes,missing_value,,
+sales_orders_messy.csv,14,ZIP Code,missing_value,07630,
+sales_orders_messy.csv,15,Order Date,invalid_value,2024-01-08,31/02/2024
+sales_orders_messy.csv,15,Amount (USD),missing_value,4633.31,
+sales_orders_messy.csv,15,Notes,extra_whitespace,gift wrap,gift  wrap
+sales_orders_messy.csv,15,ZIP Code,null_token,35760,N/A
+sales_orders_messy.csv,16,Order ID,missing_value,ORD-00016,
+sales_orders_messy.csv,16,Amount (USD),null_token,4787.44,?
+sales_orders_messy.csv,16,Discount %,missing_value,20,
+sales_orders_messy.csv,16, Customer Name ,extra_whitespace,Zoë Tanaka,Zoë Tanaka 
+sales_orders_messy.csv,16,Notes,missing_value,,
+sales_orders_messy.csv,17,Order Date,missing_value,2024-09-14,
+sales_orders_messy.csv,18,Amount (USD),currency_symbol,2926.69,"$2,926.69"
+sales_orders_messy.csv,18,Amount (USD),number_with_thousands_sep,2926.69,"$2,926.69"
+sales_orders_messy.csv,18,Notes,null_token,,?
+sales_orders_messy.csv,19,Order Date,invalid_value,2024-10-15,99/99/9999
+sales_orders_messy.csv,19,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,19,Region,case_variant,West,west 
+sales_orders_messy.csv,19,Paid?,missing_value,,
+sales_orders_messy.csv,19,Notes,null_token,,N/A
+sales_orders_messy.csv,20,Order ID,null_token,ORD-00020,TBD
+sales_orders_messy.csv,20,Amount (USD),currency_symbol,3345.96,"$3,345.96"
+sales_orders_messy.csv,20,Amount (USD),number_with_thousands_sep,3345.96,"$3,345.96"
+sales_orders_messy.csv,20,Discount %,null_token,0,TBD
+sales_orders_messy.csv,20,Paid?,missing_value,,
+sales_orders_messy.csv,20,Notes,missing_value,,
+sales_orders_messy.csv,21,Order ID,missing_value,ORD-00021,
+sales_orders_messy.csv,21,Amount (USD),missing_value,1270.58,
+sales_orders_messy.csv,21,Region,case_variant,East,EAST
+sales_orders_messy.csv,21,Notes,extra_whitespace,gift wrap,gift  wrap
+sales_orders_messy.csv,21,ZIP Code,missing_value,22178,
+sales_orders_messy.csv,22,Order Date,mixed_date_format,2024-08-06,06/08/2024
+sales_orders_messy.csv,22,Amount (USD),invalid_value,577.13,abc
+sales_orders_messy.csv,22,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,22,ZIP Code,null_token,06229,N/A
+sales_orders_messy.csv,23,Order Date,mixed_date_format,2024-05-07,07/05/2024
+sales_orders_messy.csv,23,Amount (USD),currency_symbol,1781.32,"$1,781.32"
+sales_orders_messy.csv,23,Amount (USD),number_with_thousands_sep,1781.32,"$1,781.32"
+sales_orders_messy.csv,23,Discount %,null_token,15,?
+sales_orders_messy.csv,23,Region,null_token,South,N/A
+sales_orders_messy.csv,23, Customer Name ,mojibake,Chloé Peña,ChloÃ© PeÃ±a
+sales_orders_messy.csv,24,Order ID,null_token,ORD-00024,N/A
+sales_orders_messy.csv,24,Order Date,null_token,2024-07-29,N/A
+sales_orders_messy.csv,24,Amount (USD),null_token,4323.04,TBD
+sales_orders_messy.csv,25,Order ID,missing_value,ORD-00025,
+sales_orders_messy.csv,25,Discount %,null_token,10,N/A
+sales_orders_messy.csv,25, Customer Name ,missing_value,Wei Lefèvre,
+sales_orders_messy.csv,25,Notes,missing_value,,
+sales_orders_messy.csv,26,Order ID,null_token,ORD-00026,N/A
+sales_orders_messy.csv,26,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,26, Customer Name ,extra_whitespace,Mia García,Mia  García
+sales_orders_messy.csv,26,Notes,missing_value,,
+sales_orders_messy.csv,26,ZIP Code,missing_value,71575,
+sales_orders_messy.csv,27,Order ID,null_token,ORD-00027,N/A
+sales_orders_messy.csv,27,Amount (USD),invalid_value,2167.86,abc
+sales_orders_messy.csv,27,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,27,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,27,Notes,missing_value,,
+sales_orders_messy.csv,28,Order Date,invalid_value,2024-12-06,soon
+sales_orders_messy.csv,28,Amount (USD),missing_value,3393.04,
+sales_orders_messy.csv,28,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,28,Notes,missing_value,,
+sales_orders_messy.csv,29,Amount (USD),missing_value,2376.47,
+sales_orders_messy.csv,29,Discount %,missing_value,5,
+sales_orders_messy.csv,29,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,29, Customer Name ,case_variant,Ava Smith,ava smith
+sales_orders_messy.csv,29,Notes,null_token,,?
+sales_orders_messy.csv,30,Order ID,missing_value,ORD-00030,
+sales_orders_messy.csv,30,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,30,Notes,null_token,,-
+sales_orders_messy.csv,30,ZIP Code,extra_whitespace,99430, 99430
+sales_orders_messy.csv,31,Order ID,extra_whitespace,ORD-00031, ORD-00031
+sales_orders_messy.csv,31,Amount (USD),extra_whitespace,4024.47, 4024.47 
+sales_orders_messy.csv,31,Region,null_token,South,N/A
+sales_orders_messy.csv,31,Notes,missing_value,,
+sales_orders_messy.csv,31,ZIP Code,missing_value,74259,
+sales_orders_messy.csv,32,Order ID,null_token,ORD-00032,N/A
+sales_orders_messy.csv,32,Order Date,mixed_date_format,2024-08-14,14/08/2024
+sales_orders_messy.csv,32,Amount (USD),currency_symbol,3601.98,"$3,601.98"
+sales_orders_messy.csv,32,Amount (USD),number_with_thousands_sep,3601.98,"$3,601.98"
+sales_orders_messy.csv,32,Region,typo_category,South,Sout
+sales_orders_messy.csv,32,Notes,missing_value,,
+sales_orders_messy.csv,33,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,33,Region,case_variant,West,west 
+sales_orders_messy.csv,33, Customer Name ,extra_whitespace,Søren Schröder,Søren  Schröder
+sales_orders_messy.csv,33,Notes,missing_value,,
+sales_orders_messy.csv,33,ZIP Code,missing_value,18342,
+sales_orders_messy.csv,33,,duplicate_row,,
+sales_orders_messy.csv,34,Discount %,null_token,10,N/A
+sales_orders_messy.csv,34,Notes,missing_value,,
+sales_orders_messy.csv,35,Order Date,null_token,2024-04-15,N/A
+sales_orders_messy.csv,35,Amount (USD),null_token,1959.59,N/A
+sales_orders_messy.csv,35,Discount %,null_token,0,N/A
+sales_orders_messy.csv,35,Paid?,null_token,,N/A
+sales_orders_messy.csv,36,Order ID,missing_value,ORD-00035,
+sales_orders_messy.csv,36,Order Date,missing_value,2024-11-04,
+sales_orders_messy.csv,36,Region,typo_category,North,Nrth
+sales_orders_messy.csv,36,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,36,Notes,missing_value,,
+sales_orders_messy.csv,37,Order ID,extra_whitespace,ORD-00036, ORD-00036
+sales_orders_messy.csv,37,Order Date,mixed_date_format,2024-10-30,30/10/2024
+sales_orders_messy.csv,37,Amount (USD),currency_symbol,154.97,$154.97
+sales_orders_messy.csv,37,Discount %,null_token,5,N/A
+sales_orders_messy.csv,37,Notes,null_token,,?
+sales_orders_messy.csv,38,Order ID,null_token,ORD-00037,N/A
+sales_orders_messy.csv,38,Notes,missing_value,,
+sales_orders_messy.csv,38,ZIP Code,missing_value,03671,
+sales_orders_messy.csv,39,Order Date,mixed_date_format,2024-08-30,30/08/2024
+sales_orders_messy.csv,39,Discount %,missing_value,10,
+sales_orders_messy.csv,39,Region,case_variant,North,north
+sales_orders_messy.csv,39,Paid?,null_token,,?
+sales_orders_messy.csv,39, Customer Name ,mojibake,Anna Peña,Anna PeÃ±a
+sales_orders_messy.csv,40,Order ID,null_token,ORD-00039,N/A
+sales_orders_messy.csv,40,Order Date,mixed_date_format,2024-10-21,21/10/2024
+sales_orders_messy.csv,40,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,40,Notes,extra_whitespace,gift wrap,gift  wrap
+sales_orders_messy.csv,41,Discount %,null_token,15,N/A
+sales_orders_messy.csv,41,Notes,missing_value,,
+sales_orders_messy.csv,41,ZIP Code,null_token,69386,?
+sales_orders_messy.csv,42,Order Date,null_token,2024-10-02,TBD
+sales_orders_messy.csv,42,Amount (USD),missing_value,2335.07,
+sales_orders_messy.csv,42,Region,case_variant,East,EAST
+sales_orders_messy.csv,42, Customer Name ,extra_whitespace,Emma O'Brien,Emma  O'Brien
+sales_orders_messy.csv,42,Notes,missing_value,,
+sales_orders_messy.csv,43,Amount (USD),null_token,1076.36,TBD
+sales_orders_messy.csv,43,Notes,missing_value,,
+sales_orders_messy.csv,43,ZIP Code,missing_value,73768,
+sales_orders_messy.csv,44,Order ID,missing_value,ORD-00043,
+sales_orders_messy.csv,44,Order Date,mixed_date_format,2024-11-26,26 Nov 2024
+sales_orders_messy.csv,44,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,44,Notes,missing_value,,
+sales_orders_messy.csv,45,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,45,Notes,null_token,,?
+sales_orders_messy.csv,46,Amount (USD),null_token,1076.36,TBD
+sales_orders_messy.csv,46,Notes,missing_value,,
+sales_orders_messy.csv,46,ZIP Code,missing_value,73768,
+sales_orders_messy.csv,46,,duplicate_row,,
+sales_orders_messy.csv,47,Region,missing_value,North,
+sales_orders_messy.csv,47,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,47, Customer Name ,missing_value,Liam Brown,
+sales_orders_messy.csv,47,Notes,missing_value,,
+sales_orders_messy.csv,48,Notes,missing_value,,
+sales_orders_messy.csv,49,Order Date,mixed_date_format,2024-10-12,2024/10/12
+sales_orders_messy.csv,49,Amount (USD),null_token,3039.46,TBD
+sales_orders_messy.csv,49,Discount %,missing_value,5,
+sales_orders_messy.csv,49,Notes,missing_value,,
+sales_orders_messy.csv,49,ZIP Code,null_token,80905,?
+sales_orders_messy.csv,50,Order Date,mixed_date_format,2024-04-16,16/04/2024
+sales_orders_messy.csv,50,Notes,missing_value,,
+sales_orders_messy.csv,51,Order ID,extra_whitespace,ORD-00049, ORD-00049
+sales_orders_messy.csv,51,Order Date,mixed_date_format,2024-02-06,06/02/2024
+sales_orders_messy.csv,51,Amount (USD),null_token,4621.08,N/A
+sales_orders_messy.csv,51,Discount %,missing_value,20,
+sales_orders_messy.csv,51,Notes,missing_value,,
+sales_orders_messy.csv,52,Order Date,missing_value,2024-10-18,
+sales_orders_messy.csv,52,Discount %,missing_value,10,
+sales_orders_messy.csv,52,Notes,missing_value,,
+sales_orders_messy.csv,52,ZIP Code,missing_value,43247,
+sales_orders_messy.csv,53,Order Date,invalid_value,2024-04-27,soon
+sales_orders_messy.csv,53,Amount (USD),currency_symbol,4183.07,"$4,183.07"
+sales_orders_messy.csv,53,Amount (USD),number_with_thousands_sep,4183.07,"$4,183.07"
+sales_orders_messy.csv,53,Discount %,null_token,0,?
+sales_orders_messy.csv,53,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,53,Notes,missing_value,,
+sales_orders_messy.csv,54,Order Date,null_token,2024-11-21,N/A
+sales_orders_messy.csv,54,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,54,Region,case_variant,West,west 
+sales_orders_messy.csv,54, Customer Name ,extra_whitespace,Jürgen Schröder,Jürgen  Schröder
+sales_orders_messy.csv,54,Notes,missing_value,,
+sales_orders_messy.csv,55,Discount %,null_token,20,N/A
+sales_orders_messy.csv,55,Region,case_variant,North,NORTH
+sales_orders_messy.csv,55,Notes,missing_value,,
+sales_orders_messy.csv,55,ZIP Code,missing_value,66338,
+sales_orders_messy.csv,56,Order ID,missing_value,ORD-00054,
+sales_orders_messy.csv,56,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,56,Notes,missing_value,,
+sales_orders_messy.csv,57,Order ID,missing_value,ORD-00084,
+sales_orders_messy.csv,57,Notes,missing_value,,
+sales_orders_messy.csv,57,ZIP Code,missing_value,67910,
+sales_orders_messy.csv,57,,duplicate_row,,
+sales_orders_messy.csv,58,Amount (USD),currency_symbol,3588.68,"$3,588.68"
+sales_orders_messy.csv,58,Amount (USD),number_with_thousands_sep,3588.68,"$3,588.68"
+sales_orders_messy.csv,58,Region,null_token,West,?
+sales_orders_messy.csv,58,ZIP Code,missing_value,67616,
+sales_orders_messy.csv,59, Customer Name ,placeholder_token,Sofía Tanaka,unknown
+sales_orders_messy.csv,59,Notes,missing_value,,
+sales_orders_messy.csv,60,Order Date,mixed_date_format,2024-06-19,19/06/2024
+sales_orders_messy.csv,60,Discount %,null_token,10,N/A
+sales_orders_messy.csv,60,Notes,missing_value,,
+sales_orders_messy.csv,61,Order ID,missing_value,ORD-00058,
+sales_orders_messy.csv,61,Order Date,invalid_value,2024-11-29,31/02/2024
+sales_orders_messy.csv,61,Discount %,null_token,20,?
+sales_orders_messy.csv,61,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,61,Region,case_variant,West,west 
+sales_orders_messy.csv,61,Paid?,missing_value,,
+sales_orders_messy.csv,61,Notes,missing_value,,
+sales_orders_messy.csv,62,Order ID,extra_whitespace,ORD-00059, ORD-00059
+sales_orders_messy.csv,62,Discount %,missing_value,20,
+sales_orders_messy.csv,62,Region,typo_category,West,Wset
+sales_orders_messy.csv,62,Paid?,missing_value,,
+sales_orders_messy.csv,62, Customer Name ,missing_value,Wei Khan,
+sales_orders_messy.csv,62,Notes,missing_value,,
+sales_orders_messy.csv,62,ZIP Code,null_token,64956,N/A
+sales_orders_messy.csv,63,Discount %,missing_value,5,
+sales_orders_messy.csv,63,Region,null_token,West,?
+sales_orders_messy.csv,63,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,63,Notes,missing_value,,
+sales_orders_messy.csv,64,Order ID,missing_value,ORD-00061,
+sales_orders_messy.csv,64,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,64, Customer Name ,case_variant,Lucas Tanaka,LUCAS TANAKA
+sales_orders_messy.csv,64,Notes,missing_value,,
+sales_orders_messy.csv,65,Amount (USD),missing_value,3340.87,
+sales_orders_messy.csv,65,Discount %,null_token,15,TBD
+sales_orders_messy.csv,65,Paid?,null_token,,N/A
+sales_orders_messy.csv,65, Customer Name ,case_variant,Sofía Schröder,SOFÍA SCHRÖDER
+sales_orders_messy.csv,65,Notes,missing_value,,
+sales_orders_messy.csv,66,Order Date,missing_value,2024-07-15,
+sales_orders_messy.csv,66,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,66,Paid?,boolean_variant,No,no
+sales_orders_messy.csv,66,Notes,null_token,,TBD
+sales_orders_messy.csv,66,ZIP Code,null_token,98605,?
+sales_orders_messy.csv,67,Order ID,extra_whitespace,ORD-00064, ORD-00064
+sales_orders_messy.csv,67,Order Date,null_token,2024-09-11,N/A
+sales_orders_messy.csv,67,Amount (USD),null_token,4516.62,N/A
+sales_orders_messy.csv,67,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,67, Customer Name ,extra_whitespace,Mia Brown,Mia  Brown
+sales_orders_messy.csv,67,Notes,null_token,,?
+sales_orders_messy.csv,67,ZIP Code,extra_whitespace,90241, 90241
+sales_orders_messy.csv,68,Order Date,mixed_date_format,2024-11-17,17/11/2024
+sales_orders_messy.csv,68,Notes,null_token,,N/A
+sales_orders_messy.csv,69,Order ID,extra_whitespace,ORD-00233, ORD-00233
+sales_orders_messy.csv,69,Order Date,invalid_value,2024-06-01,soon
+sales_orders_messy.csv,69,Amount (USD),currency_symbol,2290.51,"$2,290.51"
+sales_orders_messy.csv,69,Amount (USD),number_with_thousands_sep,2290.51,"$2,290.51"
+sales_orders_messy.csv,69,Paid?,missing_value,,
+sales_orders_messy.csv,69,,duplicate_row,,
+sales_orders_messy.csv,70,Order ID,extra_whitespace,ORD-00066, ORD-00066
+sales_orders_messy.csv,70,Discount %,missing_value,10,
+sales_orders_messy.csv,70,Region,case_variant,East,EAST
+sales_orders_messy.csv,70, Customer Name ,extra_whitespace,Müller Nuñez,Müller Nuñez 
+sales_orders_messy.csv,70,Notes,missing_value,,
+sales_orders_messy.csv,70,ZIP Code,missing_value,89647,
+sales_orders_messy.csv,71,Order ID,null_token,ORD-00067,TBD
+sales_orders_messy.csv,71,Region,typo_category,North,Nrth
+sales_orders_messy.csv,71,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,71, Customer Name ,mojibake,Sofía Khan,SofÃ­a Khan
+sales_orders_messy.csv,71,ZIP Code,missing_value,15201,
+sales_orders_messy.csv,72,Order Date,missing_value,2024-11-13,
+sales_orders_messy.csv,72,Amount (USD),missing_value,2815.81,
+sales_orders_messy.csv,72,Discount %,missing_value,5,
+sales_orders_messy.csv,72,Region,null_token,West,N/A
+sales_orders_messy.csv,72,ZIP Code,null_token,40893,?
+sales_orders_messy.csv,73,Order Date,missing_value,2024-04-30,
+sales_orders_messy.csv,73,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,73,Region,case_variant,West,west 
+sales_orders_messy.csv,73,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,73,ZIP Code,missing_value,05288,
+sales_orders_messy.csv,74,Order Date,invalid_value,2024-08-15,soon
+sales_orders_messy.csv,74,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,74, Customer Name ,case_variant,Anna Novak,anna novak
+sales_orders_messy.csv,74,Notes,missing_value,,
+sales_orders_messy.csv,74,ZIP Code,missing_value,28801,
+sales_orders_messy.csv,75,Amount (USD),null_token,1680.88,?
+sales_orders_messy.csv,75,Paid?,boolean_variant,No,no
+sales_orders_messy.csv,75, Customer Name ,case_variant,Søren Lefèvre,søren lefèvre
+sales_orders_messy.csv,75,Notes,null_token,,N/A
+sales_orders_messy.csv,76,Order ID,extra_whitespace,ORD-00072, ORD-00072
+sales_orders_messy.csv,76,Order Date,invalid_value,2024-03-15,31/02/2024
+sales_orders_messy.csv,76,Amount (USD),null_token,2710.27,TBD
+sales_orders_messy.csv,76,Discount %,missing_value,0,
+sales_orders_messy.csv,76,Notes,missing_value,,
+sales_orders_messy.csv,77,Order Date,mixed_date_format,2024-02-28,2024/02/28
+sales_orders_messy.csv,77,Amount (USD),null_token,2391.70,N/A
+sales_orders_messy.csv,77,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,77,Paid?,null_token,,N/A
+sales_orders_messy.csv,77, Customer Name ,mojibake,Zoë Dubois,ZoÃ« Dubois
+sales_orders_messy.csv,77,Notes,null_token,,TBD
+sales_orders_messy.csv,78,Discount %,percent_symbol,0,0%
+sales_orders_messy.csv,78,Notes,missing_value,,
+sales_orders_messy.csv,79,Order ID,missing_value,ORD-00075,
+sales_orders_messy.csv,79,Order Date,invalid_value,2024-07-14,99/99/9999
+sales_orders_messy.csv,79,Region,typo_category,West,Wset
+sales_orders_messy.csv,79,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,79, Customer Name ,missing_value,Wei Dubois,
+sales_orders_messy.csv,79,Notes,missing_value,,
+sales_orders_messy.csv,80,Order ID,extra_whitespace,ORD-00076, ORD-00076
+sales_orders_messy.csv,80,Region,typo_category,North,Nrth
+sales_orders_messy.csv,80,Notes,missing_value,,
+sales_orders_messy.csv,80,ZIP Code,missing_value,98594,
+sales_orders_messy.csv,81,Order ID,missing_value,ORD-00077,
+sales_orders_messy.csv,81,Amount (USD),currency_symbol,4783.99,"$4,783.99"
+sales_orders_messy.csv,81,Amount (USD),number_with_thousands_sep,4783.99,"$4,783.99"
+sales_orders_messy.csv,81,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,81,Region,case_variant,West,west 
+sales_orders_messy.csv,81,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,81,Notes,missing_value,,
+sales_orders_messy.csv,82,Order Date,missing_value,2024-04-24,
+sales_orders_messy.csv,82,Amount (USD),currency_symbol,1763.57,"$1,763.57"
+sales_orders_messy.csv,82,Amount (USD),number_with_thousands_sep,1763.57,"$1,763.57"
+sales_orders_messy.csv,82,Discount %,missing_value,0,
+sales_orders_messy.csv,82,Region,case_variant,East,EAST
+sales_orders_messy.csv,82,Paid?,missing_value,,
+sales_orders_messy.csv,82, Customer Name ,case_variant,Ethan Tanaka,ETHAN TANAKA
+sales_orders_messy.csv,82,Notes,missing_value,,
+sales_orders_messy.csv,82,ZIP Code,null_token,80822,N/A
+sales_orders_messy.csv,83,Order ID,extra_whitespace,ORD-00079, ORD-00079
+sales_orders_messy.csv,83,Amount (USD),null_token,1380.89,N/A
+sales_orders_messy.csv,83,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,83,Region,case_variant,West,west 
+sales_orders_messy.csv,83,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,83,Notes,missing_value,,
+sales_orders_messy.csv,84,Discount %,missing_value,10,
+sales_orders_messy.csv,84,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,84,Region,case_variant,West,west 
+sales_orders_messy.csv,84, Customer Name ,extra_whitespace,Ethan García,Ethan  García
+sales_orders_messy.csv,84,Notes,missing_value,,
+sales_orders_messy.csv,85, Customer Name ,placeholder_token,Søren Khan,unknown
+sales_orders_messy.csv,85,Notes,missing_value,,
+sales_orders_messy.csv,86,Order Date,mixed_date_format,2024-03-11,2024/03/11
+sales_orders_messy.csv,86,Discount %,missing_value,15,
+sales_orders_messy.csv,86, Customer Name ,extra_whitespace,Søren Åberg,  Søren Åberg
+sales_orders_messy.csv,86,Notes,missing_value,,
+sales_orders_messy.csv,87,Order ID,extra_whitespace,ORD-00083, ORD-00083
+sales_orders_messy.csv,87,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,87,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,87,Notes,missing_value,,
+sales_orders_messy.csv,88,Order ID,missing_value,ORD-00084,
+sales_orders_messy.csv,88,Notes,missing_value,,
+sales_orders_messy.csv,88,ZIP Code,missing_value,67910,
+sales_orders_messy.csv,89,Order Date,missing_value,2024-04-09,
+sales_orders_messy.csv,89,Amount (USD),extra_whitespace,1759.89, 1759.89 
+sales_orders_messy.csv,89, Customer Name ,case_variant,Liam Peña,liam peña
+sales_orders_messy.csv,89,Notes,missing_value,,
+sales_orders_messy.csv,90,Order ID,missing_value,ORD-00086,
+sales_orders_messy.csv,90,Amount (USD),currency_symbol,4622.29,"$4,622.29"
+sales_orders_messy.csv,90,Amount (USD),number_with_thousands_sep,4622.29,"$4,622.29"
+sales_orders_messy.csv,90,Notes,missing_value,,
+sales_orders_messy.csv,91,Amount (USD),missing_value,303.31,
+sales_orders_messy.csv,91,Discount %,missing_value,0,
+sales_orders_messy.csv,91,Region,case_variant,North,north
+sales_orders_messy.csv,91,Notes,null_token,,N/A
+sales_orders_messy.csv,92,Order ID,missing_value,ORD-00088,
+sales_orders_messy.csv,92,Amount (USD),currency_symbol,3032.93,"$3,032.93"
+sales_orders_messy.csv,92,Amount (USD),number_with_thousands_sep,3032.93,"$3,032.93"
+sales_orders_messy.csv,92,Region,null_token,East,?
+sales_orders_messy.csv,92,Notes,missing_value,,
+sales_orders_messy.csv,93,Discount %,missing_value,10,
+sales_orders_messy.csv,93,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,93,Region,case_variant,East,  east
+sales_orders_messy.csv,93,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,93,Notes,missing_value,,
+sales_orders_messy.csv,94,Order ID,extra_whitespace,ORD-00090, ORD-00090
+sales_orders_messy.csv,94,Order Date,missing_value,2024-11-04,
+sales_orders_messy.csv,94,Amount (USD),currency_symbol,1680.14,"$1,680.14"
+sales_orders_messy.csv,94,Amount (USD),number_with_thousands_sep,1680.14,"$1,680.14"
+sales_orders_messy.csv,94,Discount %,null_token,5,TBD
+sales_orders_messy.csv,94,Region,missing_value,East,
+sales_orders_messy.csv,94,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,94, Customer Name ,extra_whitespace,Lucas Nuñez,  Lucas Nuñez
+sales_orders_messy.csv,95,Order Date,null_token,2024-06-17,N/A
+sales_orders_messy.csv,95,Amount (USD),missing_value,3357.18,
+sales_orders_messy.csv,95, Customer Name ,missing_value,Omar Nuñez,
+sales_orders_messy.csv,95,Notes,missing_value,,
+sales_orders_messy.csv,96,Order ID,null_token,ORD-00092,TBD
+sales_orders_messy.csv,96,Discount %,null_token,20,N/A
+sales_orders_messy.csv,96,Region,case_variant,North,NORTH
+sales_orders_messy.csv,96,Paid?,missing_value,,
+sales_orders_messy.csv,96, Customer Name ,extra_whitespace,Ethan Nuñez,  Ethan Nuñez
+sales_orders_messy.csv,96,Notes,missing_value,,
+sales_orders_messy.csv,96,ZIP Code,extra_whitespace,24703, 24703
+sales_orders_messy.csv,97,Order ID,missing_value,ORD-00093,
+sales_orders_messy.csv,97,Order Date,mixed_date_format,2024-03-25,25 Mar 2024
+sales_orders_messy.csv,97,Discount %,null_token,5,?
+sales_orders_messy.csv,97,Region,typo_category,South,Sout
+sales_orders_messy.csv,97,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,97,ZIP Code,null_token,62474,N/A
+sales_orders_messy.csv,98,Order Date,invalid_value,2024-12-13,soon
+sales_orders_messy.csv,98,Discount %,missing_value,10,
+sales_orders_messy.csv,98,Region,missing_value,West,
+sales_orders_messy.csv,98,Paid?,boolean_variant,No,no
+sales_orders_messy.csv,98, Customer Name ,missing_value,Ethan Nuñez,
+sales_orders_messy.csv,98,Notes,missing_value,,
+sales_orders_messy.csv,98,ZIP Code,null_token,63991,N/A
+sales_orders_messy.csv,99,Order Date,mixed_date_format,2024-02-22,22 Feb 2024
+sales_orders_messy.csv,99,Discount %,missing_value,0,
+sales_orders_messy.csv,99, Customer Name ,missing_value,Iñaki Smith,
+sales_orders_messy.csv,99,Notes,missing_value,,
+sales_orders_messy.csv,99,ZIP Code,null_token,60130,N/A
+sales_orders_messy.csv,100,Order ID,null_token,ORD-00096,N/A
+sales_orders_messy.csv,100,Notes,missing_value,,
+sales_orders_messy.csv,100,ZIP Code,missing_value,62925,
+sales_orders_messy.csv,101,Order ID,extra_whitespace,ORD-00233, ORD-00233
+sales_orders_messy.csv,101,Order Date,invalid_value,2024-06-01,soon
+sales_orders_messy.csv,101,Amount (USD),currency_symbol,2290.51,"$2,290.51"
+sales_orders_messy.csv,101,Amount (USD),number_with_thousands_sep,2290.51,"$2,290.51"
+sales_orders_messy.csv,101,Paid?,missing_value,,
+sales_orders_messy.csv,101,,duplicate_row,,
+sales_orders_messy.csv,102,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,102,Notes,missing_value,,
+sales_orders_messy.csv,103,Order Date,null_token,2024-11-23,TBD
+sales_orders_messy.csv,103,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,103,Region,case_variant,North,NORTH
+sales_orders_messy.csv,103,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,103,Notes,missing_value,,
+sales_orders_messy.csv,104,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,104,Notes,missing_value,,
+sales_orders_messy.csv,105,Order ID,missing_value,ORD-00100,
+sales_orders_messy.csv,105,Amount (USD),null_token,2917.88,N/A
+sales_orders_messy.csv,105,Region,case_variant,East,EAST
+sales_orders_messy.csv,105,Notes,missing_value,,
+sales_orders_messy.csv,106,Order ID,missing_value,ORD-00101,
+sales_orders_messy.csv,106,Amount (USD),null_token,1023.92,TBD
+sales_orders_messy.csv,106,Paid?,null_token,,?
+sales_orders_messy.csv,106,Notes,null_token,,?
+sales_orders_messy.csv,107,Order ID,missing_value,ORD-00258,
+sales_orders_messy.csv,107,Amount (USD),missing_value,3218.48,
+sales_orders_messy.csv,107,Discount %,null_token,5,?
+sales_orders_messy.csv,107,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,107,Notes,null_token,,-
+sales_orders_messy.csv,107,ZIP Code,null_token,04238,N/A
+sales_orders_messy.csv,107,,duplicate_row,,
+sales_orders_messy.csv,108,Order ID,extra_whitespace,ORD-00102, ORD-00102
+sales_orders_messy.csv,108,Order Date,missing_value,2024-01-25,
+sales_orders_messy.csv,108,Region,typo_category,South,Sout
+sales_orders_messy.csv,108,Paid?,missing_value,,
+sales_orders_messy.csv,108, Customer Name ,placeholder_token,Lucas Lefèvre,unknown
+sales_orders_messy.csv,108,Notes,missing_value,,
+sales_orders_messy.csv,109,Order ID,missing_value,ORD-00103,
+sales_orders_messy.csv,109,Order Date,null_token,2024-05-16,N/A
+sales_orders_messy.csv,109,Discount %,null_token,20,?
+sales_orders_messy.csv,109, Customer Name ,extra_whitespace,Müller Lefèvre,Müller  Lefèvre
+sales_orders_messy.csv,109,Notes,missing_value,,
+sales_orders_messy.csv,109,ZIP Code,missing_value,79986,
+sales_orders_messy.csv,110,Amount (USD),missing_value,230.93,
+sales_orders_messy.csv,110,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,110,Paid?,null_token,,?
+sales_orders_messy.csv,110, Customer Name ,extra_whitespace,Zoë Smith,Zoë  Smith
+sales_orders_messy.csv,110,Notes,missing_value,,
+sales_orders_messy.csv,110,ZIP Code,extra_whitespace,68251, 68251
+sales_orders_messy.csv,111,Order ID,missing_value,ORD-00105,
+sales_orders_messy.csv,111,Amount (USD),null_token,3045.71,N/A
+sales_orders_messy.csv,111,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,111,Region,case_variant,East,  east
+sales_orders_messy.csv,111,Notes,missing_value,,
+sales_orders_messy.csv,111,ZIP Code,null_token,59972,?
+sales_orders_messy.csv,112,Order Date,mixed_date_format,2024-02-09,09/02/2024
+sales_orders_messy.csv,112, Customer Name ,missing_value,Priya Khan,
+sales_orders_messy.csv,112,Notes,missing_value,,
+sales_orders_messy.csv,112,ZIP Code,missing_value,35116,
+sales_orders_messy.csv,113,Paid?,missing_value,,
+sales_orders_messy.csv,113, Customer Name ,extra_whitespace,Emma Smith,Emma Smith 
+sales_orders_messy.csv,113,ZIP Code,missing_value,42889,
+sales_orders_messy.csv,114,Order ID,missing_value,ORD-00108,
+sales_orders_messy.csv,114,Order Date,mixed_date_format,2024-10-08,08/10/2024
+sales_orders_messy.csv,114,Amount (USD),missing_value,4458.83,
+sales_orders_messy.csv,114,Discount %,missing_value,5,
+sales_orders_messy.csv,114, Customer Name ,extra_whitespace,Liam O'Brien,Liam O'Brien 
+sales_orders_messy.csv,114,Notes,missing_value,,
+sales_orders_messy.csv,115,Discount %,null_token,15,?
+sales_orders_messy.csv,115,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,115,Notes,missing_value,,
+sales_orders_messy.csv,116,Order ID,missing_value,ORD-00110,
+sales_orders_messy.csv,116,Amount (USD),currency_symbol,4148.69,"$4,148.69"
+sales_orders_messy.csv,116,Amount (USD),number_with_thousands_sep,4148.69,"$4,148.69"
+sales_orders_messy.csv,116,Paid?,null_token,,N/A
+sales_orders_messy.csv,116,Notes,missing_value,,
+sales_orders_messy.csv,117,Order ID,null_token,ORD-00111,N/A
+sales_orders_messy.csv,117,Amount (USD),missing_value,4705.70,
+sales_orders_messy.csv,117,Notes,missing_value,,
+sales_orders_messy.csv,118,Region,case_variant,North,NORTH
+sales_orders_messy.csv,118,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,118, Customer Name ,case_variant,Iñaki Tanaka,IÑAKI TANAKA
+sales_orders_messy.csv,118,Notes,missing_value,,
+sales_orders_messy.csv,119,Amount (USD),parentheses_negative,4027.35,(4027.35)
+sales_orders_messy.csv,119,Notes,missing_value,,
+sales_orders_messy.csv,120,Order ID,null_token,ORD-00114,TBD
+sales_orders_messy.csv,120,Order Date,invalid_value,2024-06-25,31/02/2024
+sales_orders_messy.csv,120,Notes,missing_value,,
+sales_orders_messy.csv,120,ZIP Code,extra_whitespace,51351, 51351
+sales_orders_messy.csv,121,Order Date,null_token,2024-03-22,N/A
+sales_orders_messy.csv,121,Amount (USD),extra_whitespace,4670.08, 4670.08 
+sales_orders_messy.csv,121,Discount %,missing_value,5,
+sales_orders_messy.csv,121,Region,null_token,West,?
+sales_orders_messy.csv,122,Region,typo_category,West,Wset
+sales_orders_messy.csv,122,Notes,missing_value,,
+sales_orders_messy.csv,123,Discount %,missing_value,15,
+sales_orders_messy.csv,123,Region,case_variant,East,EAST
+sales_orders_messy.csv,123,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,123,Notes,missing_value,,
+sales_orders_messy.csv,123,ZIP Code,extra_whitespace,49915, 49915
+sales_orders_messy.csv,124,Order Date,mixed_date_format,2024-07-06,2024/07/06
+sales_orders_messy.csv,124,Amount (USD),currency_symbol,1011.31,"$1,011.31"
+sales_orders_messy.csv,124,Amount (USD),number_with_thousands_sep,1011.31,"$1,011.31"
+sales_orders_messy.csv,124,Notes,missing_value,,
+sales_orders_messy.csv,125,Order ID,null_token,ORD-00119,N/A
+sales_orders_messy.csv,125,Amount (USD),null_token,4953.27,N/A
+sales_orders_messy.csv,125,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,125,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,125,Notes,missing_value,,
+sales_orders_messy.csv,126,Order ID,missing_value,ORD-00120,
+sales_orders_messy.csv,126,Order Date,mixed_date_format,2024-12-18,18/12/2024
+sales_orders_messy.csv,126,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,126, Customer Name ,mojibake,Ethan Peña,Ethan PeÃ±a
+sales_orders_messy.csv,126,Notes,missing_value,,
+sales_orders_messy.csv,127,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,127, Customer Name ,mojibake,Jürgen Novak,JÃ¼rgen Novak
+sales_orders_messy.csv,127,Notes,null_token,,-
+sales_orders_messy.csv,128,Order Date,invalid_value,2024-06-15,99/99/9999
+sales_orders_messy.csv,128,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,129,Order Date,null_token,2024-06-01,TBD
+sales_orders_messy.csv,129,Amount (USD),extra_whitespace,3530.41, 3530.41 
+sales_orders_messy.csv,129,Paid?,null_token,,N/A
+sales_orders_messy.csv,129,Notes,missing_value,,
+sales_orders_messy.csv,129,ZIP Code,null_token,50767,N/A
+sales_orders_messy.csv,130,Order Date,invalid_value,2024-06-25,soon
+sales_orders_messy.csv,130,Discount %,null_token,10,?
+sales_orders_messy.csv,130,Notes,missing_value,,
+sales_orders_messy.csv,131,Amount (USD),currency_symbol,3086.07,"$3,086.07"
+sales_orders_messy.csv,131,Amount (USD),number_with_thousands_sep,3086.07,"$3,086.07"
+sales_orders_messy.csv,131,Region,case_variant,North,NORTH
+sales_orders_messy.csv,131, Customer Name ,extra_whitespace,Iñaki Lefèvre,Iñaki Lefèvre 
+sales_orders_messy.csv,131,Notes,missing_value,,
+sales_orders_messy.csv,132,Amount (USD),missing_value,4676.46,
+sales_orders_messy.csv,132,Discount %,missing_value,15,
+sales_orders_messy.csv,132,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,132, Customer Name ,extra_whitespace,Müller Brown,  Müller Brown
+sales_orders_messy.csv,132,Notes,missing_value,,
+sales_orders_messy.csv,132,ZIP Code,extra_whitespace,95780, 95780
+sales_orders_messy.csv,133,Amount (USD),invalid_value,4191.27,abc
+sales_orders_messy.csv,133,Discount %,null_token,0,?
+sales_orders_messy.csv,133,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,133,Region,case_variant,East,  east
+sales_orders_messy.csv,133,Notes,missing_value,,
+sales_orders_messy.csv,134,Order ID,null_token,ORD-00128,TBD
+sales_orders_messy.csv,134,Amount (USD),currency_symbol,3213.74,"$3,213.74"
+sales_orders_messy.csv,134,Amount (USD),number_with_thousands_sep,3213.74,"$3,213.74"
+sales_orders_messy.csv,134,Discount %,null_token,5,N/A
+sales_orders_messy.csv,134,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,134, Customer Name ,extra_whitespace,Ava Nuñez,Ava Nuñez 
+sales_orders_messy.csv,134,Notes,missing_value,,
+sales_orders_messy.csv,135,Order ID,missing_value,ORD-00129,
+sales_orders_messy.csv,135,Order Date,mixed_date_format,2024-05-31,31/05/2024
+sales_orders_messy.csv,135,Discount %,null_token,15,N/A
+sales_orders_messy.csv,135,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,136,Order Date,invalid_value,2024-05-16,soon
+sales_orders_messy.csv,136,Amount (USD),extra_whitespace,1523.69, 1523.69 
+sales_orders_messy.csv,136,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,136,Notes,missing_value,,
+sales_orders_messy.csv,136,ZIP Code,null_token,66866,N/A
+sales_orders_messy.csv,137,Order ID,extra_whitespace,ORD-00131, ORD-00131
+sales_orders_messy.csv,137,Order Date,mixed_date_format,2024-06-08,8 Jun 2024
+sales_orders_messy.csv,137,Amount (USD),invalid_value,3200.78,abc
+sales_orders_messy.csv,137,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,137,Region,missing_value,South,
+sales_orders_messy.csv,137, Customer Name ,placeholder_token,Emma Dubois,unknown
+sales_orders_messy.csv,137,Notes,missing_value,,
+sales_orders_messy.csv,138,Order Date,null_token,2024-10-02,N/A
+sales_orders_messy.csv,138,Amount (USD),null_token,4131.51,N/A
+sales_orders_messy.csv,138,Discount %,null_token,20,N/A
+sales_orders_messy.csv,138, Customer Name ,missing_value,Renée Smith,
+sales_orders_messy.csv,138,Notes,missing_value,,
+sales_orders_messy.csv,138,ZIP Code,null_token,72781,N/A
+sales_orders_messy.csv,139,Amount (USD),currency_symbol,1654.03,"$1,654.03"
+sales_orders_messy.csv,139,Amount (USD),number_with_thousands_sep,1654.03,"$1,654.03"
+sales_orders_messy.csv,139,Discount %,missing_value,0,
+sales_orders_messy.csv,139,Notes,missing_value,,
+sales_orders_messy.csv,140,Order Date,mixed_date_format,2024-06-06,6 Jun 2024
+sales_orders_messy.csv,140,Amount (USD),null_token,1991.82,TBD
+sales_orders_messy.csv,140,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,140,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,140, Customer Name ,missing_value,Wei García,
+sales_orders_messy.csv,140,Notes,missing_value,,
+sales_orders_messy.csv,141,Order Date,mixed_date_format,2024-03-10,2024/03/10
+sales_orders_messy.csv,141,Amount (USD),currency_symbol,4892.10,"$4,892.10"
+sales_orders_messy.csv,141,Amount (USD),number_with_thousands_sep,4892.10,"$4,892.10"
+sales_orders_messy.csv,141,Paid?,null_token,,N/A
+sales_orders_messy.csv,142,Order ID,extra_whitespace,ORD-00136, ORD-00136
+sales_orders_messy.csv,142,Amount (USD),currency_symbol,2695.55,"$2,695.55"
+sales_orders_messy.csv,142,Amount (USD),number_with_thousands_sep,2695.55,"$2,695.55"
+sales_orders_messy.csv,142,Discount %,null_token,5,N/A
+sales_orders_messy.csv,142,Region,null_token,North,?
+sales_orders_messy.csv,142,Notes,null_token,,N/A
+sales_orders_messy.csv,143,Order Date,invalid_value,2024-04-06,soon
+sales_orders_messy.csv,143,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,143,Notes,missing_value,,
+sales_orders_messy.csv,144,Amount (USD),missing_value,1102.00,
+sales_orders_messy.csv,144,Paid?,null_token,,N/A
+sales_orders_messy.csv,144, Customer Name ,extra_whitespace,Sofía Lefèvre,  Sofía Lefèvre
+sales_orders_messy.csv,144,Notes,null_token,,?
+sales_orders_messy.csv,145, Customer Name ,placeholder_token,Sofía Tanaka,unknown
+sales_orders_messy.csv,145,Notes,missing_value,,
+sales_orders_messy.csv,145,,duplicate_row,,
+sales_orders_messy.csv,146,Order ID,extra_whitespace,ORD-00139, ORD-00139
+sales_orders_messy.csv,146,Discount %,null_token,20,?
+sales_orders_messy.csv,146,Region,case_variant,North,north
+sales_orders_messy.csv,146, Customer Name ,placeholder_token,Jürgen García,unknown
+sales_orders_messy.csv,147,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,147,Notes,missing_value,,
+sales_orders_messy.csv,148,Discount %,null_token,15,N/A
+sales_orders_messy.csv,148,Paid?,boolean_variant,No,no
+sales_orders_messy.csv,148,Notes,missing_value,,
+sales_orders_messy.csv,148,ZIP Code,null_token,06183,N/A
+sales_orders_messy.csv,149,Order Date,mixed_date_format,2024-10-27,27 Oct 2024
+sales_orders_messy.csv,149, Customer Name ,placeholder_token,Anna Dubois,unknown
+sales_orders_messy.csv,149,Notes,missing_value,,
+sales_orders_messy.csv,149,ZIP Code,missing_value,32797,
+sales_orders_messy.csv,150,Order ID,missing_value,ORD-00143,
+sales_orders_messy.csv,150,Order Date,missing_value,2024-07-22,
+sales_orders_messy.csv,150,Amount (USD),null_token,2769.35,N/A
+sales_orders_messy.csv,150,Notes,extra_whitespace,gift wrap,gift  wrap
+sales_orders_messy.csv,150,ZIP Code,missing_value,62537,
+sales_orders_messy.csv,151,Order Date,invalid_value,2024-12-13,soon
+sales_orders_messy.csv,151,Discount %,missing_value,10,
+sales_orders_messy.csv,151,Region,missing_value,West,
+sales_orders_messy.csv,151,Paid?,boolean_variant,No,no
+sales_orders_messy.csv,151, Customer Name ,missing_value,Ethan Nuñez,
+sales_orders_messy.csv,151,Notes,missing_value,,
+sales_orders_messy.csv,151,ZIP Code,null_token,63991,N/A
+sales_orders_messy.csv,151,,duplicate_row,,
+sales_orders_messy.csv,152,Amount (USD),currency_symbol,2081.37,"$2,081.37"
+sales_orders_messy.csv,152,Amount (USD),number_with_thousands_sep,2081.37,"$2,081.37"
+sales_orders_messy.csv,152,Discount %,missing_value,5,
+sales_orders_messy.csv,152,Paid?,null_token,,N/A
+sales_orders_messy.csv,152,Notes,missing_value,,
+sales_orders_messy.csv,153,Amount (USD),parentheses_negative,3279.95,(3279.95)
+sales_orders_messy.csv,153,Discount %,missing_value,10,
+sales_orders_messy.csv,153,Region,missing_value,West,
+sales_orders_messy.csv,153,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,153,Notes,null_token,,N/A
+sales_orders_messy.csv,154,Order Date,null_token,2024-10-28,N/A
+sales_orders_messy.csv,154,Amount (USD),null_token,1904.35,N/A
+sales_orders_messy.csv,154,Region,missing_value,North,
+sales_orders_messy.csv,154,Paid?,null_token,,N/A
+sales_orders_messy.csv,154, Customer Name ,placeholder_token,Lucas Novak,unknown
+sales_orders_messy.csv,154,,duplicate_row,,
+sales_orders_messy.csv,155,Discount %,null_token,15,N/A
+sales_orders_messy.csv,155,Notes,missing_value,,
+sales_orders_messy.csv,155,ZIP Code,null_token,69386,?
+sales_orders_messy.csv,155,,duplicate_row,,
+sales_orders_messy.csv,156,Order Date,missing_value,2024-04-04,
+sales_orders_messy.csv,156,Amount (USD),currency_symbol,2719.84,"$2,719.84"
+sales_orders_messy.csv,156,Amount (USD),number_with_thousands_sep,2719.84,"$2,719.84"
+sales_orders_messy.csv,156,Discount %,percent_symbol,0,0%
+sales_orders_messy.csv,156,Region,missing_value,North,
+sales_orders_messy.csv,156,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,156,Notes,missing_value,,
+sales_orders_messy.csv,156,ZIP Code,missing_value,09908,
+sales_orders_messy.csv,157,Amount (USD),currency_symbol,321.04,$321.04
+sales_orders_messy.csv,157,Discount %,null_token,20,TBD
+sales_orders_messy.csv,157,Notes,null_token,,-
+sales_orders_messy.csv,157,ZIP Code,null_token,71220,?
+sales_orders_messy.csv,158,Order Date,mixed_date_format,2024-12-23,23/12/2024
+sales_orders_messy.csv,158,Amount (USD),missing_value,4034.72,
+sales_orders_messy.csv,158,Discount %,null_token,0,TBD
+sales_orders_messy.csv,158,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,158,Notes,null_token,,N/A
+sales_orders_messy.csv,159,Discount %,missing_value,0,
+sales_orders_messy.csv,159,Notes,missing_value,,
+sales_orders_messy.csv,160,Order ID,extra_whitespace,ORD-00150, ORD-00150
+sales_orders_messy.csv,160,Order Date,null_token,2024-11-26,TBD
+sales_orders_messy.csv,160,Amount (USD),missing_value,2837.97,
+sales_orders_messy.csv,160,Discount %,null_token,0,TBD
+sales_orders_messy.csv,160,Paid?,missing_value,,
+sales_orders_messy.csv,160,ZIP Code,null_token,90709,N/A
+sales_orders_messy.csv,161,Order ID,extra_whitespace,ORD-00151, ORD-00151
+sales_orders_messy.csv,161,Order Date,mixed_date_format,2024-10-15,15/10/2024
+sales_orders_messy.csv,161,Amount (USD),missing_value,913.19,
+sales_orders_messy.csv,161,Discount %,null_token,0,?
+sales_orders_messy.csv,161,Region,typo_category,South,Sout
+sales_orders_messy.csv,161,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,161,Notes,missing_value,,
+sales_orders_messy.csv,162,Order ID,extra_whitespace,ORD-00152, ORD-00152
+sales_orders_messy.csv,162,Order Date,missing_value,2024-12-12,
+sales_orders_messy.csv,162,Amount (USD),null_token,1672.01,N/A
+sales_orders_messy.csv,162,Discount %,missing_value,5,
+sales_orders_messy.csv,162,Paid?,null_token,,?
+sales_orders_messy.csv,162,Notes,null_token,,N/A
+sales_orders_messy.csv,162,ZIP Code,missing_value,45642,
+sales_orders_messy.csv,163,Discount %,missing_value,10,
+sales_orders_messy.csv,163,Notes,missing_value,,
+sales_orders_messy.csv,164,Order Date,mixed_date_format,2024-05-06,6 May 2024
+sales_orders_messy.csv,164,Discount %,missing_value,5,
+sales_orders_messy.csv,164,Notes,missing_value,,
+sales_orders_messy.csv,165,Order Date,mixed_date_format,2024-10-12,12/10/2024
+sales_orders_messy.csv,165,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,165,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,165,Region,case_variant,West,west 
+sales_orders_messy.csv,165, Customer Name ,mojibake,Iñaki Khan,IÃ±aki Khan
+sales_orders_messy.csv,165,Notes,null_token,,-
+sales_orders_messy.csv,165,ZIP Code,null_token,74339,N/A
+sales_orders_messy.csv,166,Order ID,null_token,ORD-00156,TBD
+sales_orders_messy.csv,166,Notes,null_token,,N/A
+sales_orders_messy.csv,167,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,167,Notes,null_token,,N/A
+sales_orders_messy.csv,167,ZIP Code,null_token,86332,?
+sales_orders_messy.csv,168,,empty_row,,
+sales_orders_messy.csv,169,Order Date,mixed_date_format,2024-06-13,13/06/2024
+sales_orders_messy.csv,169,Discount %,null_token,5,?
+sales_orders_messy.csv,169,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,169, Customer Name ,mojibake,Jürgen Tanaka,JÃ¼rgen Tanaka
+sales_orders_messy.csv,169,Notes,missing_value,,
+sales_orders_messy.csv,169,ZIP Code,extra_whitespace,37739, 37739
+sales_orders_messy.csv,170,Order Date,missing_value,2024-02-28,
+sales_orders_messy.csv,170,Amount (USD),null_token,1015.00,?
+sales_orders_messy.csv,170,Discount %,missing_value,5,
+sales_orders_messy.csv,170,Region,missing_value,North,
+sales_orders_messy.csv,170, Customer Name ,extra_whitespace,Noah Rossi,Noah Rossi 
+sales_orders_messy.csv,170,Notes,null_token,,N/A
+sales_orders_messy.csv,170,ZIP Code,extra_whitespace,10064, 10064
+sales_orders_messy.csv,171,Order ID,missing_value,ORD-00160,
+sales_orders_messy.csv,171,Order Date,mixed_date_format,2024-07-28,28/07/2024
+sales_orders_messy.csv,171,Discount %,missing_value,10,
+sales_orders_messy.csv,171,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,171,Region,case_variant,East,  east
+sales_orders_messy.csv,171,Notes,missing_value,,
+sales_orders_messy.csv,172,Order Date,mixed_date_format,2024-07-03,3 Jul 2024
+sales_orders_messy.csv,172,Amount (USD),currency_symbol,4065.24,"$4,065.24"
+sales_orders_messy.csv,172,Amount (USD),number_with_thousands_sep,4065.24,"$4,065.24"
+sales_orders_messy.csv,172,Region,case_variant,North,NORTH
+sales_orders_messy.csv,172, Customer Name ,extra_whitespace,Ethan García,  Ethan García
+sales_orders_messy.csv,172,Notes,missing_value,,
+sales_orders_messy.csv,173,,empty_row,,
+sales_orders_messy.csv,174,Order ID,missing_value,ORD-00162,
+sales_orders_messy.csv,174,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,174,Notes,missing_value,,
+sales_orders_messy.csv,175, Customer Name ,extra_whitespace,Anna Rossi,Anna  Rossi
+sales_orders_messy.csv,175,Notes,missing_value,,
+sales_orders_messy.csv,176,Order ID,missing_value,ORD-00164,
+sales_orders_messy.csv,176,Discount %,null_token,5,TBD
+sales_orders_messy.csv,176,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,176,Notes,missing_value,,
+sales_orders_messy.csv,176,ZIP Code,missing_value,54090,
+sales_orders_messy.csv,177,,empty_row,,
+sales_orders_messy.csv,178,Amount (USD),currency_symbol,165.38,$165.38
+sales_orders_messy.csv,178,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,178, Customer Name ,extra_whitespace,Noah Schröder,Noah Schröder 
+sales_orders_messy.csv,178,Notes,null_token,,N/A
+sales_orders_messy.csv,179,Order ID,missing_value,ORD-00166,
+sales_orders_messy.csv,179,Discount %,missing_value,10,
+sales_orders_messy.csv,179,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,179, Customer Name ,extra_whitespace,Ethan Khan,  Ethan Khan
+sales_orders_messy.csv,179,Notes,missing_value,,
+sales_orders_messy.csv,180,Order Date,null_token,2024-03-29,N/A
+sales_orders_messy.csv,180,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,180,Notes,missing_value,,
+sales_orders_messy.csv,181,Amount (USD),currency_symbol,2443.62,"$2,443.62"
+sales_orders_messy.csv,181,Amount (USD),number_with_thousands_sep,2443.62,"$2,443.62"
+sales_orders_messy.csv,181,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,181,Notes,missing_value,,
+sales_orders_messy.csv,182,Order Date,invalid_value,2024-07-15,soon
+sales_orders_messy.csv,182, Customer Name ,case_variant,José Peña,josé peña
+sales_orders_messy.csv,182,Notes,missing_value,,
+sales_orders_messy.csv,183,Order Date,null_token,2024-10-28,N/A
+sales_orders_messy.csv,183,Amount (USD),null_token,1904.35,N/A
+sales_orders_messy.csv,183,Region,missing_value,North,
+sales_orders_messy.csv,183,Paid?,null_token,,N/A
+sales_orders_messy.csv,183, Customer Name ,placeholder_token,Lucas Novak,unknown
+sales_orders_messy.csv,183,,duplicate_row,,
+sales_orders_messy.csv,184,Order Date,mixed_date_format,2024-08-22,22/08/2024
+sales_orders_messy.csv,184, Customer Name ,mojibake,Renée Åberg,RenÃ©e Ã…berg
+sales_orders_messy.csv,184,Notes,missing_value,,
+sales_orders_messy.csv,185,Amount (USD),null_token,4153.75,N/A
+sales_orders_messy.csv,185,Discount %,null_token,10,N/A
+sales_orders_messy.csv,185, Customer Name ,missing_value,Müller Rossi,
+sales_orders_messy.csv,185,Notes,missing_value,,
+sales_orders_messy.csv,186,Order ID,missing_value,ORD-00172,
+sales_orders_messy.csv,186,Amount (USD),currency_symbol,3559.55,"$3,559.55"
+sales_orders_messy.csv,186,Amount (USD),number_with_thousands_sep,3559.55,"$3,559.55"
+sales_orders_messy.csv,186,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,186,Region,case_variant,East,EAST
+sales_orders_messy.csv,186,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,186,Notes,missing_value,,
+sales_orders_messy.csv,187,Order ID,missing_value,ORD-00173,
+sales_orders_messy.csv,187,Order Date,mixed_date_format,2024-05-28,28/05/2024
+sales_orders_messy.csv,187,Amount (USD),currency_symbol,4762.94,"$4,762.94"
+sales_orders_messy.csv,187,Amount (USD),number_with_thousands_sep,4762.94,"$4,762.94"
+sales_orders_messy.csv,187,Region,null_token,West,N/A
+sales_orders_messy.csv,187,Paid?,null_token,,?
+sales_orders_messy.csv,187, Customer Name ,missing_value,Liam Dubois,
+sales_orders_messy.csv,187,Notes,missing_value,,
+sales_orders_messy.csv,188,Amount (USD),currency_symbol,728.01,$728.01
+sales_orders_messy.csv,188,Region,case_variant,North,NORTH
+sales_orders_messy.csv,188,Paid?,missing_value,,
+sales_orders_messy.csv,188,Notes,missing_value,,
+sales_orders_messy.csv,189,Amount (USD),extra_whitespace,3875.19, 3875.19 
+sales_orders_messy.csv,189,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,189,Region,typo_category,West,Wset
+sales_orders_messy.csv,189,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,189, Customer Name ,placeholder_token,Lucas O'Brien,unknown
+sales_orders_messy.csv,189,Notes,null_token,,N/A
+sales_orders_messy.csv,190,Order ID,extra_whitespace,ORD-00176, ORD-00176
+sales_orders_messy.csv,190,Order Date,mixed_date_format,2024-06-21,21/06/2024
+sales_orders_messy.csv,190,Amount (USD),missing_value,670.36,
+sales_orders_messy.csv,190,Discount %,null_token,10,TBD
+sales_orders_messy.csv,190,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,190,Notes,null_token,,TBD
+sales_orders_messy.csv,191,Order ID,null_token,ORD-00177,TBD
+sales_orders_messy.csv,191, Customer Name ,extra_whitespace,Müller Lefèvre,Müller  Lefèvre
+sales_orders_messy.csv,191,Notes,missing_value,,
+sales_orders_messy.csv,192,Order Date,mixed_date_format,2024-12-24,2024/12/24
+sales_orders_messy.csv,192,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,192,Notes,missing_value,,
+sales_orders_messy.csv,192,ZIP Code,extra_whitespace,46032, 46032
+sales_orders_messy.csv,193,Order ID,null_token,ORD-00179,TBD
+sales_orders_messy.csv,193,Order Date,mixed_date_format,2024-08-04,4 Aug 2024
+sales_orders_messy.csv,193,Discount %,missing_value,0,
+sales_orders_messy.csv,193,Notes,null_token,,N/A
+sales_orders_messy.csv,193,ZIP Code,missing_value,18451,
+sales_orders_messy.csv,194,Order ID,missing_value,ORD-00180,
+sales_orders_messy.csv,194,Amount (USD),currency_symbol,62.20,$62.20
+sales_orders_messy.csv,194,Region,case_variant,North,north
+sales_orders_messy.csv,194, Customer Name ,extra_whitespace,Iñaki Tanaka,Iñaki  Tanaka
+sales_orders_messy.csv,194,Notes,null_token,,TBD
+sales_orders_messy.csv,194,ZIP Code,null_token,12362,N/A
+sales_orders_messy.csv,195,Order Date,mixed_date_format,2024-03-04,04/03/2024
+sales_orders_messy.csv,195,Amount (USD),invalid_value,1932.48,abc
+sales_orders_messy.csv,195,Discount %,missing_value,10,
+sales_orders_messy.csv,195, Customer Name ,extra_whitespace,Wei Tanaka,  Wei Tanaka
+sales_orders_messy.csv,195,Notes,missing_value,,
+sales_orders_messy.csv,196,Order ID,extra_whitespace,ORD-00182, ORD-00182
+sales_orders_messy.csv,196,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,196,Region,case_variant,East,  east
+sales_orders_messy.csv,196,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,196,Notes,missing_value,,
+sales_orders_messy.csv,196,ZIP Code,missing_value,84634,
+sales_orders_messy.csv,197,Order Date,invalid_value,2024-01-07,31/02/2024
+sales_orders_messy.csv,197,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,197,Region,case_variant,East,  east
+sales_orders_messy.csv,197,Paid?,null_token,,?
+sales_orders_messy.csv,197, Customer Name ,extra_whitespace,Müller García,  Müller García
+sales_orders_messy.csv,197,Notes,missing_value,,
+sales_orders_messy.csv,198,Amount (USD),currency_symbol,3150.28,"$3,150.28"
+sales_orders_messy.csv,198,Amount (USD),number_with_thousands_sep,3150.28,"$3,150.28"
+sales_orders_messy.csv,198,Notes,missing_value,,
+sales_orders_messy.csv,198,ZIP Code,null_token,68017,N/A
+sales_orders_messy.csv,199,Order ID,null_token,ORD-00185,TBD
+sales_orders_messy.csv,199,Order Date,mixed_date_format,2024-03-20,20/03/2024
+sales_orders_messy.csv,199,Amount (USD),currency_symbol,1965.84,"$1,965.84"
+sales_orders_messy.csv,199,Amount (USD),number_with_thousands_sep,1965.84,"$1,965.84"
+sales_orders_messy.csv,199,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,199,Paid?,missing_value,,
+sales_orders_messy.csv,199,Notes,missing_value,,
+sales_orders_messy.csv,199,ZIP Code,missing_value,60424,
+sales_orders_messy.csv,200,Order Date,mixed_date_format,2024-12-07,2024/12/07
+sales_orders_messy.csv,200,Discount %,missing_value,5,
+sales_orders_messy.csv,200, Customer Name ,mojibake,Priya Peña,Priya PeÃ±a
+sales_orders_messy.csv,200,Notes,missing_value,,
+sales_orders_messy.csv,201,Order ID,missing_value,ORD-00187,
+sales_orders_messy.csv,201,Order Date,mixed_date_format,2024-05-17,17 May 2024
+sales_orders_messy.csv,201,Amount (USD),missing_value,607.92,
+sales_orders_messy.csv,201,Discount %,missing_value,10,
+sales_orders_messy.csv,201,Notes,missing_value,,
+sales_orders_messy.csv,202,Order ID,extra_whitespace,ORD-00188, ORD-00188
+sales_orders_messy.csv,202,Discount %,missing_value,20,
+sales_orders_messy.csv,202, Customer Name ,missing_value,Zoë Novak,
+sales_orders_messy.csv,202,Notes,missing_value,,
+sales_orders_messy.csv,203,Order Date,invalid_value,2024-03-08,soon
+sales_orders_messy.csv,203,Amount (USD),null_token,37.59,N/A
+sales_orders_messy.csv,203,Notes,missing_value,,
+sales_orders_messy.csv,203,,duplicate_row,,
+sales_orders_messy.csv,204,Order ID,extra_whitespace,ORD-00189, ORD-00189
+sales_orders_messy.csv,204,Order Date,missing_value,2024-04-01,
+sales_orders_messy.csv,204,Amount (USD),currency_symbol,4290.28,"$4,290.28"
+sales_orders_messy.csv,204,Amount (USD),number_with_thousands_sep,4290.28,"$4,290.28"
+sales_orders_messy.csv,204,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,204,Notes,missing_value,,
+sales_orders_messy.csv,204,ZIP Code,missing_value,66803,
+sales_orders_messy.csv,205,Order Date,null_token,2024-04-24,N/A
+sales_orders_messy.csv,205,Amount (USD),invalid_value,4907.44,abc
+sales_orders_messy.csv,205,Discount %,null_token,0,N/A
+sales_orders_messy.csv,205,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,205,Region,case_variant,East,  east
+sales_orders_messy.csv,205,Notes,missing_value,,
+sales_orders_messy.csv,206,Amount (USD),invalid_value,1854.00,12..5
+sales_orders_messy.csv,206,Discount %,missing_value,5,
+sales_orders_messy.csv,206,Paid?,null_token,,N/A
+sales_orders_messy.csv,206,Notes,missing_value,,
+sales_orders_messy.csv,206,ZIP Code,null_token,91893,N/A
+sales_orders_messy.csv,207,Order ID,null_token,ORD-00192,N/A
+sales_orders_messy.csv,207,Order Date,mixed_date_format,2024-01-01,2024/01/01
+sales_orders_messy.csv,207,Amount (USD),null_token,1893.85,N/A
+sales_orders_messy.csv,207,Paid?,null_token,,?
+sales_orders_messy.csv,207,Notes,missing_value,,
+sales_orders_messy.csv,207,ZIP Code,null_token,31339,N/A
+sales_orders_messy.csv,208,Order Date,missing_value,2024-12-24,
+sales_orders_messy.csv,208,Amount (USD),null_token,2303.12,N/A
+sales_orders_messy.csv,208,Region,case_variant,North,NORTH
+sales_orders_messy.csv,208,Notes,missing_value,,
+sales_orders_messy.csv,209,Order Date,missing_value,2024-06-10,
+sales_orders_messy.csv,209,Amount (USD),missing_value,1976.90,
+sales_orders_messy.csv,209,Paid?,null_token,,N/A
+sales_orders_messy.csv,209, Customer Name ,case_variant,Liam Peña,liam peña
+sales_orders_messy.csv,209,Notes,missing_value,,
+sales_orders_messy.csv,210,Amount (USD),null_token,1804.27,N/A
+sales_orders_messy.csv,210,Region,typo_category,West,Wset
+sales_orders_messy.csv,210, Customer Name ,extra_whitespace,Omar Novak,Omar  Novak
+sales_orders_messy.csv,210,Notes,missing_value,,
+sales_orders_messy.csv,210,ZIP Code,extra_whitespace,29183, 29183
+sales_orders_messy.csv,211,Order Date,mixed_date_format,2024-02-16,16 Feb 2024
+sales_orders_messy.csv,211,Discount %,missing_value,0,
+sales_orders_messy.csv,211,Region,case_variant,East,EAST
+sales_orders_messy.csv,211,Notes,null_token,,?
+sales_orders_messy.csv,212,Amount (USD),null_token,327.11,N/A
+sales_orders_messy.csv,212,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,212, Customer Name ,extra_whitespace,Müller Tanaka,  Müller Tanaka
+sales_orders_messy.csv,213,,empty_row,,
+sales_orders_messy.csv,214,Order Date,null_token,2024-06-17,N/A
+sales_orders_messy.csv,214,Amount (USD),missing_value,3357.18,
+sales_orders_messy.csv,214, Customer Name ,missing_value,Omar Nuñez,
+sales_orders_messy.csv,214,Notes,missing_value,,
+sales_orders_messy.csv,214,,duplicate_row,,
+sales_orders_messy.csv,215,Amount (USD),missing_value,661.38,
+sales_orders_messy.csv,215,Paid?,null_token,,N/A
+sales_orders_messy.csv,215, Customer Name ,extra_whitespace,Iñaki Novak,Iñaki Novak 
+sales_orders_messy.csv,215,Notes,missing_value,,
+sales_orders_messy.csv,215,ZIP Code,missing_value,51165,
+sales_orders_messy.csv,216,Order Date,missing_value,2024-04-19,
+sales_orders_messy.csv,216,Region,case_variant,North,NORTH
+sales_orders_messy.csv,216,Notes,missing_value,,
+sales_orders_messy.csv,217,Amount (USD),currency_symbol,4970.55,"$4,970.55"
+sales_orders_messy.csv,217,Amount (USD),number_with_thousands_sep,4970.55,"$4,970.55"
+sales_orders_messy.csv,217,Discount %,null_token,0,?
+sales_orders_messy.csv,217,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,217, Customer Name ,extra_whitespace,Renée Silva,  Renée Silva
+sales_orders_messy.csv,217,Notes,missing_value,,
+sales_orders_messy.csv,218,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,218,Region,missing_value,South,
+sales_orders_messy.csv,218,Notes,null_token,,N/A
+sales_orders_messy.csv,219,Order ID,null_token,ORD-00202,TBD
+sales_orders_messy.csv,219,Order Date,mixed_date_format,2024-04-22,22/04/2024
+sales_orders_messy.csv,219,Region,case_variant,East,EAST
+sales_orders_messy.csv,219,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,219, Customer Name ,extra_whitespace,Sofía García,Sofía  García
+sales_orders_messy.csv,219,Notes,missing_value,,
+sales_orders_messy.csv,220,Order Date,missing_value,2024-04-06,
+sales_orders_messy.csv,220,Amount (USD),invalid_value,4055.80,12..5
+sales_orders_messy.csv,220,Notes,missing_value,,
+sales_orders_messy.csv,220,ZIP Code,null_token,44481,N/A
+sales_orders_messy.csv,221,Amount (USD),null_token,903.75,TBD
+sales_orders_messy.csv,221,Paid?,null_token,,N/A
+sales_orders_messy.csv,221,Notes,missing_value,,
+sales_orders_messy.csv,222,Order ID,null_token,ORD-00205,N/A
+sales_orders_messy.csv,222,Order Date,mixed_date_format,2024-07-21,21/07/2024
+sales_orders_messy.csv,222,Discount %,missing_value,5,
+sales_orders_messy.csv,222,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,222,Region,case_variant,East,  east
+sales_orders_messy.csv,222,Paid?,null_token,,?
+sales_orders_messy.csv,222, Customer Name ,extra_whitespace,Ava Nuñez,Ava  Nuñez
+sales_orders_messy.csv,222,Notes,missing_value,,
+sales_orders_messy.csv,222,ZIP Code,extra_whitespace,81440, 81440
+sales_orders_messy.csv,223,Order Date,null_token,2024-10-28,N/A
+sales_orders_messy.csv,223,Amount (USD),null_token,1904.35,N/A
+sales_orders_messy.csv,223,Region,missing_value,North,
+sales_orders_messy.csv,223,Paid?,null_token,,N/A
+sales_orders_messy.csv,223, Customer Name ,placeholder_token,Lucas Novak,unknown
+sales_orders_messy.csv,224,Amount (USD),invalid_value,2836.44,abc
+sales_orders_messy.csv,224,Paid?,null_token,,?
+sales_orders_messy.csv,224, Customer Name ,missing_value,Chloé Brown,
+sales_orders_messy.csv,224,Notes,missing_value,,
+sales_orders_messy.csv,224,ZIP Code,missing_value,93925,
+sales_orders_messy.csv,225,Order ID,missing_value,ORD-00208,
+sales_orders_messy.csv,225,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,225,Notes,missing_value,,
+sales_orders_messy.csv,226,Amount (USD),null_token,4147.46,N/A
+sales_orders_messy.csv,226,Discount %,missing_value,20,
+sales_orders_messy.csv,226,Notes,missing_value,,
+sales_orders_messy.csv,227,Amount (USD),invalid_value,393.51,abc
+sales_orders_messy.csv,227,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,227, Customer Name ,missing_value,Chloé Tanaka,
+sales_orders_messy.csv,227,Notes,missing_value,,
+sales_orders_messy.csv,228,Order ID,null_token,ORD-00211,TBD
+sales_orders_messy.csv,228,Order Date,mixed_date_format,2024-07-28,28 Jul 2024
+sales_orders_messy.csv,228,Amount (USD),extra_whitespace,3615.75, 3615.75 
+sales_orders_messy.csv,228,Discount %,missing_value,10,
+sales_orders_messy.csv,228, Customer Name ,mojibake,Sofía Åberg,SofÃ­a Ã…berg
+sales_orders_messy.csv,228,Notes,missing_value,,
+sales_orders_messy.csv,229,Order Date,mixed_date_format,2024-12-04,04/12/2024
+sales_orders_messy.csv,229,Region,null_token,East,?
+sales_orders_messy.csv,229, Customer Name ,mojibake,Anna Schröder,Anna SchrÃ¶der
+sales_orders_messy.csv,229,Notes,missing_value,,
+sales_orders_messy.csv,230,Notes,null_token,,?
+sales_orders_messy.csv,231,Order ID,missing_value,ORD-00214,
+sales_orders_messy.csv,231,Discount %,null_token,0,N/A
+sales_orders_messy.csv,231,Region,missing_value,West,
+sales_orders_messy.csv,231,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,231, Customer Name ,missing_value,Jürgen Tanaka,
+sales_orders_messy.csv,231,Notes,missing_value,,
+sales_orders_messy.csv,232,Order ID,extra_whitespace,ORD-00215, ORD-00215
+sales_orders_messy.csv,232,Amount (USD),null_token,4504.27,TBD
+sales_orders_messy.csv,232,Paid?,null_token,,?
+sales_orders_messy.csv,232,Notes,missing_value,,
+sales_orders_messy.csv,232,ZIP Code,null_token,11271,?
+sales_orders_messy.csv,233,Paid?,missing_value,,
+sales_orders_messy.csv,233, Customer Name ,missing_value,Priya Rossi,
+sales_orders_messy.csv,233,Notes,missing_value,,
+sales_orders_messy.csv,233,ZIP Code,missing_value,92804,
+sales_orders_messy.csv,234,Order ID,extra_whitespace,ORD-00359, ORD-00359
+sales_orders_messy.csv,234,Order Date,null_token,2024-05-24,TBD
+sales_orders_messy.csv,234,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,234,Notes,missing_value,,
+sales_orders_messy.csv,234,ZIP Code,missing_value,32270,
+sales_orders_messy.csv,234,,duplicate_row,,
+sales_orders_messy.csv,235,Amount (USD),currency_symbol,765.22,$765.22
+sales_orders_messy.csv,235,Discount %,missing_value,20,
+sales_orders_messy.csv,235,Region,null_token,North,N/A
+sales_orders_messy.csv,235,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,235,Notes,missing_value,,
+sales_orders_messy.csv,235,ZIP Code,null_token,46071,N/A
+sales_orders_messy.csv,236,Paid?,missing_value,,
+sales_orders_messy.csv,236,Notes,null_token,,?
+sales_orders_messy.csv,236,ZIP Code,null_token,36203,N/A
+sales_orders_messy.csv,237,Amount (USD),missing_value,4217.38,
+sales_orders_messy.csv,237,Discount %,null_token,0,?
+sales_orders_messy.csv,237,Paid?,null_token,,?
+sales_orders_messy.csv,237, Customer Name ,mojibake,Emma Peña,Emma PeÃ±a
+sales_orders_messy.csv,237,Notes,missing_value,,
+sales_orders_messy.csv,237,ZIP Code,missing_value,55627,
+sales_orders_messy.csv,238,Amount (USD),null_token,4123.37,N/A
+sales_orders_messy.csv,238,Discount %,null_token,20,N/A
+sales_orders_messy.csv,238,Notes,missing_value,,
+sales_orders_messy.csv,238,ZIP Code,null_token,69719,N/A
+sales_orders_messy.csv,239,Order Date,missing_value,2024-04-08,
+sales_orders_messy.csv,239,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,240,Region,typo_category,West,Wset
+sales_orders_messy.csv,240,Notes,missing_value,,
+sales_orders_messy.csv,240,ZIP Code,missing_value,76007,
+sales_orders_messy.csv,241,Order Date,mixed_date_format,2024-04-23,23/04/2024
+sales_orders_messy.csv,241,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,241, Customer Name ,mojibake,Chloé Tanaka,ChloÃ© Tanaka
+sales_orders_messy.csv,241,Notes,missing_value,,
+sales_orders_messy.csv,241,ZIP Code,extra_whitespace,80736, 80736
+sales_orders_messy.csv,242,Amount (USD),missing_value,4479.51,
+sales_orders_messy.csv,242,Notes,missing_value,,
+sales_orders_messy.csv,242,ZIP Code,null_token,87816,?
+sales_orders_messy.csv,243,Order ID,extra_whitespace,ORD-00225, ORD-00225
+sales_orders_messy.csv,243,Order Date,mixed_date_format,2024-10-14,14/10/2024
+sales_orders_messy.csv,243,Discount %,percent_symbol,0,0%
+sales_orders_messy.csv,243,Region,null_token,East,?
+sales_orders_messy.csv,243,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,243, Customer Name ,extra_whitespace,Mia Schröder,Mia  Schröder
+sales_orders_messy.csv,244,Order Date,missing_value,2024-05-03,
+sales_orders_messy.csv,244,Amount (USD),null_token,4031.04,TBD
+sales_orders_messy.csv,244,Region,typo_category,North,Nrth
+sales_orders_messy.csv,244,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,244,Notes,missing_value,,
+sales_orders_messy.csv,244,ZIP Code,missing_value,51891,
+sales_orders_messy.csv,245,Order Date,null_token,2024-10-19,N/A
+sales_orders_messy.csv,245,Amount (USD),extra_whitespace,1728.97, 1728.97 
+sales_orders_messy.csv,245,Discount %,missing_value,20,
+sales_orders_messy.csv,245,Region,null_token,West,N/A
+sales_orders_messy.csv,245,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,245, Customer Name ,mojibake,Priya Schröder,Priya SchrÃ¶der
+sales_orders_messy.csv,245,Notes,null_token,,TBD
+sales_orders_messy.csv,246,Order Date,mixed_date_format,2024-03-06,2024/03/06
+sales_orders_messy.csv,246,Amount (USD),currency_symbol,3631.43,"$3,631.43"
+sales_orders_messy.csv,246,Amount (USD),number_with_thousands_sep,3631.43,"$3,631.43"
+sales_orders_messy.csv,246,Discount %,null_token,5,?
+sales_orders_messy.csv,246,Region,case_variant,North,NORTH
+sales_orders_messy.csv,246, Customer Name ,missing_value,Søren Dubois,
+sales_orders_messy.csv,246,Notes,missing_value,,
+sales_orders_messy.csv,247,Order Date,missing_value,2024-08-25,
+sales_orders_messy.csv,247,Amount (USD),missing_value,2363.27,
+sales_orders_messy.csv,247,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,247, Customer Name ,case_variant,Anna Novak,ANNA NOVAK
+sales_orders_messy.csv,247,Notes,missing_value,,
+sales_orders_messy.csv,248,Order ID,extra_whitespace,ORD-00230, ORD-00230
+sales_orders_messy.csv,248,Order Date,invalid_value,2024-03-11,99/99/9999
+sales_orders_messy.csv,248,Amount (USD),null_token,1726.50,?
+sales_orders_messy.csv,248,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,248,Region,case_variant,East,  east
+sales_orders_messy.csv,248, Customer Name ,case_variant,Chloé Lefèvre,CHLOÉ LEFÈVRE
+sales_orders_messy.csv,248,Notes,missing_value,,
+sales_orders_messy.csv,249,Order ID,missing_value,ORD-00231,
+sales_orders_messy.csv,249,Order Date,mixed_date_format,2024-10-22,2024/10/22
+sales_orders_messy.csv,249,Amount (USD),null_token,2458.09,N/A
+sales_orders_messy.csv,249,Region,case_variant,North,NORTH
+sales_orders_messy.csv,249,Notes,missing_value,,
+sales_orders_messy.csv,250,Amount (USD),currency_symbol,963.51,$963.51
+sales_orders_messy.csv,250,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,250,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,250, Customer Name ,case_variant,Anna Peña,ANNA PEÑA
+sales_orders_messy.csv,250,Notes,missing_value,,
+sales_orders_messy.csv,250,ZIP Code,missing_value,61125,
+sales_orders_messy.csv,250,,duplicate_row,,
+sales_orders_messy.csv,251,Order Date,mixed_date_format,2024-06-13,2024/06/13
+sales_orders_messy.csv,251,Discount %,percent_symbol,0,0%
+sales_orders_messy.csv,251,Paid?,missing_value,,
+sales_orders_messy.csv,251,Notes,missing_value,,
+sales_orders_messy.csv,252,Order ID,extra_whitespace,ORD-00233, ORD-00233
+sales_orders_messy.csv,252,Order Date,invalid_value,2024-06-01,soon
+sales_orders_messy.csv,252,Amount (USD),currency_symbol,2290.51,"$2,290.51"
+sales_orders_messy.csv,252,Amount (USD),number_with_thousands_sep,2290.51,"$2,290.51"
+sales_orders_messy.csv,252,Paid?,missing_value,,
+sales_orders_messy.csv,253,Amount (USD),currency_symbol,129.13,$129.13
+sales_orders_messy.csv,253,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,253,Notes,extra_whitespace,gift wrap,gift  wrap
+sales_orders_messy.csv,254,Order ID,extra_whitespace,ORD-00235, ORD-00235
+sales_orders_messy.csv,254,Order Date,mixed_date_format,2024-01-25,25 Jan 2024
+sales_orders_messy.csv,254,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,254,Notes,missing_value,,
+sales_orders_messy.csv,255,Amount (USD),currency_symbol,4495.14,"$4,495.14"
+sales_orders_messy.csv,255,Amount (USD),number_with_thousands_sep,4495.14,"$4,495.14"
+sales_orders_messy.csv,255,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,255,Region,case_variant,East,  east
+sales_orders_messy.csv,255, Customer Name ,extra_whitespace,Ethan O'Brien,Ethan O'Brien 
+sales_orders_messy.csv,255,Notes,null_token,,N/A
+sales_orders_messy.csv,256,Notes,missing_value,,
+sales_orders_messy.csv,256,ZIP Code,missing_value,12807,
+sales_orders_messy.csv,257,Order Date,missing_value,2024-02-21,
+sales_orders_messy.csv,257,Notes,null_token,,N/A
+sales_orders_messy.csv,258,Amount (USD),currency_symbol,709.20,$709.20
+sales_orders_messy.csv,258,Region,missing_value,West,
+sales_orders_messy.csv,258, Customer Name ,mojibake,Müller Lefèvre,MÃ¼ller LefÃ¨vre
+sales_orders_messy.csv,258,Notes,missing_value,,
+sales_orders_messy.csv,259,Order Date,mixed_date_format,2024-07-16,16 Jul 2024
+sales_orders_messy.csv,259,Region,null_token,North,?
+sales_orders_messy.csv,259,Paid?,missing_value,,
+sales_orders_messy.csv,259, Customer Name ,missing_value,Anna Khan,
+sales_orders_messy.csv,259,Notes,missing_value,,
+sales_orders_messy.csv,259,ZIP Code,missing_value,75572,
+sales_orders_messy.csv,260,Order Date,null_token,2024-07-13,TBD
+sales_orders_messy.csv,260,Amount (USD),missing_value,3064.56,
+sales_orders_messy.csv,260,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,260,Notes,missing_value,,
+sales_orders_messy.csv,260,ZIP Code,extra_whitespace,93349, 93349
+sales_orders_messy.csv,261,Order Date,mixed_date_format,2024-10-22,22 Oct 2024
+sales_orders_messy.csv,261,Amount (USD),invalid_value,1135.44,abc
+sales_orders_messy.csv,261,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,261,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,261, Customer Name ,extra_whitespace,Jürgen Lefèvre,Jürgen  Lefèvre
+sales_orders_messy.csv,261,Notes,missing_value,,
+sales_orders_messy.csv,261,ZIP Code,extra_whitespace,20484, 20484
+sales_orders_messy.csv,262,Discount %,null_token,15,N/A
+sales_orders_messy.csv,262, Customer Name ,placeholder_token,Søren Lefèvre,unknown
+sales_orders_messy.csv,262,Notes,missing_value,,
+sales_orders_messy.csv,263,Amount (USD),currency_symbol,2232.06,"$2,232.06"
+sales_orders_messy.csv,263,Amount (USD),number_with_thousands_sep,2232.06,"$2,232.06"
+sales_orders_messy.csv,263,Discount %,null_token,0,N/A
+sales_orders_messy.csv,263,Paid?,null_token,,?
+sales_orders_messy.csv,263,Notes,missing_value,,
+sales_orders_messy.csv,264,Order Date,invalid_value,2024-11-05,soon
+sales_orders_messy.csv,264,Amount (USD),missing_value,3194.94,
+sales_orders_messy.csv,264,Region,missing_value,West,
+sales_orders_messy.csv,264,Notes,missing_value,,
+sales_orders_messy.csv,264,ZIP Code,missing_value,74420,
+sales_orders_messy.csv,265,Region,case_variant,East,EAST
+sales_orders_messy.csv,265,Paid?,null_token,,?
+sales_orders_messy.csv,265,Notes,null_token,,-
+sales_orders_messy.csv,265,ZIP Code,null_token,07000,N/A
+sales_orders_messy.csv,266,Order ID,extra_whitespace,ORD-00076, ORD-00076
+sales_orders_messy.csv,266,Region,typo_category,North,Nrth
+sales_orders_messy.csv,266,Notes,missing_value,,
+sales_orders_messy.csv,266,ZIP Code,missing_value,98594,
+sales_orders_messy.csv,266,,duplicate_row,,
+sales_orders_messy.csv,267,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,267, Customer Name ,missing_value,Iñaki García,
+sales_orders_messy.csv,267,Notes,null_token,,N/A
+sales_orders_messy.csv,268,Order ID,extra_whitespace,ORD-00248, ORD-00248
+sales_orders_messy.csv,268,Order Date,mixed_date_format,2024-08-22,22/08/2024
+sales_orders_messy.csv,268, Customer Name ,missing_value,Sofía Rossi,
+sales_orders_messy.csv,268,Notes,null_token,,N/A
+sales_orders_messy.csv,268,ZIP Code,missing_value,24226,
+sales_orders_messy.csv,269,Amount (USD),currency_symbol,3294.46,"$3,294.46"
+sales_orders_messy.csv,269,Amount (USD),number_with_thousands_sep,3294.46,"$3,294.46"
+sales_orders_messy.csv,269,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,269,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,269,Notes,missing_value,,
+sales_orders_messy.csv,270,Order Date,mixed_date_format,2024-07-30,30/07/2024
+sales_orders_messy.csv,270,Amount (USD),currency_symbol,4434.46,"$4,434.46"
+sales_orders_messy.csv,270,Amount (USD),number_with_thousands_sep,4434.46,"$4,434.46"
+sales_orders_messy.csv,270,Discount %,null_token,20,N/A
+sales_orders_messy.csv,270,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,270,Notes,missing_value,,
+sales_orders_messy.csv,270,ZIP Code,missing_value,94113,
+sales_orders_messy.csv,271,Order Date,mixed_date_format,2024-05-14,14/05/2024
+sales_orders_messy.csv,271,Amount (USD),null_token,2281.31,N/A
+sales_orders_messy.csv,271,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,271,Region,case_variant,West,west 
+sales_orders_messy.csv,271,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,271, Customer Name ,case_variant,Renée Peña,RENÉE PEÑA
+sales_orders_messy.csv,271,Notes,missing_value,,
+sales_orders_messy.csv,271,ZIP Code,missing_value,09302,
+sales_orders_messy.csv,271,,duplicate_row,,
+sales_orders_messy.csv,272,Order ID,null_token,ORD-00251,N/A
+sales_orders_messy.csv,272,Order Date,mixed_date_format,2024-09-14,14/09/2024
+sales_orders_messy.csv,272,Amount (USD),extra_whitespace,3191.65, 3191.65 
+sales_orders_messy.csv,272,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,272,Region,typo_category,North,Nrth
+sales_orders_messy.csv,272,Paid?,missing_value,,
+sales_orders_messy.csv,272, Customer Name ,missing_value,Wei Schröder,
+sales_orders_messy.csv,272,Notes,missing_value,,
+sales_orders_messy.csv,273,Discount %,null_token,5,?
+sales_orders_messy.csv,273, Customer Name ,extra_whitespace,Omar O'Brien,Omar  O'Brien
+sales_orders_messy.csv,273,Notes,missing_value,,
+sales_orders_messy.csv,274,Order ID,extra_whitespace,ORD-00253, ORD-00253
+sales_orders_messy.csv,274,Order Date,missing_value,2024-10-14,
+sales_orders_messy.csv,274,Amount (USD),currency_symbol,3717.22,"$3,717.22"
+sales_orders_messy.csv,274,Amount (USD),number_with_thousands_sep,3717.22,"$3,717.22"
+sales_orders_messy.csv,274,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,274,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,274,Notes,null_token,,N/A
+sales_orders_messy.csv,275,Order Date,mixed_date_format,2024-01-07,2024/01/07
+sales_orders_messy.csv,275,Amount (USD),missing_value,1031.37,
+sales_orders_messy.csv,275,Discount %,null_token,15,N/A
+sales_orders_messy.csv,275,Region,typo_category,South,Sout
+sales_orders_messy.csv,275, Customer Name ,extra_whitespace,Ethan O'Brien,Ethan O'Brien 
+sales_orders_messy.csv,276,Order ID,null_token,ORD-00255,TBD
+sales_orders_messy.csv,276,Amount (USD),currency_symbol,885.50,$885.50
+sales_orders_messy.csv,276,Notes,missing_value,,
+sales_orders_messy.csv,276,ZIP Code,null_token,94020,?
+sales_orders_messy.csv,277,Order Date,mixed_date_format,2024-06-14,14/06/2024
+sales_orders_messy.csv,277,Amount (USD),currency_symbol,3872.83,"$3,872.83"
+sales_orders_messy.csv,277,Amount (USD),number_with_thousands_sep,3872.83,"$3,872.83"
+sales_orders_messy.csv,277,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,277,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,277, Customer Name ,missing_value,Priya O'Brien,
+sales_orders_messy.csv,277,Notes,missing_value,,
+sales_orders_messy.csv,278,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,278, Customer Name ,placeholder_token,Priya Rossi,unknown
+sales_orders_messy.csv,278,Notes,null_token,,N/A
+sales_orders_messy.csv,279,Order ID,missing_value,ORD-00258,
+sales_orders_messy.csv,279,Amount (USD),missing_value,3218.48,
+sales_orders_messy.csv,279,Discount %,null_token,5,?
+sales_orders_messy.csv,279,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,279,Notes,null_token,,-
+sales_orders_messy.csv,279,ZIP Code,null_token,04238,N/A
+sales_orders_messy.csv,280,Order ID,extra_whitespace,ORD-00259, ORD-00259
+sales_orders_messy.csv,280,Discount %,null_token,10,TBD
+sales_orders_messy.csv,280, Customer Name ,placeholder_token,Anna Nuñez,unknown
+sales_orders_messy.csv,280,Notes,null_token,,?
+sales_orders_messy.csv,281,Order Date,mixed_date_format,2024-12-09,09/12/2024
+sales_orders_messy.csv,281,Amount (USD),parentheses_negative,1081.61,(1081.61)
+sales_orders_messy.csv,281,Region,case_variant,North,NORTH
+sales_orders_messy.csv,281,Paid?,null_token,,N/A
+sales_orders_messy.csv,281,Notes,missing_value,,
+sales_orders_messy.csv,282,Order Date,mixed_date_format,2024-05-08,08/05/2024
+sales_orders_messy.csv,282,Region,case_variant,North,north
+sales_orders_messy.csv,282, Customer Name ,extra_whitespace,José Khan,José  Khan
+sales_orders_messy.csv,282,Notes,missing_value,,
+sales_orders_messy.csv,282,ZIP Code,missing_value,85072,
+sales_orders_messy.csv,283,Region,case_variant,North,north
+sales_orders_messy.csv,283,Notes,missing_value,,
+sales_orders_messy.csv,284,Order Date,null_token,2024-07-19,TBD
+sales_orders_messy.csv,284,Region,missing_value,East,
+sales_orders_messy.csv,284,Notes,missing_value,,
+sales_orders_messy.csv,285,Amount (USD),missing_value,3746.52,
+sales_orders_messy.csv,285,Notes,missing_value,,
+sales_orders_messy.csv,285,ZIP Code,extra_whitespace,75356, 75356
+sales_orders_messy.csv,286,Order ID,extra_whitespace,ORD-00265, ORD-00265
+sales_orders_messy.csv,286,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,286,Notes,missing_value,,
+sales_orders_messy.csv,287,Amount (USD),currency_symbol,2264.22,"$2,264.22"
+sales_orders_messy.csv,287,Amount (USD),number_with_thousands_sep,2264.22,"$2,264.22"
+sales_orders_messy.csv,287,Discount %,missing_value,10,
+sales_orders_messy.csv,287,Notes,missing_value,,
+sales_orders_messy.csv,287,ZIP Code,missing_value,30035,
+sales_orders_messy.csv,288,Order Date,missing_value,2024-05-21,
+sales_orders_messy.csv,288,Amount (USD),extra_whitespace,688.84, 688.84 
+sales_orders_messy.csv,288,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,288,Region,case_variant,East,  east
+sales_orders_messy.csv,288, Customer Name ,case_variant,Anna Nuñez,ANNA NUÑEZ
+sales_orders_messy.csv,288,Notes,missing_value,,
+sales_orders_messy.csv,288,ZIP Code,extra_whitespace,37780, 37780
+sales_orders_messy.csv,289,Amount (USD),currency_symbol,3673.05,"$3,673.05"
+sales_orders_messy.csv,289,Amount (USD),number_with_thousands_sep,3673.05,"$3,673.05"
+sales_orders_messy.csv,289,Discount %,null_token,0,N/A
+sales_orders_messy.csv,289,Region,case_variant,East,EAST
+sales_orders_messy.csv,289,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,289, Customer Name ,missing_value,Sofía O'Brien,
+sales_orders_messy.csv,289,Notes,missing_value,,
+sales_orders_messy.csv,289,ZIP Code,null_token,72233,N/A
+sales_orders_messy.csv,290,Order Date,null_token,2024-11-30,TBD
+sales_orders_messy.csv,290,Discount %,missing_value,20,
+sales_orders_messy.csv,290,Notes,missing_value,,
+sales_orders_messy.csv,290,ZIP Code,extra_whitespace,32310, 32310
+sales_orders_messy.csv,291,Order ID,missing_value,ORD-00270,
+sales_orders_messy.csv,291,Order Date,mixed_date_format,2024-11-10,10/11/2024
+sales_orders_messy.csv,291,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,291,Notes,missing_value,,
+sales_orders_messy.csv,292,Discount %,null_token,15,TBD
+sales_orders_messy.csv,292,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,292, Customer Name ,placeholder_token,Anna Dubois,unknown
+sales_orders_messy.csv,292,Notes,missing_value,,
+sales_orders_messy.csv,292,ZIP Code,extra_whitespace,36847, 36847
+sales_orders_messy.csv,293,Order Date,mixed_date_format,2024-10-05,05/10/2024
+sales_orders_messy.csv,293,Discount %,missing_value,20,
+sales_orders_messy.csv,293,Notes,null_token,,N/A
+sales_orders_messy.csv,294,Order ID,extra_whitespace,ORD-00150, ORD-00150
+sales_orders_messy.csv,294,Order Date,null_token,2024-11-26,TBD
+sales_orders_messy.csv,294,Amount (USD),missing_value,2837.97,
+sales_orders_messy.csv,294,Discount %,null_token,0,TBD
+sales_orders_messy.csv,294,Paid?,missing_value,,
+sales_orders_messy.csv,294,ZIP Code,null_token,90709,N/A
+sales_orders_messy.csv,294,,duplicate_row,,
+sales_orders_messy.csv,295,Order Date,null_token,2024-10-13,N/A
+sales_orders_messy.csv,295,Amount (USD),currency_symbol,1077.44,"$1,077.44"
+sales_orders_messy.csv,295,Amount (USD),number_with_thousands_sep,1077.44,"$1,077.44"
+sales_orders_messy.csv,295,Notes,null_token,,-
+sales_orders_messy.csv,295,,duplicate_row,,
+sales_orders_messy.csv,296, Customer Name ,extra_whitespace,Renée Tanaka,Renée Tanaka 
+sales_orders_messy.csv,296,Notes,missing_value,,
+sales_orders_messy.csv,297,Discount %,missing_value,5,
+sales_orders_messy.csv,297,Notes,missing_value,,
+sales_orders_messy.csv,297,ZIP Code,null_token,06136,N/A
+sales_orders_messy.csv,298,Amount (USD),invalid_value,916.59,abc
+sales_orders_messy.csv,298,Discount %,null_token,20,?
+sales_orders_messy.csv,298,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,298,Region,case_variant,West,west 
+sales_orders_messy.csv,298,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,298,Notes,missing_value,,
+sales_orders_messy.csv,298,ZIP Code,extra_whitespace,62789, 62789
+sales_orders_messy.csv,299,,empty_row,,
+sales_orders_messy.csv,300,Order Date,mixed_date_format,2024-07-29,29/07/2024
+sales_orders_messy.csv,300,Amount (USD),null_token,3977.19,TBD
+sales_orders_messy.csv,300,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,300,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,300,Notes,missing_value,,
+sales_orders_messy.csv,301,Order Date,missing_value,2024-09-24,
+sales_orders_messy.csv,301,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,301,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,301, Customer Name ,mojibake,Zoë Silva,ZoÃ« Silva
+sales_orders_messy.csv,301,Notes,missing_value,,
+sales_orders_messy.csv,302,Order ID,missing_value,ORD-00278,
+sales_orders_messy.csv,302,Order Date,mixed_date_format,2024-11-04,04/11/2024
+sales_orders_messy.csv,302,Amount (USD),invalid_value,25.98,abc
+sales_orders_messy.csv,302,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,302,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,302,Region,case_variant,West,west 
+sales_orders_messy.csv,302,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,302, Customer Name ,missing_value,Iñaki O'Brien,
+sales_orders_messy.csv,302,Notes,missing_value,,
+sales_orders_messy.csv,303,Order ID,missing_value,ORD-00279,
+sales_orders_messy.csv,303,Order Date,mixed_date_format,2024-12-22,22/12/2024
+sales_orders_messy.csv,303,Discount %,null_token,5,TBD
+sales_orders_messy.csv,303,Paid?,missing_value,,
+sales_orders_messy.csv,303,Notes,null_token,,-
+sales_orders_messy.csv,304,Amount (USD),null_token,1042.99,TBD
+sales_orders_messy.csv,304,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,304,Notes,missing_value,,
+sales_orders_messy.csv,305,Order ID,missing_value,ORD-00281,
+sales_orders_messy.csv,305,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,305, Customer Name ,extra_whitespace,Renée Peña,Renée  Peña
+sales_orders_messy.csv,305,Notes,null_token,,-
+sales_orders_messy.csv,306,Order Date,invalid_value,2024-12-24,soon
+sales_orders_messy.csv,306,Amount (USD),currency_symbol,519.39,$519.39
+sales_orders_messy.csv,306,Discount %,missing_value,10,
+sales_orders_messy.csv,306,Paid?,null_token,,?
+sales_orders_messy.csv,306,Notes,missing_value,,
+sales_orders_messy.csv,307,Amount (USD),extra_whitespace,3052.96, 3052.96 
+sales_orders_messy.csv,307,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,307,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,307,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,307,Notes,missing_value,,
+sales_orders_messy.csv,307,ZIP Code,null_token,87099,N/A
+sales_orders_messy.csv,308,Amount (USD),currency_symbol,3005.58,"$3,005.58"
+sales_orders_messy.csv,308,Amount (USD),number_with_thousands_sep,3005.58,"$3,005.58"
+sales_orders_messy.csv,308,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,308,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,308, Customer Name ,placeholder_token,Chloé Smith,unknown
+sales_orders_messy.csv,308,Notes,null_token,,?
+sales_orders_messy.csv,308,ZIP Code,missing_value,47285,
+sales_orders_messy.csv,309,Discount %,percent_symbol,0,0%
+sales_orders_messy.csv,309,Paid?,boolean_variant,No,no
+sales_orders_messy.csv,309, Customer Name ,missing_value,Søren Tanaka,
+sales_orders_messy.csv,309,Notes,missing_value,,
+sales_orders_messy.csv,310,Amount (USD),currency_symbol,2801.98,"$2,801.98"
+sales_orders_messy.csv,310,Amount (USD),number_with_thousands_sep,2801.98,"$2,801.98"
+sales_orders_messy.csv,310,Discount %,null_token,10,?
+sales_orders_messy.csv,310,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,310,Region,case_variant,West,west 
+sales_orders_messy.csv,310,Paid?,boolean_variant,No,no
+sales_orders_messy.csv,310, Customer Name ,extra_whitespace,Sofía Schröder,Sofía  Schröder
+sales_orders_messy.csv,311,Order Date,invalid_value,2024-06-22,soon
+sales_orders_messy.csv,311,Discount %,null_token,20,N/A
+sales_orders_messy.csv,311, Customer Name ,extra_whitespace,Søren Brown,Søren  Brown
+sales_orders_messy.csv,311,Notes,null_token,,N/A
+sales_orders_messy.csv,311,ZIP Code,null_token,55057,?
+sales_orders_messy.csv,312,Order Date,mixed_date_format,2024-01-05,5 Jan 2024
+sales_orders_messy.csv,312,Discount %,missing_value,15,
+sales_orders_messy.csv,312,Paid?,null_token,,N/A
+sales_orders_messy.csv,313,Order ID,missing_value,ORD-00289,
+sales_orders_messy.csv,313,Amount (USD),null_token,1014.34,N/A
+sales_orders_messy.csv,313,Region,typo_category,West,Wset
+sales_orders_messy.csv,313,Paid?,missing_value,,
+sales_orders_messy.csv,313, Customer Name ,case_variant,Renée Nuñez,renée nuñez
+sales_orders_messy.csv,313,Notes,missing_value,,
+sales_orders_messy.csv,313,ZIP Code,missing_value,11287,
+sales_orders_messy.csv,314,Order ID,missing_value,ORD-00290,
+sales_orders_messy.csv,314,Amount (USD),invalid_value,4288.30,abc
+sales_orders_messy.csv,314,Paid?,null_token,,?
+sales_orders_messy.csv,314,Notes,missing_value,,
+sales_orders_messy.csv,315,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,315, Customer Name ,placeholder_token,Chloé Rossi,unknown
+sales_orders_messy.csv,315,Notes,null_token,,-
+sales_orders_messy.csv,316,Discount %,null_token,20,N/A
+sales_orders_messy.csv,316,Notes,missing_value,,
+sales_orders_messy.csv,317,Order ID,missing_value,ORD-00293,
+sales_orders_messy.csv,317,Region,case_variant,East,EAST
+sales_orders_messy.csv,317,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,317,Notes,missing_value,,
+sales_orders_messy.csv,317,ZIP Code,extra_whitespace,20116, 20116
+sales_orders_messy.csv,318,Order ID,missing_value,ORD-00294,
+sales_orders_messy.csv,318,Order Date,null_token,2024-08-30,N/A
+sales_orders_messy.csv,318,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,318,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,318,Region,case_variant,East,  east
+sales_orders_messy.csv,318,Notes,missing_value,,
+sales_orders_messy.csv,319,Paid?,null_token,,N/A
+sales_orders_messy.csv,319,Notes,missing_value,,
+sales_orders_messy.csv,319,ZIP Code,null_token,90074,?
+sales_orders_messy.csv,320,Order Date,mixed_date_format,2024-10-21,21/10/2024
+sales_orders_messy.csv,320,Amount (USD),null_token,2701.42,?
+sales_orders_messy.csv,320,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,320,Region,case_variant,East,  east
+sales_orders_messy.csv,320, Customer Name ,case_variant,Müller Khan,MÜLLER KHAN
+sales_orders_messy.csv,320,Notes,missing_value,,
+sales_orders_messy.csv,320,ZIP Code,extra_whitespace,19985, 19985
+sales_orders_messy.csv,321,Notes,missing_value,,
+sales_orders_messy.csv,321,ZIP Code,null_token,36553,N/A
+sales_orders_messy.csv,322,Order ID,missing_value,ORD-00298,
+sales_orders_messy.csv,322,Order Date,mixed_date_format,2024-07-04,2024/07/04
+sales_orders_messy.csv,322, Customer Name ,extra_whitespace,Mia Dubois,Mia  Dubois
+sales_orders_messy.csv,322,Notes,missing_value,,
+sales_orders_messy.csv,323,Order Date,mixed_date_format,2024-08-30,30/08/2024
+sales_orders_messy.csv,323,Paid?,null_token,,N/A
+sales_orders_messy.csv,323,Notes,null_token,,-
+sales_orders_messy.csv,323,ZIP Code,missing_value,59085,
+sales_orders_messy.csv,324,Amount (USD),missing_value,3324.47,
+sales_orders_messy.csv,324,Discount %,null_token,10,N/A
+sales_orders_messy.csv,324,Region,missing_value,West,
+sales_orders_messy.csv,325,Order Date,mixed_date_format,2024-08-21,21/08/2024
+sales_orders_messy.csv,325,Amount (USD),currency_symbol,3186.54,"$3,186.54"
+sales_orders_messy.csv,325,Amount (USD),number_with_thousands_sep,3186.54,"$3,186.54"
+sales_orders_messy.csv,325,Discount %,missing_value,20,
+sales_orders_messy.csv,325,Region,null_token,East,N/A
+sales_orders_messy.csv,325,Notes,missing_value,,
+sales_orders_messy.csv,326,Region,typo_category,North,Nrth
+sales_orders_messy.csv,326,Notes,missing_value,,
+sales_orders_messy.csv,326,ZIP Code,missing_value,39393,
+sales_orders_messy.csv,327,Order ID,missing_value,ORD-00303,
+sales_orders_messy.csv,327,Amount (USD),currency_symbol,2070.44,"$2,070.44"
+sales_orders_messy.csv,327,Amount (USD),number_with_thousands_sep,2070.44,"$2,070.44"
+sales_orders_messy.csv,327,Region,case_variant,East,EAST
+sales_orders_messy.csv,327, Customer Name ,case_variant,Müller Khan,MÜLLER KHAN
+sales_orders_messy.csv,327,Notes,missing_value,,
+sales_orders_messy.csv,327,ZIP Code,extra_whitespace,81375, 81375
+sales_orders_messy.csv,328,Order ID,missing_value,ORD-00304,
+sales_orders_messy.csv,328,Order Date,mixed_date_format,2024-05-25,25/05/2024
+sales_orders_messy.csv,328,Discount %,null_token,5,N/A
+sales_orders_messy.csv,328,Notes,null_token,,-
+sales_orders_messy.csv,329,Order Date,invalid_value,2024-01-26,31/02/2024
+sales_orders_messy.csv,329,Amount (USD),invalid_value,130.21,12..5
+sales_orders_messy.csv,329,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,329,Notes,missing_value,,
+sales_orders_messy.csv,329,ZIP Code,extra_whitespace,41838, 41838
+sales_orders_messy.csv,330, Customer Name ,missing_value,Noah Silva,
+sales_orders_messy.csv,330,Notes,null_token,,N/A
+sales_orders_messy.csv,331,Order ID,missing_value,ORD-00307,
+sales_orders_messy.csv,331,Paid?,null_token,,?
+sales_orders_messy.csv,331, Customer Name ,extra_whitespace,Jürgen Khan,Jürgen  Khan
+sales_orders_messy.csv,331,Notes,missing_value,,
+sales_orders_messy.csv,332,,empty_row,,
+sales_orders_messy.csv,333,Order ID,missing_value,ORD-00308,
+sales_orders_messy.csv,333,Amount (USD),currency_symbol,1281.50,"$1,281.50"
+sales_orders_messy.csv,333,Amount (USD),number_with_thousands_sep,1281.50,"$1,281.50"
+sales_orders_messy.csv,333,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,333,Region,case_variant,West,west 
+sales_orders_messy.csv,333, Customer Name ,extra_whitespace,Anna O'Brien,  Anna O'Brien
+sales_orders_messy.csv,333,Notes,missing_value,,
+sales_orders_messy.csv,333,ZIP Code,extra_whitespace,22936, 22936
+sales_orders_messy.csv,334,Order Date,null_token,2024-07-21,TBD
+sales_orders_messy.csv,334,Discount %,missing_value,15,
+sales_orders_messy.csv,334,Notes,missing_value,,
+sales_orders_messy.csv,335,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,335,Region,case_variant,West,west 
+sales_orders_messy.csv,335, Customer Name ,extra_whitespace,Søren Schröder,Søren  Schröder
+sales_orders_messy.csv,335,Notes,missing_value,,
+sales_orders_messy.csv,335,ZIP Code,missing_value,18342,
+sales_orders_messy.csv,335,,duplicate_row,,
+sales_orders_messy.csv,336,Order Date,mixed_date_format,2024-03-19,19 Mar 2024
+sales_orders_messy.csv,336,Region,case_variant,East,EAST
+sales_orders_messy.csv,336, Customer Name ,extra_whitespace,Noah García,Noah  García
+sales_orders_messy.csv,336,Notes,missing_value,,
+sales_orders_messy.csv,337,Order Date,mixed_date_format,2024-08-12,12/08/2024
+sales_orders_messy.csv,337, Customer Name ,missing_value,Ethan Silva,
+sales_orders_messy.csv,337,Notes,missing_value,,
+sales_orders_messy.csv,338,,empty_row,,
+sales_orders_messy.csv,339,Order Date,mixed_date_format,2024-05-14,14/05/2024
+sales_orders_messy.csv,339,Amount (USD),null_token,2281.31,N/A
+sales_orders_messy.csv,339,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,339,Region,case_variant,West,west 
+sales_orders_messy.csv,339,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,339, Customer Name ,case_variant,Renée Peña,RENÉE PEÑA
+sales_orders_messy.csv,339,Notes,missing_value,,
+sales_orders_messy.csv,339,ZIP Code,missing_value,09302,
+sales_orders_messy.csv,340,Amount (USD),null_token,3422.46,N/A
+sales_orders_messy.csv,340,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,340, Customer Name ,extra_whitespace,Anna Åberg,Anna  Åberg
+sales_orders_messy.csv,340,Notes,missing_value,,
+sales_orders_messy.csv,341,Amount (USD),currency_symbol,1074.76,"$1,074.76"
+sales_orders_messy.csv,341,Amount (USD),number_with_thousands_sep,1074.76,"$1,074.76"
+sales_orders_messy.csv,341,Discount %,missing_value,5,
+sales_orders_messy.csv,341,Region,null_token,West,?
+sales_orders_messy.csv,341,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,341,Notes,missing_value,,
+sales_orders_messy.csv,341,,duplicate_row,,
+sales_orders_messy.csv,342,Amount (USD),currency_symbol,511.79,$511.79
+sales_orders_messy.csv,342,Discount %,missing_value,15,
+sales_orders_messy.csv,342, Customer Name ,missing_value,Müller García,
+sales_orders_messy.csv,342,Notes,missing_value,,
+sales_orders_messy.csv,342,ZIP Code,null_token,65409,N/A
+sales_orders_messy.csv,343,Order ID,extra_whitespace,ORD-00315, ORD-00315
+sales_orders_messy.csv,343,Order Date,null_token,2024-08-27,N/A
+sales_orders_messy.csv,343,Amount (USD),currency_symbol,322.29,$322.29
+sales_orders_messy.csv,343,Discount %,null_token,15,N/A
+sales_orders_messy.csv,343,Region,case_variant,East,EAST
+sales_orders_messy.csv,343,Notes,missing_value,,
+sales_orders_messy.csv,343,ZIP Code,null_token,29298,?
+sales_orders_messy.csv,344,Amount (USD),currency_symbol,963.51,$963.51
+sales_orders_messy.csv,344,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,344,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,344, Customer Name ,case_variant,Anna Peña,ANNA PEÑA
+sales_orders_messy.csv,344,Notes,missing_value,,
+sales_orders_messy.csv,344,ZIP Code,missing_value,61125,
+sales_orders_messy.csv,345,Discount %,missing_value,10,
+sales_orders_messy.csv,345,Region,missing_value,West,
+sales_orders_messy.csv,345,Paid?,missing_value,,
+sales_orders_messy.csv,345, Customer Name ,mojibake,Wei Lefèvre,Wei LefÃ¨vre
+sales_orders_messy.csv,345,Notes,missing_value,,
+sales_orders_messy.csv,346,Order ID,missing_value,ORD-00318,
+sales_orders_messy.csv,346,Discount %,null_token,20,TBD
+sales_orders_messy.csv,346, Customer Name ,extra_whitespace,Lucas García,Lucas García 
+sales_orders_messy.csv,346,Notes,extra_whitespace,gift wrap,gift  wrap
+sales_orders_messy.csv,347,Region,null_token,East,N/A
+sales_orders_messy.csv,347, Customer Name ,extra_whitespace,Sofía Silva,  Sofía Silva
+sales_orders_messy.csv,347,Notes,missing_value,,
+sales_orders_messy.csv,348,Order Date,missing_value,2024-07-06,
+sales_orders_messy.csv,348,Notes,missing_value,,
+sales_orders_messy.csv,348,ZIP Code,extra_whitespace,64999, 64999
+sales_orders_messy.csv,349,Order ID,missing_value,ORD-00321,
+sales_orders_messy.csv,349,Order Date,null_token,2024-10-22,N/A
+sales_orders_messy.csv,349,Amount (USD),currency_symbol,494.91,$494.91
+sales_orders_messy.csv,349,Discount %,missing_value,0,
+sales_orders_messy.csv,349, Customer Name ,missing_value,Ava Lefèvre,
+sales_orders_messy.csv,349,Notes,missing_value,,
+sales_orders_messy.csv,349,ZIP Code,extra_whitespace,16799, 16799
+sales_orders_messy.csv,350,Order Date,missing_value,2024-11-30,
+sales_orders_messy.csv,350,Amount (USD),currency_symbol,4644.69,"$4,644.69"
+sales_orders_messy.csv,350,Amount (USD),number_with_thousands_sep,4644.69,"$4,644.69"
+sales_orders_messy.csv,350,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,350, Customer Name ,extra_whitespace,Ava Åberg,Ava  Åberg
+sales_orders_messy.csv,350,Notes,missing_value,,
+sales_orders_messy.csv,350,ZIP Code,missing_value,89294,
+sales_orders_messy.csv,351,Order Date,mixed_date_format,2024-08-16,2024/08/16
+sales_orders_messy.csv,351, Customer Name ,extra_whitespace,Jürgen Tanaka,Jürgen Tanaka 
+sales_orders_messy.csv,351,Notes,missing_value,,
+sales_orders_messy.csv,352,Amount (USD),currency_symbol,691.66,$691.66
+sales_orders_messy.csv,352,Paid?,null_token,,?
+sales_orders_messy.csv,352,Notes,missing_value,,
+sales_orders_messy.csv,353,Order ID,null_token,ORD-00325,N/A
+sales_orders_messy.csv,353,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,353,Region,case_variant,East,  east
+sales_orders_messy.csv,353, Customer Name ,mojibake,Renée Tanaka,RenÃ©e Tanaka
+sales_orders_messy.csv,353,Notes,null_token,,N/A
+sales_orders_messy.csv,354,Amount (USD),null_token,1881.63,N/A
+sales_orders_messy.csv,354,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,354, Customer Name ,case_variant,Liam Novak,liam novak
+sales_orders_messy.csv,354,Notes,missing_value,,
+sales_orders_messy.csv,354,ZIP Code,missing_value,45993,
+sales_orders_messy.csv,355,Amount (USD),null_token,1672.75,N/A
+sales_orders_messy.csv,355,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,355, Customer Name ,case_variant,Liam Dubois,LIAM DUBOIS
+sales_orders_messy.csv,355,Notes,missing_value,,
+sales_orders_messy.csv,355,ZIP Code,null_token,77415,N/A
+sales_orders_messy.csv,356,Amount (USD),null_token,1434.39,TBD
+sales_orders_messy.csv,356,Region,case_variant,North,NORTH
+sales_orders_messy.csv,356,Notes,null_token,,TBD
+sales_orders_messy.csv,357,Order Date,missing_value,2024-05-29,
+sales_orders_messy.csv,357,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,357,Region,null_token,North,N/A
+sales_orders_messy.csv,357,Notes,missing_value,,
+sales_orders_messy.csv,358,Order ID,missing_value,ORD-00330,
+sales_orders_messy.csv,358,Discount %,missing_value,15,
+sales_orders_messy.csv,358, Customer Name ,placeholder_token,Omar O'Brien,unknown
+sales_orders_messy.csv,358,Notes,extra_whitespace,gift wrap,gift  wrap
+sales_orders_messy.csv,358,ZIP Code,extra_whitespace,37159, 37159
+sales_orders_messy.csv,359,Order Date,missing_value,2024-07-17,
+sales_orders_messy.csv,359,Discount %,null_token,20,?
+sales_orders_messy.csv,359,Paid?,missing_value,,
+sales_orders_messy.csv,359, Customer Name ,extra_whitespace,Liam Smith,Liam  Smith
+sales_orders_messy.csv,359,Notes,missing_value,,
+sales_orders_messy.csv,359,ZIP Code,missing_value,89866,
+sales_orders_messy.csv,360,Discount %,null_token,10,TBD
+sales_orders_messy.csv,360,Notes,null_token,,N/A
+sales_orders_messy.csv,361,Order ID,missing_value,ORD-00333,
+sales_orders_messy.csv,361,Order Date,missing_value,2024-09-25,
+sales_orders_messy.csv,361,Amount (USD),missing_value,2161.72,
+sales_orders_messy.csv,361,Discount %,missing_value,5,
+sales_orders_messy.csv,361,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,362,Order Date,invalid_value,2024-07-30,soon
+sales_orders_messy.csv,362,Amount (USD),null_token,1530.67,N/A
+sales_orders_messy.csv,362,Notes,missing_value,,
+sales_orders_messy.csv,362,ZIP Code,missing_value,31266,
+sales_orders_messy.csv,363,Discount %,null_token,20,N/A
+sales_orders_messy.csv,363,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,363,Notes,missing_value,,
+sales_orders_messy.csv,364,Order Date,missing_value,2024-05-21,
+sales_orders_messy.csv,364,Amount (USD),extra_whitespace,688.84, 688.84 
+sales_orders_messy.csv,364,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,364,Region,case_variant,East,  east
+sales_orders_messy.csv,364, Customer Name ,case_variant,Anna Nuñez,ANNA NUÑEZ
+sales_orders_messy.csv,364,Notes,missing_value,,
+sales_orders_messy.csv,364,ZIP Code,extra_whitespace,37780, 37780
+sales_orders_messy.csv,364,,duplicate_row,,
+sales_orders_messy.csv,365,Order ID,missing_value,ORD-00336,
+sales_orders_messy.csv,365,Order Date,missing_value,2024-01-08,
+sales_orders_messy.csv,365,Discount %,missing_value,5,
+sales_orders_messy.csv,365,Paid?,null_token,,?
+sales_orders_messy.csv,365, Customer Name ,extra_whitespace,Emma Novak,  Emma Novak
+sales_orders_messy.csv,365,Notes,null_token,,-
+sales_orders_messy.csv,365,ZIP Code,null_token,60971,N/A
+sales_orders_messy.csv,366,Order Date,mixed_date_format,2024-01-22,22/01/2024
+sales_orders_messy.csv,366,Amount (USD),extra_whitespace,4125.16, 4125.16 
+sales_orders_messy.csv,366,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,366, Customer Name ,placeholder_token,Zoë Silva,unknown
+sales_orders_messy.csv,366,Notes,missing_value,,
+sales_orders_messy.csv,366,ZIP Code,null_token,52853,?
+sales_orders_messy.csv,367,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,367,Region,case_variant,East,  east
+sales_orders_messy.csv,368,Discount %,null_token,20,TBD
+sales_orders_messy.csv,368,ZIP Code,null_token,27467,N/A
+sales_orders_messy.csv,369,Order Date,mixed_date_format,2024-06-14,14 Jun 2024
+sales_orders_messy.csv,369,Amount (USD),null_token,4537.67,TBD
+sales_orders_messy.csv,369,Region,case_variant,North,NORTH
+sales_orders_messy.csv,369, Customer Name ,extra_whitespace,Lucas Dubois,Lucas Dubois 
+sales_orders_messy.csv,369,Notes,missing_value,,
+sales_orders_messy.csv,370,Order Date,missing_value,2024-03-28,
+sales_orders_messy.csv,370,Amount (USD),currency_symbol,2836.15,"$2,836.15"
+sales_orders_messy.csv,370,Amount (USD),number_with_thousands_sep,2836.15,"$2,836.15"
+sales_orders_messy.csv,370,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,370,Notes,null_token,,?
+sales_orders_messy.csv,371,Order Date,invalid_value,2024-03-08,soon
+sales_orders_messy.csv,371,Amount (USD),null_token,37.59,N/A
+sales_orders_messy.csv,371,Notes,missing_value,,
+sales_orders_messy.csv,372,Discount %,null_token,20,N/A
+sales_orders_messy.csv,372,Notes,missing_value,,
+sales_orders_messy.csv,372,ZIP Code,extra_whitespace,76771, 76771
+sales_orders_messy.csv,373,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,373,Region,missing_value,South,
+sales_orders_messy.csv,373,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,373,Notes,null_token,,?
+sales_orders_messy.csv,374,Order Date,mixed_date_format,2024-02-04,2024/02/04
+sales_orders_messy.csv,374,Notes,missing_value,,
+sales_orders_messy.csv,374,ZIP Code,missing_value,75890,
+sales_orders_messy.csv,375,Amount (USD),invalid_value,3449.50,abc
+sales_orders_messy.csv,375,Paid?,boolean_variant,Yes,Y
+sales_orders_messy.csv,375, Customer Name ,missing_value,Ethan Lefèvre,
+sales_orders_messy.csv,375,Notes,missing_value,,
+sales_orders_messy.csv,376,Discount %,percent_symbol,0,0%
+sales_orders_messy.csv,376,Notes,missing_value,,
+sales_orders_messy.csv,376,,duplicate_row,,
+sales_orders_messy.csv,377,Order Date,null_token,2024-09-09,N/A
+sales_orders_messy.csv,377,Discount %,null_token,10,?
+sales_orders_messy.csv,377, Customer Name ,missing_value,Anna Dubois,
+sales_orders_messy.csv,377,Notes,null_token,,N/A
+sales_orders_messy.csv,378,Order Date,null_token,2024-10-13,N/A
+sales_orders_messy.csv,378,Amount (USD),currency_symbol,1077.44,"$1,077.44"
+sales_orders_messy.csv,378,Amount (USD),number_with_thousands_sep,1077.44,"$1,077.44"
+sales_orders_messy.csv,378,Notes,null_token,,-
+sales_orders_messy.csv,379,Order Date,null_token,2024-01-15,N/A
+sales_orders_messy.csv,379,Amount (USD),missing_value,986.20,
+sales_orders_messy.csv,379,Discount %,null_token,15,TBD
+sales_orders_messy.csv,379,Region,case_variant,North,NORTH
+sales_orders_messy.csv,379, Customer Name ,missing_value,Emma Silva,
+sales_orders_messy.csv,379,ZIP Code,missing_value,61616,
+sales_orders_messy.csv,380,Order Date,missing_value,2024-01-29,
+sales_orders_messy.csv,380,Amount (USD),extra_whitespace,1510.73, 1510.73 
+sales_orders_messy.csv,380,Discount %,percent_symbol,10,10%
+sales_orders_messy.csv,380,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,380, Customer Name ,placeholder_token,Renée Smith,unknown
+sales_orders_messy.csv,380,Notes,missing_value,,
+sales_orders_messy.csv,381,Order Date,null_token,2024-04-15,N/A
+sales_orders_messy.csv,381,Amount (USD),null_token,1959.59,N/A
+sales_orders_messy.csv,381,Discount %,null_token,0,N/A
+sales_orders_messy.csv,381,Paid?,null_token,,N/A
+sales_orders_messy.csv,381,,duplicate_row,,
+sales_orders_messy.csv,382,Order Date,missing_value,2024-09-30,
+sales_orders_messy.csv,382,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,382,Notes,missing_value,,
+sales_orders_messy.csv,383,Order ID,extra_whitespace,ORD-00352, ORD-00352
+sales_orders_messy.csv,383,Discount %,missing_value,0,
+sales_orders_messy.csv,383,Notes,missing_value,,
+sales_orders_messy.csv,383,ZIP Code,missing_value,64369,
+sales_orders_messy.csv,384,Amount (USD),null_token,4361.56,TBD
+sales_orders_messy.csv,384,Discount %,missing_value,20,
+sales_orders_messy.csv,384, Customer Name ,missing_value,Lucas Dubois,
+sales_orders_messy.csv,384,Notes,missing_value,,
+sales_orders_messy.csv,384,ZIP Code,null_token,41760,N/A
+sales_orders_messy.csv,385,Order ID,missing_value,ORD-00354,
+sales_orders_messy.csv,385,Order Date,missing_value,2024-10-31,
+sales_orders_messy.csv,385,Amount (USD),missing_value,1679.78,
+sales_orders_messy.csv,385,Discount %,percent_symbol,0,0%
+sales_orders_messy.csv,385,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,385,Notes,missing_value,,
+sales_orders_messy.csv,386,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,386,Notes,null_token,,-
+sales_orders_messy.csv,387,Order Date,mixed_date_format,2024-06-08,08/06/2024
+sales_orders_messy.csv,387,Notes,missing_value,,
+sales_orders_messy.csv,387,ZIP Code,missing_value,78693,
+sales_orders_messy.csv,388,Order ID,missing_value,ORD-00357,
+sales_orders_messy.csv,388,Order Date,mixed_date_format,2024-08-16,16/08/2024
+sales_orders_messy.csv,388,Amount (USD),null_token,1575.95,TBD
+sales_orders_messy.csv,388,Notes,null_token,,-
+sales_orders_messy.csv,388,ZIP Code,missing_value,94089,
+sales_orders_messy.csv,389,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,389,Region,case_variant,East,  east
+sales_orders_messy.csv,389,Paid?,missing_value,,
+sales_orders_messy.csv,389,Notes,missing_value,,
+sales_orders_messy.csv,390,Order ID,extra_whitespace,ORD-00359, ORD-00359
+sales_orders_messy.csv,390,Order Date,null_token,2024-05-24,TBD
+sales_orders_messy.csv,390,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,390,Notes,missing_value,,
+sales_orders_messy.csv,390,ZIP Code,missing_value,32270,
+sales_orders_messy.csv,391,Amount (USD),null_token,1716.76,TBD
+sales_orders_messy.csv,391, Customer Name ,extra_whitespace,Søren Nuñez,Søren  Nuñez
+sales_orders_messy.csv,391,Notes,missing_value,,
+sales_orders_messy.csv,392,Order Date,mixed_date_format,2024-10-30,30/10/2024
+sales_orders_messy.csv,392, Customer Name ,mojibake,Ethan Peña,Ethan PeÃ±a
+sales_orders_messy.csv,392,Notes,missing_value,,
+sales_orders_messy.csv,392,ZIP Code,missing_value,85540,
+sales_orders_messy.csv,393,Order Date,missing_value,2024-03-12,
+sales_orders_messy.csv,393,Amount (USD),currency_symbol,4518.21,"$4,518.21"
+sales_orders_messy.csv,393,Amount (USD),number_with_thousands_sep,4518.21,"$4,518.21"
+sales_orders_messy.csv,393,Discount %,missing_value,0,
+sales_orders_messy.csv,393,Notes,missing_value,,
+sales_orders_messy.csv,394,Order ID,missing_value,ORD-00363,
+sales_orders_messy.csv,394,Discount %,null_token,10,?
+sales_orders_messy.csv,394,Region,case_variant,North,north
+sales_orders_messy.csv,394,Notes,missing_value,,
+sales_orders_messy.csv,394,ZIP Code,null_token,72943,?
+sales_orders_messy.csv,395,Order Date,null_token,2024-10-13,N/A
+sales_orders_messy.csv,395,Amount (USD),missing_value,1809.04,
+sales_orders_messy.csv,395,Region,case_variant,North,north
+sales_orders_messy.csv,395,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,395,Notes,missing_value,,
+sales_orders_messy.csv,396,Order Date,missing_value,2024-07-15,
+sales_orders_messy.csv,396,Discount %,null_token,10,?
+sales_orders_messy.csv,396, Customer Name ,extra_whitespace,José Nuñez,José Nuñez 
+sales_orders_messy.csv,396,Notes,missing_value,,
+sales_orders_messy.csv,396,ZIP Code,null_token,58243,?
+sales_orders_messy.csv,397,Order Date,mixed_date_format,2024-03-11,11/03/2024
+sales_orders_messy.csv,397,Discount %,null_token,20,TBD
+sales_orders_messy.csv,397,Notes,missing_value,,
+sales_orders_messy.csv,398,Order Date,mixed_date_format,2024-05-01,1 May 2024
+sales_orders_messy.csv,398,Amount (USD),missing_value,1360.87,
+sales_orders_messy.csv,398,Paid?,boolean_variant,Yes,TRUE
+sales_orders_messy.csv,398,Notes,null_token,,-
+sales_orders_messy.csv,398,ZIP Code,missing_value,19623,
+sales_orders_messy.csv,399,Amount (USD),missing_value,409.61,
+sales_orders_messy.csv,399,Region,typo_category,North,Nrth
+sales_orders_messy.csv,399, Customer Name ,case_variant,Sofía Schröder,SOFÍA SCHRÖDER
+sales_orders_messy.csv,399,ZIP Code,missing_value,71127,
+sales_orders_messy.csv,400,Order Date,missing_value,2024-09-19,
+sales_orders_messy.csv,400,Discount %,null_token,10,?
+sales_orders_messy.csv,400,Notes,null_token,,N/A
+sales_orders_messy.csv,401,Order Date,mixed_date_format,2024-03-27,27/03/2024
+sales_orders_messy.csv,401,Notes,missing_value,,
+sales_orders_messy.csv,402,Order Date,missing_value,2024-03-30,
+sales_orders_messy.csv,402,Amount (USD),currency_symbol,3700.06,"$3,700.06"
+sales_orders_messy.csv,402,Amount (USD),number_with_thousands_sep,3700.06,"$3,700.06"
+sales_orders_messy.csv,402,Discount %,missing_value,10,
+sales_orders_messy.csv,402,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,402,Region,case_variant,East,  east
+sales_orders_messy.csv,402,Notes,missing_value,,
+sales_orders_messy.csv,402,ZIP Code,null_token,12062,?
+sales_orders_messy.csv,403,Order Date,missing_value,2024-03-19,
+sales_orders_messy.csv,403,Region,extra_whitespace,South,South 
+sales_orders_messy.csv,403, Customer Name ,mojibake,Sofía Dubois,SofÃ­a Dubois
+sales_orders_messy.csv,403,Notes,missing_value,,
+sales_orders_messy.csv,403,ZIP Code,missing_value,35654,
+sales_orders_messy.csv,404,,empty_row,,
+sales_orders_messy.csv,405,Notes,null_token,,N/A
+sales_orders_messy.csv,405,ZIP Code,missing_value,51070,
+sales_orders_messy.csv,406,Order ID,null_token,ORD-00374,N/A
+sales_orders_messy.csv,406,Order Date,invalid_value,2024-12-15,soon
+sales_orders_messy.csv,406,Amount (USD),currency_symbol,504.87,$504.87
+sales_orders_messy.csv,406,Discount %,null_token,10,?
+sales_orders_messy.csv,406,Region,case_variant,North,north
+sales_orders_messy.csv,406,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,406,Notes,null_token,,N/A
+sales_orders_messy.csv,406,ZIP Code,missing_value,34468,
+sales_orders_messy.csv,407,Order Date,mixed_date_format,2024-12-11,2024/12/11
+sales_orders_messy.csv,407,Amount (USD),currency_symbol,3676.88,"$3,676.88"
+sales_orders_messy.csv,407,Amount (USD),number_with_thousands_sep,3676.88,"$3,676.88"
+sales_orders_messy.csv,407,Discount %,percent_symbol,5,5%
+sales_orders_messy.csv,407,Notes,missing_value,,
+sales_orders_messy.csv,408,Order Date,mixed_date_format,2024-04-22,22 Apr 2024
+sales_orders_messy.csv,408,Region,missing_value,South,
+sales_orders_messy.csv,408,Paid?,boolean_variant,No,N
+sales_orders_messy.csv,408, Customer Name ,missing_value,Anna Smith,
+sales_orders_messy.csv,408,Notes,missing_value,,
+sales_orders_messy.csv,408,ZIP Code,missing_value,87034,
+sales_orders_messy.csv,409,Order Date,missing_value,2024-04-04,
+sales_orders_messy.csv,409,Discount %,missing_value,15,
+sales_orders_messy.csv,409,Region,case_variant,North,NORTH
+sales_orders_messy.csv,409,Paid?,null_token,,N/A
+sales_orders_messy.csv,410,Order ID,missing_value,ORD-00378,
+sales_orders_messy.csv,410,Order Date,null_token,2024-05-21,TBD
+sales_orders_messy.csv,410,Notes,missing_value,,
+sales_orders_messy.csv,411,Order ID,missing_value,ORD-00379,
+sales_orders_messy.csv,411,Order Date,mixed_date_format,2024-04-21,21/04/2024
+sales_orders_messy.csv,411,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,411, Customer Name ,missing_value,Emma García,
+sales_orders_messy.csv,411,Notes,missing_value,,
+sales_orders_messy.csv,412,Amount (USD),missing_value,3506.27,
+sales_orders_messy.csv,412,Notes,missing_value,,
+sales_orders_messy.csv,412,ZIP Code,extra_whitespace,91342, 91342
+sales_orders_messy.csv,413,Order Date,mixed_date_format,2024-10-17,17/10/2024
+sales_orders_messy.csv,413,Paid?,missing_value,,
+sales_orders_messy.csv,413, Customer Name ,missing_value,Ava Smith,
+sales_orders_messy.csv,413,Notes,null_token,,?
+sales_orders_messy.csv,413,ZIP Code,missing_value,39005,
+sales_orders_messy.csv,414,Order Date,invalid_value,2024-01-21,31/02/2024
+sales_orders_messy.csv,414,Discount %,null_token,15,TBD
+sales_orders_messy.csv,414,Paid?,missing_value,,
+sales_orders_messy.csv,414,Notes,missing_value,,
+sales_orders_messy.csv,414,ZIP Code,missing_value,04324,
+sales_orders_messy.csv,415,Amount (USD),currency_symbol,3967.84,"$3,967.84"
+sales_orders_messy.csv,415,Amount (USD),number_with_thousands_sep,3967.84,"$3,967.84"
+sales_orders_messy.csv,415,Discount %,percent_symbol,15,15%
+sales_orders_messy.csv,415,Region,missing_value,West,
+sales_orders_messy.csv,415,Notes,null_token,,-
+sales_orders_messy.csv,416,Order ID,missing_value,ORD-00384,
+sales_orders_messy.csv,416,Amount (USD),missing_value,4701.65,
+sales_orders_messy.csv,416,Region,null_token,South,N/A
+sales_orders_messy.csv,416, Customer Name ,case_variant,Liam Rossi,LIAM ROSSI
+sales_orders_messy.csv,416,Notes,missing_value,,
+sales_orders_messy.csv,417,Order ID,missing_value,ORD-00385,
+sales_orders_messy.csv,417,Amount (USD),missing_value,3170.65,
+sales_orders_messy.csv,417,Region,typo_category,West,Wset
+sales_orders_messy.csv,417,Notes,null_token,,N/A
+sales_orders_messy.csv,418,Order Date,null_token,2024-06-21,N/A
+sales_orders_messy.csv,418,Amount (USD),parentheses_negative,4911.32,(4911.32)
+sales_orders_messy.csv,418,Paid?,null_token,,?
+sales_orders_messy.csv,418,Notes,missing_value,,
+sales_orders_messy.csv,419,Discount %,null_token,5,TBD
+sales_orders_messy.csv,419,Paid?,boolean_variant,Yes,yes
+sales_orders_messy.csv,419, Customer Name ,extra_whitespace,Ethan Khan,Ethan Khan 
+sales_orders_messy.csv,419,Notes,missing_value,,
+sales_orders_messy.csv,420,Amount (USD),parentheses_negative,4027.35,(4027.35)
+sales_orders_messy.csv,420,Notes,missing_value,,
+sales_orders_messy.csv,420,,duplicate_row,,
+sales_orders_messy.csv,421,Order Date,mixed_date_format,2024-02-15,15 Feb 2024
+sales_orders_messy.csv,421,Discount %,missing_value,15,
+sales_orders_messy.csv,421,Notes,missing_value,,
+sales_orders_messy.csv,422,Order Date,mixed_date_format,2024-09-12,12/09/2024
+sales_orders_messy.csv,422,Amount (USD),missing_value,458.35,
+sales_orders_messy.csv,422, Customer Name ,extra_whitespace,Priya Smith,  Priya Smith
+sales_orders_messy.csv,422,Notes,null_token,,TBD
+sales_orders_messy.csv,423,Order Date,mixed_date_format,2024-11-16,16/11/2024
+sales_orders_messy.csv,423,Discount %,missing_value,5,
+sales_orders_messy.csv,423, Customer Name ,case_variant,Zoë García,ZOË GARCÍA
+sales_orders_messy.csv,423,Notes,missing_value,,
+sales_orders_messy.csv,424,Amount (USD),missing_value,3707.28,
+sales_orders_messy.csv,424,Notes,missing_value,,
+sales_orders_messy.csv,425,Order ID,missing_value,ORD-00392,
+sales_orders_messy.csv,425,Discount %,missing_value,5,
+sales_orders_messy.csv,426,Amount (USD),extra_whitespace,699.29, 699.29 
+sales_orders_messy.csv,426,Discount %,null_token,10,?
+sales_orders_messy.csv,426,Notes,missing_value,,
+sales_orders_messy.csv,427,Discount %,null_token,20,TBD
+sales_orders_messy.csv,427,Paid?,missing_value,,
+sales_orders_messy.csv,427, Customer Name ,placeholder_token,Jürgen Novak,unknown
+sales_orders_messy.csv,427,Notes,missing_value,,
+sales_orders_messy.csv,428,Order ID,missing_value,ORD-00395,
+sales_orders_messy.csv,428,Discount %,null_token,20,TBD
+sales_orders_messy.csv,428, Customer Name ,case_variant,Jürgen Dubois,jürgen dubois
+sales_orders_messy.csv,428,Notes,missing_value,,
+sales_orders_messy.csv,429,Order ID,missing_value,ORD-00396,
+sales_orders_messy.csv,429,Order Date,null_token,2024-12-22,N/A
+sales_orders_messy.csv,429,Discount %,missing_value,20,
+sales_orders_messy.csv,429,Region,missing_value,West,
+sales_orders_messy.csv,429, Customer Name ,extra_whitespace,Omar O'Brien,  Omar O'Brien
+sales_orders_messy.csv,429,Notes,missing_value,,
+sales_orders_messy.csv,429,ZIP Code,missing_value,63886,
+sales_orders_messy.csv,430,Order Date,missing_value,2024-08-23,
+sales_orders_messy.csv,430,Region,extra_whitespace,West,west 
+sales_orders_messy.csv,430,Region,case_variant,West,west 
+sales_orders_messy.csv,430,Notes,missing_value,,
+sales_orders_messy.csv,431,Order ID,extra_whitespace,ORD-00398, ORD-00398
+sales_orders_messy.csv,431,Amount (USD),null_token,1497.02,N/A
+sales_orders_messy.csv,431,Discount %,percent_symbol,20,20%
+sales_orders_messy.csv,431,Region,extra_whitespace,East,  east
+sales_orders_messy.csv,431,Region,case_variant,East,  east
+sales_orders_messy.csv,431, Customer Name ,missing_value,Ava Dubois,
+sales_orders_messy.csv,431,Notes,missing_value,,
+sales_orders_messy.csv,432,Discount %,missing_value,5,
+sales_orders_messy.csv,432,Paid?,boolean_variant,No,false
+sales_orders_messy.csv,432,Notes,missing_value,,
+sales_orders_messy.csv,432,ZIP Code,missing_value,63717,
+sales_orders_messy.csv,433,Order ID,missing_value,ORD-00400,
+sales_orders_messy.csv,433,Discount %,null_token,10,TBD
+sales_orders_messy.csv,433,Notes,missing_value,,
+customers_messy.xlsx,0,,title_row,,Customer export - generated for demo
+customers_messy.xlsx,0,,blank_row_above_header,,
+customers_messy.xlsx,2,Full Name,extra_whitespace,Ethan Novak, Ethan Novak  
+customers_messy.xlsx,2,Email,case_variant,user1@example.com,USER1@Example.COM
+customers_messy.xlsx,3,Email,missing_value,user2@example.com,
+customers_messy.xlsx,3,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,4,Email,missing_value,user3@example.com,
+customers_messy.xlsx,4,Signup Date,mixed_date_format,2022-04-07,2022/04/07
+customers_messy.xlsx,5,Segment,typo_category,Consumer,Consumr
+customers_messy.xlsx,6,Country,case_variant,USA,usa
+customers_messy.xlsx,7,Full Name,non_breaking_space,Liam Tanaka,Liam Tanaka
+customers_messy.xlsx,7,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,8,Full Name,zero_width_space,José Peña,José Peña​
+customers_messy.xlsx,8,Email,case_variant,user7@example.com,USER7@Example.COM
+customers_messy.xlsx,8,Country,typo_category,Canada,Canda
+customers_messy.xlsx,9,Segment,typo_category,Enterprise,Enterprize
+customers_messy.xlsx,10,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,10,Segment,case_variant,Consumer,CONSUMER
+customers_messy.xlsx,11,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,11,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,11,Country,typo_category,Canada,Canda
+customers_messy.xlsx,12,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,12,,duplicate_row,,
+customers_messy.xlsx,13,,empty_row,,
+customers_messy.xlsx,16,Active,missing_value,,
+customers_messy.xlsx,17,Email,missing_value,user14@example.com,
+customers_messy.xlsx,17,Signup Date,mixed_date_format,2023-05-14,2023/05/14
+customers_messy.xlsx,18,Signup Date,mixed_date_format,2024-02-28,"February 28, 2024"
+customers_messy.xlsx,18,Lifetime Value,placeholder_token,2159.18,unknown
+customers_messy.xlsx,20,Email,missing_value,user17@example.com,
+customers_messy.xlsx,20,Signup Date,mixed_date_format,2024-05-06,2024/05/06
+customers_messy.xlsx,20,Segment,case_variant,Consumer,CONSUMER
+customers_messy.xlsx,21,Signup Date,mixed_date_format,2022-05-14,2022/05/14
+customers_messy.xlsx,21,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,22,Full Name,zero_width_space,Noah Schröder,Noah Schröder​
+customers_messy.xlsx,22,Signup Date,mixed_date_format,2022-09-18,2022/09/18
+customers_messy.xlsx,23,Full Name,extra_whitespace,Priya Peña, Priya Peña  
+customers_messy.xlsx,23,Country,typo_category,Canada,Canda
+customers_messy.xlsx,25,Signup Date,mixed_date_format,2023-07-24,2023/07/24
+customers_messy.xlsx,25,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,26,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,27,Email,case_variant,user24@example.com,USER24@Example.COM
+customers_messy.xlsx,28,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,32,Segment,case_variant,SMB,smb
+customers_messy.xlsx,33,Signup Date,mixed_date_format,2022-11-06,2022/11/06
+customers_messy.xlsx,35,Lifetime Value,missing_value,1064.01,
+customers_messy.xlsx,36,Signup Date,mixed_date_format,2024-04-02,"April 2, 2024"
+customers_messy.xlsx,36,,duplicate_row,,
+customers_messy.xlsx,37,Email,case_variant,user33@example.com,USER33@Example.COM
+customers_messy.xlsx,37,Signup Date,mixed_date_format,2024-05-29,"May 29, 2024"
+customers_messy.xlsx,39,Full Name,extra_whitespace,José Tanaka, José Tanaka  
+customers_messy.xlsx,39,Email,case_variant,user35@example.com,USER35@Example.COM
+customers_messy.xlsx,39,Signup Date,mixed_date_format,2023-12-30,"December 30, 2023"
+customers_messy.xlsx,39,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,40,,duplicate_row,,
+customers_messy.xlsx,42,Lifetime Value,currency_symbol,6101.19,"$6,101.19"
+customers_messy.xlsx,42,Lifetime Value,number_with_thousands_sep,6101.19,"$6,101.19"
+customers_messy.xlsx,43,Segment,case_variant,Consumer,CONSUMER
+customers_messy.xlsx,44,Email,case_variant,user39@example.com,USER39@Example.COM
+customers_messy.xlsx,45,Lifetime Value,outlier,3911.01,9750000.0
+customers_messy.xlsx,46,Segment,case_variant,Consumer,CONSUMER
+customers_messy.xlsx,47,Lifetime Value,currency_symbol,4322.63,"$4,322.63"
+customers_messy.xlsx,47,Lifetime Value,number_with_thousands_sep,4322.63,"$4,322.63"
+customers_messy.xlsx,48,Full Name,non_breaking_space,Sofía Khan,Sofía Khan
+customers_messy.xlsx,48,Signup Date,mixed_date_format,2022-05-03,2022/05/03
+customers_messy.xlsx,48,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,48,Country,category_synonym,USA,U.S.A.
+customers_messy.xlsx,50,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,51,Email,case_variant,user46@example.com,USER46@Example.COM
+customers_messy.xlsx,52,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,53,Email,null_token,user48@example.com,n/a
+customers_messy.xlsx,53,Lifetime Value,placeholder_token,3309.45,unknown
+customers_messy.xlsx,53,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,54,Lifetime Value,placeholder_token,7522.87,unknown
+customers_messy.xlsx,55,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,56,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,57,Email,case_variant,user52@example.com,USER52@Example.COM
+customers_messy.xlsx,57,Country,case_variant,USA,usa
+customers_messy.xlsx,58,Full Name,extra_whitespace,Iñaki Peña, Iñaki Peña  
+customers_messy.xlsx,58,Email,null_token,user53@example.com,n/a
+customers_messy.xlsx,58,Signup Date,mixed_date_format,2022-12-14,2022/12/14
+customers_messy.xlsx,59,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,59,Country,typo_category,Canada,Canda
+customers_messy.xlsx,61,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,63,Email,missing_value,user58@example.com,
+customers_messy.xlsx,65,Signup Date,mixed_date_format,2023-05-07,2023/05/07
+customers_messy.xlsx,66,Full Name,zero_width_space,Mia Åberg,Mia Åberg​
+customers_messy.xlsx,67,Full Name,non_breaking_space,Iñaki Tanaka,Iñaki Tanaka
+customers_messy.xlsx,68,Full Name,zero_width_space,Renée Lefèvre,Renée Lefèvre​
+customers_messy.xlsx,69,Lifetime Value,missing_value,6785.26,
+customers_messy.xlsx,69,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,70,Full Name,non_breaking_space,Chloé Brown,Chloé Brown
+customers_messy.xlsx,70,Lifetime Value,currency_symbol,1845.79,"$1,845.79"
+customers_messy.xlsx,70,Lifetime Value,number_with_thousands_sep,1845.79,"$1,845.79"
+customers_messy.xlsx,71,Signup Date,mixed_date_format,2024-06-16,2024/06/16
+customers_messy.xlsx,71,Country,case_variant,USA,usa
+customers_messy.xlsx,72,Full Name,non_breaking_space,Ethan O'Brien,Ethan O'Brien
+customers_messy.xlsx,72,Email,case_variant,user67@example.com,USER67@Example.COM
+customers_messy.xlsx,73,Email,case_variant,user68@example.com,USER68@Example.COM
+customers_messy.xlsx,74,Full Name,extra_whitespace,Mia Rossi, Mia Rossi  
+customers_messy.xlsx,75,Full Name,extra_whitespace,Emma Schröder, Emma Schröder  
+customers_messy.xlsx,75,Email,case_variant,user70@example.com,USER70@Example.COM
+customers_messy.xlsx,75,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,76,Lifetime Value,missing_value,6211.92,
+customers_messy.xlsx,77,Full Name,non_breaking_space,Sofía Silva,Sofía Silva
+customers_messy.xlsx,77,Lifetime Value,currency_symbol,2010.28,"$2,010.28"
+customers_messy.xlsx,77,Lifetime Value,number_with_thousands_sep,2010.28,"$2,010.28"
+customers_messy.xlsx,78,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,79,Signup Date,mixed_date_format,2023-03-18,2023/03/18
+customers_messy.xlsx,79,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,80,Email,case_variant,user75@example.com,USER75@Example.COM
+customers_messy.xlsx,80,Active,missing_value,,
+customers_messy.xlsx,81,Country,typo_category,Canada,Canda
+customers_messy.xlsx,86,Signup Date,mixed_date_format,2022-01-08,2022/01/08
+customers_messy.xlsx,86,Country,typo_category,Canada,Canda
+customers_messy.xlsx,87,Full Name,non_breaking_space,Lucas García,Lucas García
+customers_messy.xlsx,88,Lifetime Value,missing_value,5099.55,
+customers_messy.xlsx,89,Full Name,non_breaking_space,Iñaki Lefèvre,Iñaki Lefèvre
+customers_messy.xlsx,89,Signup Date,missing_value,2023-04-10,
+customers_messy.xlsx,89,Country,category_synonym,USA,U.S.A.
+customers_messy.xlsx,90,Email,case_variant,user85@example.com,USER85@Example.COM
+customers_messy.xlsx,91,Email,null_token,user86@example.com,n/a
+customers_messy.xlsx,92,Signup Date,mixed_date_format,2023-03-18,"March 18, 2023"
+customers_messy.xlsx,92,Country,case_variant,USA,usa
+customers_messy.xlsx,93,Signup Date,mixed_date_format,2022-10-11,2022/10/11
+customers_messy.xlsx,94,Email,case_variant,user89@example.com,USER89@Example.COM
+customers_messy.xlsx,95,Lifetime Value,currency_symbol,8727.09,"$8,727.09"
+customers_messy.xlsx,95,Lifetime Value,number_with_thousands_sep,8727.09,"$8,727.09"
+customers_messy.xlsx,96,Signup Date,mixed_date_format,2023-05-22,"May 22, 2023"
+customers_messy.xlsx,97,Full Name,extra_whitespace,Priya Brown, Priya Brown  
+customers_messy.xlsx,99,Email,missing_value,user94@example.com,
+customers_messy.xlsx,99,Signup Date,mixed_date_format,2023-11-30,2023/11/30
+customers_messy.xlsx,99,Lifetime Value,currency_symbol,8160.46,"$8,160.46"
+customers_messy.xlsx,99,Lifetime Value,number_with_thousands_sep,8160.46,"$8,160.46"
+customers_messy.xlsx,99,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,99,Country,case_variant,USA,usa
+customers_messy.xlsx,100,Email,case_variant,user95@example.com,USER95@Example.COM
+customers_messy.xlsx,100,Signup Date,mixed_date_format,2024-02-01,2024/02/01
+customers_messy.xlsx,101,Lifetime Value,currency_symbol,6070.56,"$6,070.56"
+customers_messy.xlsx,101,Lifetime Value,number_with_thousands_sep,6070.56,"$6,070.56"
+customers_messy.xlsx,101,Active,missing_value,,
+customers_messy.xlsx,101,Country,case_variant,USA,usa
+customers_messy.xlsx,102,Signup Date,mixed_date_format,2024-04-06,2024/04/06
+customers_messy.xlsx,102,Segment,case_variant,SMB,smb
+customers_messy.xlsx,103,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,104,Full Name,extra_whitespace,Zoë Åberg, Zoë Åberg  
+customers_messy.xlsx,104,Email,case_variant,user99@example.com,USER99@Example.COM
+customers_messy.xlsx,104,Lifetime Value,currency_symbol,4564.21,"$4,564.21"
+customers_messy.xlsx,104,Lifetime Value,number_with_thousands_sep,4564.21,"$4,564.21"
+customers_messy.xlsx,105,Email,case_variant,user33@example.com,USER33@Example.COM
+customers_messy.xlsx,105,Signup Date,mixed_date_format,2024-05-29,"May 29, 2024"
+customers_messy.xlsx,105,,duplicate_row,,
+customers_messy.xlsx,106,Full Name,zero_width_space,Jürgen Dubois,Jürgen Dubois​
+customers_messy.xlsx,106,Signup Date,mixed_date_format,2024-05-05,"May 5, 2024"
+customers_messy.xlsx,109,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,110,Active,missing_value,,
+customers_messy.xlsx,111,Full Name,extra_whitespace,Jürgen Lefèvre, Jürgen Lefèvre  
+customers_messy.xlsx,112,Email,case_variant,user106@example.com,USER106@Example.COM
+customers_messy.xlsx,112,Lifetime Value,currency_symbol,7062.78,"$7,062.78"
+customers_messy.xlsx,112,Lifetime Value,number_with_thousands_sep,7062.78,"$7,062.78"
+customers_messy.xlsx,114,Signup Date,mixed_date_format,2024-04-10,"April 10, 2024"
+customers_messy.xlsx,114,Lifetime Value,currency_symbol,8455.63,"$8,455.63"
+customers_messy.xlsx,114,Lifetime Value,number_with_thousands_sep,8455.63,"$8,455.63"
+customers_messy.xlsx,116,Signup Date,mixed_date_format,2024-05-29,2024/05/29
+customers_messy.xlsx,117,Full Name,extra_whitespace,Renée O'Brien, Renée O'Brien  
+customers_messy.xlsx,117,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,119,Lifetime Value,currency_symbol,8949.5,"$8,949.50"
+customers_messy.xlsx,119,Lifetime Value,number_with_thousands_sep,8949.5,"$8,949.50"
+customers_messy.xlsx,119,Segment,case_variant,SMB,smb
+customers_messy.xlsx,120,Full Name,extra_whitespace,Noah Novak, Noah Novak  
+customers_messy.xlsx,120,Signup Date,mixed_date_format,2022-01-31,"January 31, 2022"
+customers_messy.xlsx,120,Lifetime Value,placeholder_token,8241.99,unknown
+customers_messy.xlsx,121,Full Name,extra_whitespace,Ava Tanaka, Ava Tanaka  
+customers_messy.xlsx,121,Signup Date,mixed_date_format,2023-08-29,"August 29, 2023"
+customers_messy.xlsx,121,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,121,Segment,case_variant,SMB,smb
+customers_messy.xlsx,122,Email,case_variant,user116@example.com,USER116@Example.COM
+customers_messy.xlsx,122,Signup Date,mixed_date_format,2023-12-04,"December 4, 2023"
+customers_messy.xlsx,123,Signup Date,mixed_date_format,2022-07-30,"July 30, 2022"
+customers_messy.xlsx,123,Lifetime Value,placeholder_token,6530.49,unknown
+customers_messy.xlsx,123,Segment,case_variant,SMB,smb
+customers_messy.xlsx,125,Lifetime Value,currency_symbol,5473.01,"$5,473.01"
+customers_messy.xlsx,125,Lifetime Value,number_with_thousands_sep,5473.01,"$5,473.01"
+customers_messy.xlsx,126,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,126,Country,category_synonym,USA,U.S.A.
+customers_messy.xlsx,126,CustomerID,duplicate_key,1121,1120
+customers_messy.xlsx,127,Full Name,zero_width_space,Lucas Dubois,Lucas Dubois​
+customers_messy.xlsx,127,Signup Date,mixed_date_format,2023-11-20,"November 20, 2023"
+customers_messy.xlsx,128,Signup Date,mixed_date_format,2023-10-29,2023/10/29
+customers_messy.xlsx,128,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,129,Email,null_token,user123@example.com,n/a
+customers_messy.xlsx,129,Segment,typo_category,Enterprise,Enterprize
+customers_messy.xlsx,130,Lifetime Value,missing_value,2112.71,
+customers_messy.xlsx,131,Full Name,non_breaking_space,Ava Khan,Ava Khan
+customers_messy.xlsx,133,Email,case_variant,user127@example.com,USER127@Example.COM
+customers_messy.xlsx,133,Signup Date,mixed_date_format,2022-07-19,"July 19, 2022"
+customers_messy.xlsx,134,Email,missing_value,user128@example.com,
+customers_messy.xlsx,134,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,135,Full Name,extra_whitespace,Noah Lefèvre, Noah Lefèvre  
+customers_messy.xlsx,135,Lifetime Value,currency_symbol,7605.9,"$7,605.90"
+customers_messy.xlsx,135,Lifetime Value,number_with_thousands_sep,7605.9,"$7,605.90"
+customers_messy.xlsx,137,Segment,typo_category,Enterprise,Enterprize
+customers_messy.xlsx,138,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,140,Signup Date,missing_value,2022-07-19,
+customers_messy.xlsx,141,Lifetime Value,missing_value,8249.08,
+customers_messy.xlsx,141,Segment,typo_category,Enterprise,Enterprize
+customers_messy.xlsx,142,Full Name,extra_whitespace,José Silva, José Silva  
+customers_messy.xlsx,144,Full Name,extra_whitespace,Zoë Dubois, Zoë Dubois  
+customers_messy.xlsx,145,Signup Date,mixed_date_format,2024-03-07,2024/03/07
+customers_messy.xlsx,146,Lifetime Value,currency_symbol,6777.56,"$6,777.56"
+customers_messy.xlsx,146,Lifetime Value,number_with_thousands_sep,6777.56,"$6,777.56"
+customers_messy.xlsx,146,Country,category_synonym,USA,U.S.A.
+customers_messy.xlsx,147,Email,case_variant,user141@example.com,USER141@Example.COM
+customers_messy.xlsx,149,Signup Date,missing_value,2022-07-17,
+customers_messy.xlsx,150,Signup Date,mixed_date_format,2022-02-06,2022/02/06
+customers_messy.xlsx,150,Lifetime Value,currency_symbol,1936.85,"$1,936.85"
+customers_messy.xlsx,150,Lifetime Value,number_with_thousands_sep,1936.85,"$1,936.85"
+customers_messy.xlsx,151,Email,missing_value,user145@example.com,
+customers_messy.xlsx,151,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,151,Country,case_variant,UK,uk 
+customers_messy.xlsx,151,Country,extra_whitespace,UK,uk 
+customers_messy.xlsx,152,Lifetime Value,currency_symbol,1940.85,"$1,940.85"
+customers_messy.xlsx,152,Lifetime Value,number_with_thousands_sep,1940.85,"$1,940.85"
+customers_messy.xlsx,152,Country,typo_category,Canada,Canda
+customers_messy.xlsx,153,Signup Date,mixed_date_format,2023-10-07,"October 7, 2023"
+customers_messy.xlsx,153,Lifetime Value,missing_value,1175.64,
+customers_messy.xlsx,155,Active,missing_value,,
+customers_messy.xlsx,155,Segment,case_variant,Consumer,CONSUMER
+customers_messy.xlsx,155,Country,category_synonym,USA,U.S.A.
+customers_messy.xlsx,156,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,157,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,157,Country,case_variant,UK,uk 
+customers_messy.xlsx,157,Country,extra_whitespace,UK,uk 
+customers_messy.xlsx,158,Full Name,extra_whitespace,Ava Silva, Ava Silva  
+customers_messy.xlsx,159,Email,case_variant,user153@example.com,USER153@Example.COM
+customers_messy.xlsx,159,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,159,Segment,typo_category,Enterprise,Enterprize
+customers_messy.xlsx,160,Lifetime Value,currency_symbol,4457.31,"$4,457.31"
+customers_messy.xlsx,160,Lifetime Value,number_with_thousands_sep,4457.31,"$4,457.31"
+customers_messy.xlsx,161,Full Name,zero_width_space,Chloé Dubois,Chloé Dubois​
+customers_messy.xlsx,161,Segment,typo_category,Enterprise,Enterprize
+customers_messy.xlsx,162,Lifetime Value,missing_value,3681.82,
+customers_messy.xlsx,163,Email,case_variant,user157@example.com,USER157@Example.COM
+customers_messy.xlsx,163,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,164,Full Name,extra_whitespace,Jürgen Smith, Jürgen Smith  
+customers_messy.xlsx,165,Full Name,non_breaking_space,Anna Åberg,Anna Åberg
+customers_messy.xlsx,165,Signup Date,mixed_date_format,2024-03-12,"March 12, 2024"
+customers_messy.xlsx,165,Country,category_synonym,USA,U.S.A.
+customers_messy.xlsx,166,Email,null_token,user160@example.com,n/a
+customers_messy.xlsx,166,Signup Date,mixed_date_format,2022-06-03,"June 3, 2022"
+customers_messy.xlsx,167,Email,missing_value,user161@example.com,
+customers_messy.xlsx,168,Signup Date,mixed_date_format,2024-01-31,2024/01/31
+customers_messy.xlsx,168,Lifetime Value,placeholder_token,6189.35,unknown
+customers_messy.xlsx,168,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,169,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,169,Segment,typo_category,Consumer,Consumr
+customers_messy.xlsx,170,Email,case_variant,user164@example.com,USER164@Example.COM
+customers_messy.xlsx,171,Email,case_variant,user165@example.com,USER165@Example.COM
+customers_messy.xlsx,172,Email,missing_value,user166@example.com,
+customers_messy.xlsx,172,Lifetime Value,currency_symbol,7057.38,"$7,057.38"
+customers_messy.xlsx,172,Lifetime Value,number_with_thousands_sep,7057.38,"$7,057.38"
+customers_messy.xlsx,173,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,174,Lifetime Value,currency_symbol,2059.13,"$2,059.13"
+customers_messy.xlsx,174,Lifetime Value,number_with_thousands_sep,2059.13,"$2,059.13"
+customers_messy.xlsx,174,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,177,Lifetime Value,currency_symbol,2539.31,"$2,539.31"
+customers_messy.xlsx,177,Lifetime Value,number_with_thousands_sep,2539.31,"$2,539.31"
+customers_messy.xlsx,177,Country,category_synonym,USA,U.S.A.
+customers_messy.xlsx,178,Signup Date,mixed_date_format,2023-08-08,"August 8, 2023"
+customers_messy.xlsx,179,Full Name,non_breaking_space,Ava Rossi,Ava Rossi
+customers_messy.xlsx,180,Full Name,non_breaking_space,Chloé Rossi,Chloé Rossi
+customers_messy.xlsx,180,Signup Date,mixed_date_format,2023-11-16,"November 16, 2023"
+customers_messy.xlsx,181,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,182,Full Name,extra_whitespace,Priya Lefèvre, Priya Lefèvre  
+customers_messy.xlsx,182,Signup Date,mixed_date_format,2022-02-25,2022/02/25
+customers_messy.xlsx,183,Full Name,non_breaking_space,Lucas Peña,Lucas Peña
+customers_messy.xlsx,183,Signup Date,mixed_date_format,2023-01-06,2023/01/06
+customers_messy.xlsx,183,Active,missing_value,,
+customers_messy.xlsx,185,Email,missing_value,user179@example.com,
+customers_messy.xlsx,185,Signup Date,mixed_date_format,2022-10-18,2022/10/18
+customers_messy.xlsx,185,Lifetime Value,currency_symbol,1309.53,"$1,309.53"
+customers_messy.xlsx,185,Lifetime Value,number_with_thousands_sep,1309.53,"$1,309.53"
+customers_messy.xlsx,186,Email,null_token,user180@example.com,n/a
+customers_messy.xlsx,188,Lifetime Value,currency_symbol,7056.63,"$7,056.63"
+customers_messy.xlsx,188,Lifetime Value,number_with_thousands_sep,7056.63,"$7,056.63"
+customers_messy.xlsx,188,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,189,Signup Date,mixed_date_format,2023-07-15,"July 15, 2023"
+customers_messy.xlsx,190,,empty_row,,
+customers_messy.xlsx,191,Email,missing_value,user184@example.com,
+customers_messy.xlsx,191,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,193,Signup Date,mixed_date_format,2022-05-14,"May 14, 2022"
+customers_messy.xlsx,194,Signup Date,missing_value,2022-11-07,
+customers_messy.xlsx,194,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,196,Lifetime Value,currency_symbol,1704.5,"$1,704.50"
+customers_messy.xlsx,196,Lifetime Value,number_with_thousands_sep,1704.5,"$1,704.50"
+customers_messy.xlsx,197,Email,case_variant,user190@example.com,USER190@Example.COM
+customers_messy.xlsx,197,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,198,Full Name,non_breaking_space,Chloé Peña,Chloé Peña
+customers_messy.xlsx,198,Country,case_variant,UK,uk 
+customers_messy.xlsx,198,Country,extra_whitespace,UK,uk 
+customers_messy.xlsx,199,Signup Date,mixed_date_format,2024-02-20,"February 20, 2024"
+customers_messy.xlsx,199,Lifetime Value,currency_symbol,564.73,$564.73
+customers_messy.xlsx,200,Email,case_variant,user193@example.com,USER193@Example.COM
+customers_messy.xlsx,200,Signup Date,mixed_date_format,2022-09-30,2022/09/30
+customers_messy.xlsx,201,Country,typo_category,Canada,Canda
+customers_messy.xlsx,202,Segment,case_variant,SMB,smb
+customers_messy.xlsx,204,Full Name,extra_whitespace,Chloé Rossi, Chloé Rossi  
+customers_messy.xlsx,204,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,205,Segment,case_variant,SMB,smb
+customers_messy.xlsx,206,Signup Date,mixed_date_format,2022-08-29,2022/08/29
+customers_messy.xlsx,206,Lifetime Value,missing_value,3801.93,
+customers_messy.xlsx,206,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,206,Country,case_variant,USA,usa
+customers_messy.xlsx,207,Full Name,non_breaking_space,Noah Rossi,Noah Rossi
+customers_messy.xlsx,207,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,209,Signup Date,mixed_date_format,2022-11-01,2022/11/01
+customers_messy.xlsx,209,Active,missing_value,,
+customers_messy.xlsx,210,Email,case_variant,user203@example.com,USER203@Example.COM
+customers_messy.xlsx,211,Signup Date,mixed_date_format,2022-01-25,2022/01/25
+customers_messy.xlsx,211,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,212,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,212,Segment,typo_category,Consumer,Consumr
+customers_messy.xlsx,214,Signup Date,mixed_date_format,2022-05-25,2022/05/25
+customers_messy.xlsx,215,Lifetime Value,currency_symbol,2012.46,"$2,012.46"
+customers_messy.xlsx,215,Lifetime Value,number_with_thousands_sep,2012.46,"$2,012.46"
+customers_messy.xlsx,215,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,215,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,216,Full Name,zero_width_space,Priya Schröder,Priya Schröder​
+customers_messy.xlsx,216,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,217,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,217,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,218,Full Name,extra_whitespace,Mia Åberg, Mia Åberg  
+customers_messy.xlsx,218,Email,case_variant,user211@example.com,USER211@Example.COM
+customers_messy.xlsx,218,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,219,Signup Date,mixed_date_format,2023-01-16,"January 16, 2023"
+customers_messy.xlsx,221,Email,missing_value,user214@example.com,
+customers_messy.xlsx,221,Signup Date,missing_value,2022-11-09,
+customers_messy.xlsx,222,Signup Date,missing_value,2024-01-25,
+customers_messy.xlsx,223,Full Name,extra_whitespace,Emma Åberg, Emma Åberg  
+customers_messy.xlsx,224,Signup Date,missing_value,2022-02-18,
+customers_messy.xlsx,225,Signup Date,missing_value,2022-01-09,
+customers_messy.xlsx,226,Email,case_variant,user219@example.com,USER219@Example.COM
+customers_messy.xlsx,226,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,227,,duplicate_row,,
+customers_messy.xlsx,228,Lifetime Value,missing_value,5539.69,
+customers_messy.xlsx,229,Email,null_token,user221@example.com,n/a
+customers_messy.xlsx,230,Segment,case_variant,Enterprise,enterprise
+customers_messy.xlsx,230,Country,case_variant,UK,uk 
+customers_messy.xlsx,230,Country,extra_whitespace,UK,uk 
+customers_messy.xlsx,231,Email,case_variant,user223@example.com,USER223@Example.COM
+customers_messy.xlsx,231,Lifetime Value,missing_value,5686.42,
+customers_messy.xlsx,231,Segment,case_variant,Consumer,CONSUMER
+customers_messy.xlsx,232,Email,null_token,user224@example.com,n/a
+customers_messy.xlsx,233,Full Name,zero_width_space,Priya Lefèvre,Priya Lefèvre​
+customers_messy.xlsx,233,Email,missing_value,user225@example.com,
+customers_messy.xlsx,233,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,235,Full Name,zero_width_space,Jürgen Lefèvre,Jürgen Lefèvre​
+customers_messy.xlsx,235,Email,null_token,user227@example.com,n/a
+customers_messy.xlsx,236,Signup Date,missing_value,2022-05-23,
+customers_messy.xlsx,237,Full Name,non_breaking_space,Emma Schröder,Emma Schröder
+customers_messy.xlsx,237,Email,case_variant,user229@example.com,USER229@Example.COM
+customers_messy.xlsx,237,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,238,Signup Date,mixed_date_format,2022-11-23,"November 23, 2022"
+customers_messy.xlsx,238,Country,case_variant,USA,usa
+customers_messy.xlsx,239,Email,case_variant,user231@example.com,USER231@Example.COM
+customers_messy.xlsx,239,Lifetime Value,missing_value,7457.19,
+customers_messy.xlsx,239,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,240,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,241,Signup Date,mixed_date_format,2022-02-08,"February 8, 2022"
+customers_messy.xlsx,241,Segment,typo_category,Consumer,Consumr
+customers_messy.xlsx,241,Country,category_synonym,USA,U.S.A.
+customers_messy.xlsx,242,Full Name,non_breaking_space,Søren Peña,Søren Peña
+customers_messy.xlsx,242,Country,case_variant,USA,usa
+customers_messy.xlsx,243,Active,boolean_variant,TRUE,yes
+customers_messy.xlsx,244,Segment,case_variant,SMB,smb
+customers_messy.xlsx,245,Email,null_token,user237@example.com,n/a
+customers_messy.xlsx,246,Email,null_token,user238@example.com,n/a
+customers_messy.xlsx,246,Country,case_variant,UK,uk 
+customers_messy.xlsx,246,Country,extra_whitespace,UK,uk 
+customers_messy.xlsx,247,Lifetime Value,currency_symbol,905.67,$905.67
+customers_messy.xlsx,247,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,248,Active,missing_value,,
+customers_messy.xlsx,249,Full Name,extra_whitespace,Noah Smith, Noah Smith  
+customers_messy.xlsx,250,Signup Date,missing_value,2023-12-17,
+customers_messy.xlsx,250,Active,boolean_variant,TRUE,Y
+customers_messy.xlsx,251,Email,null_token,user243@example.com,n/a
+customers_messy.xlsx,251,Lifetime Value,currency_symbol,4768.56,"$4,768.56"
+customers_messy.xlsx,251,Lifetime Value,number_with_thousands_sep,4768.56,"$4,768.56"
+customers_messy.xlsx,252,Full Name,non_breaking_space,Mia Dubois,Mia Dubois
+customers_messy.xlsx,253,Signup Date,missing_value,2023-07-06,
+customers_messy.xlsx,253,Lifetime Value,placeholder_token,3376.41,unknown
+customers_messy.xlsx,254,Signup Date,mixed_date_format,2024-04-02,"April 2, 2024"
+customers_messy.xlsx,255,Signup Date,mixed_date_format,2023-12-06,2023/12/06
+customers_messy.xlsx,255,Active,boolean_variant,FALSE,no
+customers_messy.xlsx,256,Country,category_synonym,USA,U.S.A.
+hr_survey_messy.csv,0,Comments,duplicate_header,,Comments
+hr_survey_messy.csv,0,,empty_header,,
+hr_survey_messy.csv,0,,utf8_bom,,UTF-8 BOM
+hr_survey_messy.csv,1,Start Date,ambiguous_date,2017-12-02,12/02/2017
+hr_survey_messy.csv,1,Manager,missing_value,Anna Nuñez,
+hr_survey_messy.csv,2,Start Date,ambiguous_date,2024-06-05,06/05/2024
+hr_survey_messy.csv,3,Start Date,ambiguous_date,2018-05-12,05/12/2018
+hr_survey_messy.csv,3,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,4,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,4,Start Date,ambiguous_date,2020-12-11,12/11/2020
+hr_survey_messy.csv,4,Salary,currency_symbol,118000,"$118,000"
+hr_survey_messy.csv,4,Salary,number_with_thousands_sep,118000,"$118,000"
+hr_survey_messy.csv,4,,stray_marker,,x
+hr_survey_messy.csv,5,Start Date,ambiguous_date,2020-07-02,07/02/2020
+hr_survey_messy.csv,5,Satisfaction,missing_value,1,
+hr_survey_messy.csv,5,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,5,,stray_marker,,x
+hr_survey_messy.csv,6,Start Date,ambiguous_date,2016-05-11,05/11/2016
+hr_survey_messy.csv,6,,stray_marker,,x
+hr_survey_messy.csv,7,Start Date,ambiguous_date,2023-10-06,10/06/2023
+hr_survey_messy.csv,7,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,7,,stray_marker,,x
+hr_survey_messy.csv,8,Start Date,ambiguous_date,2020-08-07,08/07/2020
+hr_survey_messy.csv,8,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,8,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,9,Start Date,ambiguous_date,2017-07-12,07/12/2017
+hr_survey_messy.csv,10,Department,typo_category,Marketing,Markting
+hr_survey_messy.csv,10,Start Date,ambiguous_date,2021-11-12,11/12/2021
+hr_survey_messy.csv,10,Manager,missing_value,Søren Nuñez,
+hr_survey_messy.csv,11,Start Date,ambiguous_date,2017-10-03,10/03/2017
+hr_survey_messy.csv,11,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,12,Start Date,ambiguous_date,2024-10-06,10/06/2024
+hr_survey_messy.csv,12,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,13,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,13,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,13,Start Date,ambiguous_date,2024-06-04,06/04/2024
+hr_survey_messy.csv,13,Salary,missing_value,75000,
+hr_survey_messy.csv,13,,stray_marker,,x
+hr_survey_messy.csv,14,Start Date,ambiguous_date,2024-05-12,05/12/2024
+hr_survey_messy.csv,15,Start Date,ambiguous_date,2021-06-04,06/04/2021
+hr_survey_messy.csv,15,Remote,boolean_variant,N,n
+hr_survey_messy.csv,15,Satisfaction,null_token,5,?
+hr_survey_messy.csv,16,Start Date,ambiguous_date,2020-06-11,06/11/2020
+hr_survey_messy.csv,16,,stray_marker,,x
+hr_survey_messy.csv,17,Start Date,ambiguous_date,2015-11-08,11/08/2015
+hr_survey_messy.csv,17,,stray_marker,,x
+hr_survey_messy.csv,18,Start Date,ambiguous_date,2023-09-12,09/12/2023
+hr_survey_messy.csv,18,Salary,outlier,83000,9999999
+hr_survey_messy.csv,19,Start Date,ambiguous_date,2018-02-10,02/10/2018
+hr_survey_messy.csv,19,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,19,,stray_marker,,x
+hr_survey_messy.csv,20,Start Date,ambiguous_date,2017-11-09,11/09/2017
+hr_survey_messy.csv,21,Start Date,ambiguous_date,2021-12-08,12/08/2021
+hr_survey_messy.csv,22,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,22,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,22,Start Date,ambiguous_date,2019-07-02,07/02/2019
+hr_survey_messy.csv,22,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,22,,duplicate_row,,
+hr_survey_messy.csv,23,Start Date,ambiguous_date,2024-09-05,09/05/2024
+hr_survey_messy.csv,24,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,24,Start Date,ambiguous_date,2024-08-01,08/01/2024
+hr_survey_messy.csv,24,Salary,null_token,50000,NULL
+hr_survey_messy.csv,25,Start Date,ambiguous_date,2024-10-04,10/04/2024
+hr_survey_messy.csv,25,Satisfaction,missing_value,4,
+hr_survey_messy.csv,25,Manager,missing_value,Omar Tanaka,
+hr_survey_messy.csv,26,Start Date,ambiguous_date,2015-06-09,06/09/2015
+hr_survey_messy.csv,26,Remote,boolean_variant,N,n
+hr_survey_messy.csv,26,Satisfaction,missing_value,1,
+hr_survey_messy.csv,27,Start Date,ambiguous_date,2022-03-05,03/05/2022
+hr_survey_messy.csv,28,Start Date,ambiguous_date,2019-05-04,05/04/2019
+hr_survey_messy.csv,29,Start Date,ambiguous_date,2021-11-08,11/08/2021
+hr_survey_messy.csv,30,Start Date,ambiguous_date,2021-04-10,04/10/2021
+hr_survey_messy.csv,31,Start Date,ambiguous_date,2016-02-01,02/01/2016
+hr_survey_messy.csv,31,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,32,Start Date,ambiguous_date,2020-02-08,02/08/2020
+hr_survey_messy.csv,32,Salary,currency_symbol,99000,"$99,000"
+hr_survey_messy.csv,32,Salary,number_with_thousands_sep,99000,"$99,000"
+hr_survey_messy.csv,32,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,33,Start Date,ambiguous_date,2022-07-06,07/06/2022
+hr_survey_messy.csv,33,Salary,currency_symbol,134000,"$134,000"
+hr_survey_messy.csv,33,Salary,number_with_thousands_sep,134000,"$134,000"
+hr_survey_messy.csv,34,Start Date,ambiguous_date,2015-11-12,11/12/2015
+hr_survey_messy.csv,34,Salary,currency_symbol,124000,"$124,000"
+hr_survey_messy.csv,34,Salary,number_with_thousands_sep,124000,"$124,000"
+hr_survey_messy.csv,35,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,35,Start Date,ambiguous_date,2016-01-09,01/09/2016
+hr_survey_messy.csv,36,Department,typo_category,Engineering,Enginering
+hr_survey_messy.csv,36,Start Date,ambiguous_date,2017-05-04,05/04/2017
+hr_survey_messy.csv,37,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,37,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,37,Start Date,ambiguous_date,2019-07-02,07/02/2019
+hr_survey_messy.csv,37,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,38,Start Date,ambiguous_date,2019-01-12,01/12/2019
+hr_survey_messy.csv,39,Start Date,ambiguous_date,2021-01-07,01/07/2021
+hr_survey_messy.csv,39,,stray_marker,,x
+hr_survey_messy.csv,40,Department,typo_category,Engineering,Enginering
+hr_survey_messy.csv,40,Start Date,ambiguous_date,2022-07-08,07/08/2022
+hr_survey_messy.csv,40,Salary,currency_symbol,135000,"$135,000"
+hr_survey_messy.csv,40,Salary,number_with_thousands_sep,135000,"$135,000"
+hr_survey_messy.csv,40,Manager,extra_whitespace,Chloé Peña,Chloé Peña 
+hr_survey_messy.csv,40,,stray_marker,,x
+hr_survey_messy.csv,41,Start Date,ambiguous_date,2023-03-03,03/03/2023
+hr_survey_messy.csv,41,Satisfaction,missing_value,1,
+hr_survey_messy.csv,41,Manager,extra_whitespace,Priya Novak,Priya Novak 
+hr_survey_messy.csv,42,Start Date,ambiguous_date,2018-06-09,06/09/2018
+hr_survey_messy.csv,43,Start Date,ambiguous_date,2021-12-05,12/05/2021
+hr_survey_messy.csv,43,Salary,number_with_thousands_sep,119000,"119,000"
+hr_survey_messy.csv,44,Start Date,ambiguous_date,2024-01-03,01/03/2024
+hr_survey_messy.csv,44,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,44,,duplicate_row,,
+hr_survey_messy.csv,45,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,45,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,45,Start Date,ambiguous_date,2017-08-10,08/10/2017
+hr_survey_messy.csv,46,Start Date,ambiguous_date,2023-12-12,12/12/2023
+hr_survey_messy.csv,46,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,47,Start Date,ambiguous_date,2021-05-03,05/03/2021
+hr_survey_messy.csv,47,Manager,missing_value,Müller Dubois,
+hr_survey_messy.csv,48,Start Date,ambiguous_date,2019-02-10,02/10/2019
+hr_survey_messy.csv,49,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,49,Start Date,ambiguous_date,2017-09-06,09/06/2017
+hr_survey_messy.csv,49,Manager,extra_whitespace,Ava Nuñez,Ava Nuñez 
+hr_survey_messy.csv,50,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,50,Start Date,ambiguous_date,2016-05-01,05/01/2016
+hr_survey_messy.csv,50,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,51,Start Date,ambiguous_date,2016-10-12,10/12/2016
+hr_survey_messy.csv,51,,stray_marker,,x
+hr_survey_messy.csv,52,Start Date,ambiguous_date,2016-07-11,07/11/2016
+hr_survey_messy.csv,52,Salary,currency_symbol,115000,"$115,000"
+hr_survey_messy.csv,52,Salary,number_with_thousands_sep,115000,"$115,000"
+hr_survey_messy.csv,53,Start Date,ambiguous_date,2016-11-01,11/01/2016
+hr_survey_messy.csv,54,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,54,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,54,Start Date,ambiguous_date,2019-10-08,10/08/2019
+hr_survey_messy.csv,55,Start Date,ambiguous_date,2019-03-10,03/10/2019
+hr_survey_messy.csv,56,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,56,Start Date,ambiguous_date,2020-01-12,01/12/2020
+hr_survey_messy.csv,56,Salary,currency_symbol,106000,"$106,000"
+hr_survey_messy.csv,56,Salary,number_with_thousands_sep,106000,"$106,000"
+hr_survey_messy.csv,57,Start Date,ambiguous_date,2015-05-02,05/02/2015
+hr_survey_messy.csv,57,Remote,boolean_variant,N,n
+hr_survey_messy.csv,57,Satisfaction,null_token,4,?
+hr_survey_messy.csv,58,Start Date,ambiguous_date,2019-01-01,01/01/2019
+hr_survey_messy.csv,58,Salary,null_token,128000,NULL
+hr_survey_messy.csv,58,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,59,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,59,Start Date,ambiguous_date,2020-02-01,02/01/2020
+hr_survey_messy.csv,59,Manager,extra_whitespace,Iñaki Nuñez,Iñaki Nuñez 
+hr_survey_messy.csv,60,Start Date,ambiguous_date,2019-10-08,10/08/2019
+hr_survey_messy.csv,60,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,60,,stray_marker,,x
+hr_survey_messy.csv,61,Start Date,ambiguous_date,2020-10-04,10/04/2020
+hr_survey_messy.csv,62,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,62,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,62,Start Date,ambiguous_date,2015-10-01,10/01/2015
+hr_survey_messy.csv,62,Salary,currency_symbol,74000,"$74,000"
+hr_survey_messy.csv,62,Salary,number_with_thousands_sep,74000,"$74,000"
+hr_survey_messy.csv,62,Manager,extra_whitespace,Zoë García,Zoë García 
+hr_survey_messy.csv,63,Start Date,ambiguous_date,2017-04-05,04/05/2017
+hr_survey_messy.csv,63,Manager,extra_whitespace,Liam Åberg,Liam Åberg 
+hr_survey_messy.csv,63,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,64,Start Date,ambiguous_date,2020-11-06,11/06/2020
+hr_survey_messy.csv,65,Start Date,ambiguous_date,2018-04-03,04/03/2018
+hr_survey_messy.csv,66,Start Date,ambiguous_date,2023-01-06,01/06/2023
+hr_survey_messy.csv,66,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,67,Start Date,ambiguous_date,2020-07-06,07/06/2020
+hr_survey_messy.csv,68,Department,case_variant,Finance,finance
+hr_survey_messy.csv,68,Start Date,ambiguous_date,2018-10-06,10/06/2018
+hr_survey_messy.csv,68,Salary,currency_symbol,64000,"$64,000"
+hr_survey_messy.csv,68,Salary,number_with_thousands_sep,64000,"$64,000"
+hr_survey_messy.csv,69,Start Date,ambiguous_date,2019-08-10,08/10/2019
+hr_survey_messy.csv,69,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,70,Start Date,ambiguous_date,2022-05-07,05/07/2022
+hr_survey_messy.csv,70,Salary,currency_symbol,95000,"$95,000"
+hr_survey_messy.csv,70,Salary,number_with_thousands_sep,95000,"$95,000"
+hr_survey_messy.csv,71,Start Date,ambiguous_date,2023-04-04,04/04/2023
+hr_survey_messy.csv,71,Salary,currency_symbol,136000,"$136,000"
+hr_survey_messy.csv,71,Salary,number_with_thousands_sep,136000,"$136,000"
+hr_survey_messy.csv,72,Department,typo_category,Engineering,Enginering
+hr_survey_messy.csv,72,Start Date,ambiguous_date,2015-06-01,06/01/2015
+hr_survey_messy.csv,72,Remote,boolean_variant,N,n
+hr_survey_messy.csv,72,,stray_marker,,x
+hr_survey_messy.csv,73,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,73,Start Date,ambiguous_date,2020-01-07,01/07/2020
+hr_survey_messy.csv,73,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,74,Start Date,ambiguous_date,2016-01-08,01/08/2016
+hr_survey_messy.csv,75,Start Date,ambiguous_date,2017-03-03,03/03/2017
+hr_survey_messy.csv,75,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,76,Start Date,ambiguous_date,2020-07-10,07/10/2020
+hr_survey_messy.csv,77,Start Date,ambiguous_date,2020-11-02,11/02/2020
+hr_survey_messy.csv,77,Satisfaction,null_token,5,?
+hr_survey_messy.csv,77,Manager,extra_whitespace,Jürgen Schröder,Jürgen Schröder 
+hr_survey_messy.csv,78,Start Date,ambiguous_date,2017-11-11,11/11/2017
+hr_survey_messy.csv,78,Salary,number_with_thousands_sep,48000,"48,000"
+hr_survey_messy.csv,79,Start Date,ambiguous_date,2015-06-12,06/12/2015
+hr_survey_messy.csv,80,Start Date,ambiguous_date,2016-10-06,10/06/2016
+hr_survey_messy.csv,80,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,81,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,81,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,81,Start Date,ambiguous_date,2023-08-03,08/03/2023
+hr_survey_messy.csv,81,Salary,number_with_thousands_sep,72000,"72,000"
+hr_survey_messy.csv,82,Start Date,ambiguous_date,2021-05-04,05/04/2021
+hr_survey_messy.csv,83,Start Date,ambiguous_date,2015-11-01,11/01/2015
+hr_survey_messy.csv,83,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,83,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,84,Start Date,ambiguous_date,2022-01-08,01/08/2022
+hr_survey_messy.csv,84,Satisfaction,missing_value,5,
+hr_survey_messy.csv,84,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,85,Start Date,ambiguous_date,2021-10-12,10/12/2021
+hr_survey_messy.csv,85,Manager,extra_whitespace,Müller Tanaka,Müller Tanaka 
+hr_survey_messy.csv,86,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,86,Start Date,ambiguous_date,2021-04-05,04/05/2021
+hr_survey_messy.csv,86,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,87,Start Date,ambiguous_date,2019-07-04,07/04/2019
+hr_survey_messy.csv,88,Start Date,ambiguous_date,2021-10-11,10/11/2021
+hr_survey_messy.csv,88,Satisfaction,missing_value,3,
+hr_survey_messy.csv,89,Start Date,ambiguous_date,2023-11-01,11/01/2023
+hr_survey_messy.csv,89,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,90,Start Date,ambiguous_date,2022-06-12,06/12/2022
+hr_survey_messy.csv,90,Salary,currency_symbol,113000,"$113,000"
+hr_survey_messy.csv,90,Salary,number_with_thousands_sep,113000,"$113,000"
+hr_survey_messy.csv,90,Manager,extra_whitespace,Noah O'Brien,Noah O'Brien 
+hr_survey_messy.csv,90,,stray_marker,,x
+hr_survey_messy.csv,91,Start Date,ambiguous_date,2019-08-02,08/02/2019
+hr_survey_messy.csv,92,Start Date,ambiguous_date,2015-09-10,09/10/2015
+hr_survey_messy.csv,93,Start Date,ambiguous_date,2015-02-10,02/10/2015
+hr_survey_messy.csv,94,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,94,Start Date,ambiguous_date,2022-04-12,04/12/2022
+hr_survey_messy.csv,94,Manager,missing_value,Chloé Schröder,
+hr_survey_messy.csv,95,Start Date,ambiguous_date,2020-01-10,01/10/2020
+hr_survey_messy.csv,96,Start Date,ambiguous_date,2019-02-12,02/12/2019
+hr_survey_messy.csv,96,Manager,extra_whitespace,Emma Novak,Emma Novak 
+hr_survey_messy.csv,97,Department,typo_category,Engineering,Enginering
+hr_survey_messy.csv,97,Start Date,ambiguous_date,2018-11-01,11/01/2018
+hr_survey_messy.csv,98,Start Date,ambiguous_date,2015-12-02,12/02/2015
+hr_survey_messy.csv,99,Start Date,ambiguous_date,2017-05-08,05/08/2017
+hr_survey_messy.csv,99,Salary,number_with_thousands_sep,47000,"47,000"
+hr_survey_messy.csv,99,Satisfaction,null_token,2,?
+hr_survey_messy.csv,99,Manager,extra_whitespace,Zoë Smith,Zoë Smith 
+hr_survey_messy.csv,99,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,100,Start Date,ambiguous_date,2018-09-08,09/08/2018
+hr_survey_messy.csv,100,Salary,currency_symbol,64000,"$64,000"
+hr_survey_messy.csv,100,Salary,number_with_thousands_sep,64000,"$64,000"
+hr_survey_messy.csv,100,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,100,,stray_marker,,x
+hr_survey_messy.csv,101,Start Date,ambiguous_date,2022-09-09,09/09/2022
+hr_survey_messy.csv,101,Salary,currency_symbol,76000,"$76,000"
+hr_survey_messy.csv,101,Salary,number_with_thousands_sep,76000,"$76,000"
+hr_survey_messy.csv,101,Satisfaction,null_token,2,?
+hr_survey_messy.csv,102,Start Date,ambiguous_date,2020-08-11,08/11/2020
+hr_survey_messy.csv,102,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,102,Manager,extra_whitespace,Chloé Åberg,Chloé Åberg 
+hr_survey_messy.csv,103,Department,case_variant,Finance,finance
+hr_survey_messy.csv,103,Start Date,ambiguous_date,2019-03-04,03/04/2019
+hr_survey_messy.csv,103,Satisfaction,null_token,4,?
+hr_survey_messy.csv,104,Start Date,ambiguous_date,2022-03-10,03/10/2022
+hr_survey_messy.csv,104,Salary,missing_value,89000,
+hr_survey_messy.csv,104,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,105,Department,case_variant,Finance,finance
+hr_survey_messy.csv,105,Start Date,ambiguous_date,2015-05-07,05/07/2015
+hr_survey_messy.csv,105,Satisfaction,missing_value,3,
+hr_survey_messy.csv,106,Start Date,ambiguous_date,2021-09-12,09/12/2021
+hr_survey_messy.csv,106,Salary,number_with_thousands_sep,75000,"75,000"
+hr_survey_messy.csv,107,Start Date,ambiguous_date,2023-06-06,06/06/2023
+hr_survey_messy.csv,108,Start Date,ambiguous_date,2019-09-05,09/05/2019
+hr_survey_messy.csv,109,Start Date,ambiguous_date,2021-04-10,04/10/2021
+hr_survey_messy.csv,109,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,109,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,110,Start Date,ambiguous_date,2017-06-10,06/10/2017
+hr_survey_messy.csv,110,Salary,number_with_thousands_sep,93000,"93,000"
+hr_survey_messy.csv,111,Department,typo_category,Marketing,Markting
+hr_survey_messy.csv,111,Start Date,ambiguous_date,2020-07-12,07/12/2020
+hr_survey_messy.csv,112,Start Date,ambiguous_date,2021-10-03,10/03/2021
+hr_survey_messy.csv,112,,duplicate_row,,
+hr_survey_messy.csv,113,Start Date,ambiguous_date,2016-10-07,10/07/2016
+hr_survey_messy.csv,113,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,114,Start Date,ambiguous_date,2016-05-07,05/07/2016
+hr_survey_messy.csv,115,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,115,Start Date,ambiguous_date,2024-08-11,08/11/2024
+hr_survey_messy.csv,116,Start Date,ambiguous_date,2019-03-01,03/01/2019
+hr_survey_messy.csv,116,Remote,boolean_variant,N,n
+hr_survey_messy.csv,116,Manager,missing_value,Sofía Lefèvre,
+hr_survey_messy.csv,117,Start Date,ambiguous_date,2016-06-11,06/11/2016
+hr_survey_messy.csv,117,Satisfaction,missing_value,5,
+hr_survey_messy.csv,118,Start Date,ambiguous_date,2015-09-11,09/11/2015
+hr_survey_messy.csv,118,Manager,extra_whitespace,Zoë Tanaka,Zoë Tanaka 
+hr_survey_messy.csv,118,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,119,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,119,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,119,Start Date,ambiguous_date,2022-01-07,01/07/2022
+hr_survey_messy.csv,120,Start Date,ambiguous_date,2020-10-12,10/12/2020
+hr_survey_messy.csv,120,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,121,Start Date,ambiguous_date,2022-06-05,06/05/2022
+hr_survey_messy.csv,121,,stray_marker,,x
+hr_survey_messy.csv,122,Start Date,ambiguous_date,2018-03-08,03/08/2018
+hr_survey_messy.csv,122,Salary,currency_symbol,73000,"$73,000"
+hr_survey_messy.csv,122,Salary,number_with_thousands_sep,73000,"$73,000"
+hr_survey_messy.csv,123,Start Date,ambiguous_date,2022-10-07,10/07/2022
+hr_survey_messy.csv,123,Salary,currency_symbol,98000,"$98,000"
+hr_survey_messy.csv,123,Salary,number_with_thousands_sep,98000,"$98,000"
+hr_survey_messy.csv,123,Manager,extra_whitespace,Chloé Tanaka,Chloé Tanaka 
+hr_survey_messy.csv,124,Department,typo_category,Marketing,Markting
+hr_survey_messy.csv,124,Start Date,ambiguous_date,2021-11-08,11/08/2021
+hr_survey_messy.csv,125,Department,case_variant,Finance,finance
+hr_survey_messy.csv,125,Start Date,ambiguous_date,2017-03-06,03/06/2017
+hr_survey_messy.csv,125,Manager,extra_whitespace,Wei Peña,Wei Peña 
+hr_survey_messy.csv,126,Start Date,ambiguous_date,2023-03-06,03/06/2023
+hr_survey_messy.csv,126,Salary,currency_symbol,86000,"$86,000"
+hr_survey_messy.csv,126,Salary,number_with_thousands_sep,86000,"$86,000"
+hr_survey_messy.csv,127,Start Date,ambiguous_date,2018-04-12,04/12/2018
+hr_survey_messy.csv,127,Manager,extra_whitespace,Noah García,Noah García 
+hr_survey_messy.csv,128,Department,case_variant,Finance,finance
+hr_survey_messy.csv,128,Start Date,ambiguous_date,2024-09-10,09/10/2024
+hr_survey_messy.csv,128,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,129,Start Date,ambiguous_date,2017-03-06,03/06/2017
+hr_survey_messy.csv,129,Satisfaction,missing_value,4,
+hr_survey_messy.csv,130,Start Date,ambiguous_date,2017-04-07,04/07/2017
+hr_survey_messy.csv,131,Department,case_variant,Finance,finance
+hr_survey_messy.csv,131,Start Date,ambiguous_date,2018-07-09,07/09/2018
+hr_survey_messy.csv,132,Start Date,ambiguous_date,2016-09-12,09/12/2016
+hr_survey_messy.csv,132,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,133,Start Date,ambiguous_date,2022-09-11,09/11/2022
+hr_survey_messy.csv,133,Remote,boolean_variant,N,n
+hr_survey_messy.csv,133,Satisfaction,missing_value,2,
+hr_survey_messy.csv,134,Start Date,ambiguous_date,2019-08-11,08/11/2019
+hr_survey_messy.csv,134,Salary,missing_value,67000,
+hr_survey_messy.csv,134,,stray_marker,,x
+hr_survey_messy.csv,135,Department,case_variant,Finance,finance
+hr_survey_messy.csv,135,Start Date,ambiguous_date,2016-11-02,11/02/2016
+hr_survey_messy.csv,135,,stray_marker,,x
+hr_survey_messy.csv,136,Start Date,ambiguous_date,2024-02-03,02/03/2024
+hr_survey_messy.csv,136,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,137,Department,typo_category,Engineering,Enginering
+hr_survey_messy.csv,137,Start Date,ambiguous_date,2022-09-02,09/02/2022
+hr_survey_messy.csv,138,Start Date,ambiguous_date,2015-02-04,02/04/2015
+hr_survey_messy.csv,138,,stray_marker,,x
+hr_survey_messy.csv,139,Start Date,ambiguous_date,2023-08-05,08/05/2023
+hr_survey_messy.csv,139,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,140,Start Date,ambiguous_date,2022-12-08,12/08/2022
+hr_survey_messy.csv,141,Start Date,ambiguous_date,2019-05-02,05/02/2019
+hr_survey_messy.csv,141,Salary,currency_symbol,107000,"$107,000"
+hr_survey_messy.csv,141,Salary,number_with_thousands_sep,107000,"$107,000"
+hr_survey_messy.csv,142,Start Date,ambiguous_date,2016-09-12,09/12/2016
+hr_survey_messy.csv,142,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,143,Start Date,ambiguous_date,2017-12-05,12/05/2017
+hr_survey_messy.csv,143,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,143,,stray_marker,,x
+hr_survey_messy.csv,144,Start Date,ambiguous_date,2019-01-11,01/11/2019
+hr_survey_messy.csv,144,Salary,currency_symbol,90000,"$90,000"
+hr_survey_messy.csv,144,Salary,number_with_thousands_sep,90000,"$90,000"
+hr_survey_messy.csv,145,Start Date,ambiguous_date,2017-06-09,06/09/2017
+hr_survey_messy.csv,145,Manager,missing_value,Liam Novak,
+hr_survey_messy.csv,146,Start Date,ambiguous_date,2020-12-01,12/01/2020
+hr_survey_messy.csv,146,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,147,Start Date,ambiguous_date,2020-02-09,02/09/2020
+hr_survey_messy.csv,148,Department,typo_category,Marketing,Markting
+hr_survey_messy.csv,148,Start Date,ambiguous_date,2021-08-09,08/09/2021
+hr_survey_messy.csv,149,Start Date,ambiguous_date,2024-09-07,09/07/2024
+hr_survey_messy.csv,149,Salary,currency_symbol,57000,"$57,000"
+hr_survey_messy.csv,149,Salary,number_with_thousands_sep,57000,"$57,000"
+hr_survey_messy.csv,149,Manager,missing_value,Chloé O'Brien,
+hr_survey_messy.csv,149,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,149,,stray_marker,,x
+hr_survey_messy.csv,150,Start Date,ambiguous_date,2019-11-07,11/07/2019
+hr_survey_messy.csv,151,Start Date,ambiguous_date,2015-02-12,02/12/2015
+hr_survey_messy.csv,152,Start Date,ambiguous_date,2017-07-03,07/03/2017
+hr_survey_messy.csv,153,Start Date,ambiguous_date,2016-01-11,01/11/2016
+hr_survey_messy.csv,153,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,154,Start Date,ambiguous_date,2023-04-07,04/07/2023
+hr_survey_messy.csv,155,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,155,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,155,Start Date,ambiguous_date,2020-11-02,11/02/2020
+hr_survey_messy.csv,156,Start Date,ambiguous_date,2017-08-12,08/12/2017
+hr_survey_messy.csv,156,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,157,Start Date,ambiguous_date,2020-11-07,11/07/2020
+hr_survey_messy.csv,157,,stray_marker,,x
+hr_survey_messy.csv,158,Start Date,ambiguous_date,2017-01-03,01/03/2017
+hr_survey_messy.csv,158,Manager,extra_whitespace,Renée Lefèvre,Renée Lefèvre 
+hr_survey_messy.csv,159,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,159,Start Date,ambiguous_date,2016-04-08,04/08/2016
+hr_survey_messy.csv,159,Manager,extra_whitespace,Emma Silva,Emma Silva 
+hr_survey_messy.csv,159,,stray_marker,,x
+hr_survey_messy.csv,160,Start Date,ambiguous_date,2020-03-12,03/12/2020
+hr_survey_messy.csv,160,Salary,currency_symbol,117000,"$117,000"
+hr_survey_messy.csv,160,Salary,number_with_thousands_sep,117000,"$117,000"
+hr_survey_messy.csv,160,,stray_marker,,x
+hr_survey_messy.csv,161,Start Date,ambiguous_date,2015-02-12,02/12/2015
+hr_survey_messy.csv,161,Salary,missing_value,93000,
+hr_survey_messy.csv,161,Satisfaction,missing_value,1,
+hr_survey_messy.csv,161,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,162,Start Date,ambiguous_date,2023-09-05,09/05/2023
+hr_survey_messy.csv,163,Start Date,ambiguous_date,2015-09-03,09/03/2015
+hr_survey_messy.csv,163,Manager,extra_whitespace,Jürgen Peña,Jürgen Peña 
+hr_survey_messy.csv,163,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,164,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,164,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,164,Start Date,ambiguous_date,2022-06-11,06/11/2022
+hr_survey_messy.csv,165,Start Date,ambiguous_date,2022-12-11,12/11/2022
+hr_survey_messy.csv,165,Salary,number_with_thousands_sep,107000,"107,000"
+hr_survey_messy.csv,166,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,166,Start Date,ambiguous_date,2021-05-10,05/10/2021
+hr_survey_messy.csv,167,Start Date,ambiguous_date,2016-08-10,08/10/2016
+hr_survey_messy.csv,168,Start Date,ambiguous_date,2015-02-09,02/09/2015
+hr_survey_messy.csv,168,Salary,currency_symbol,109000,"$109,000"
+hr_survey_messy.csv,168,Salary,number_with_thousands_sep,109000,"$109,000"
+hr_survey_messy.csv,169,Start Date,ambiguous_date,2019-02-11,02/11/2019
+hr_survey_messy.csv,169,,stray_marker,,x
+hr_survey_messy.csv,170,Start Date,ambiguous_date,2020-10-12,10/12/2020
+hr_survey_messy.csv,170,Salary,missing_value,40000,
+hr_survey_messy.csv,171,Start Date,ambiguous_date,2024-03-02,03/02/2024
+hr_survey_messy.csv,171,Manager,extra_whitespace,Anna O'Brien,Anna O'Brien 
+hr_survey_messy.csv,172,Start Date,ambiguous_date,2022-01-10,01/10/2022
+hr_survey_messy.csv,172,Salary,missing_value,43000,
+hr_survey_messy.csv,172,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,173,Start Date,ambiguous_date,2018-07-02,07/02/2018
+hr_survey_messy.csv,173,,stray_marker,,x
+hr_survey_messy.csv,174,Start Date,ambiguous_date,2015-10-10,10/10/2015
+hr_survey_messy.csv,175,Start Date,ambiguous_date,2018-08-08,08/08/2018
+hr_survey_messy.csv,175,Remote,boolean_variant,N,n
+hr_survey_messy.csv,176,Start Date,ambiguous_date,2016-02-02,02/02/2016
+hr_survey_messy.csv,177,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,177,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,177,Start Date,ambiguous_date,2015-01-11,01/11/2015
+hr_survey_messy.csv,177,Satisfaction,null_token,2,?
+hr_survey_messy.csv,178,Start Date,ambiguous_date,2023-02-03,02/03/2023
+hr_survey_messy.csv,179,Start Date,ambiguous_date,2019-10-11,10/11/2019
+hr_survey_messy.csv,180,Start Date,ambiguous_date,2022-04-02,04/02/2022
+hr_survey_messy.csv,180,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,181,Start Date,ambiguous_date,2021-09-09,09/09/2021
+hr_survey_messy.csv,181,Satisfaction,missing_value,3,
+hr_survey_messy.csv,182,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,182,Start Date,ambiguous_date,2015-11-11,11/11/2015
+hr_survey_messy.csv,182,Salary,currency_symbol,78000,"$78,000"
+hr_survey_messy.csv,182,Salary,number_with_thousands_sep,78000,"$78,000"
+hr_survey_messy.csv,182,Remote,boolean_variant,N,n
+hr_survey_messy.csv,183,Start Date,ambiguous_date,2015-12-04,12/04/2015
+hr_survey_messy.csv,184,Start Date,ambiguous_date,2020-08-12,08/12/2020
+hr_survey_messy.csv,184,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,185,Start Date,ambiguous_date,2024-03-10,03/10/2024
+hr_survey_messy.csv,185,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,185,,stray_marker,,x
+hr_survey_messy.csv,186,Start Date,ambiguous_date,2018-04-02,04/02/2018
+hr_survey_messy.csv,186,Satisfaction,missing_value,1,
+hr_survey_messy.csv,187,Start Date,ambiguous_date,2017-09-05,09/05/2017
+hr_survey_messy.csv,188,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,188,Start Date,ambiguous_date,2017-09-08,09/08/2017
+hr_survey_messy.csv,188,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,189,Start Date,ambiguous_date,2016-04-02,04/02/2016
+hr_survey_messy.csv,189,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,190,Start Date,ambiguous_date,2018-01-01,01/01/2018
+hr_survey_messy.csv,190,Satisfaction,missing_value,5,
+hr_survey_messy.csv,191,Start Date,ambiguous_date,2015-08-11,08/11/2015
+hr_survey_messy.csv,192,Start Date,ambiguous_date,2017-11-01,11/01/2017
+hr_survey_messy.csv,193,Start Date,ambiguous_date,2020-11-11,11/11/2020
+hr_survey_messy.csv,194,Department,typo_category,Engineering,Enginering
+hr_survey_messy.csv,194,Start Date,ambiguous_date,2021-11-06,11/06/2021
+hr_survey_messy.csv,194,Salary,missing_value,65000,
+hr_survey_messy.csv,194,,stray_marker,,x
+hr_survey_messy.csv,195,Start Date,ambiguous_date,2016-01-11,01/11/2016
+hr_survey_messy.csv,196,Start Date,ambiguous_date,2015-11-12,11/12/2015
+hr_survey_messy.csv,196,Salary,currency_symbol,136000,"$136,000"
+hr_survey_messy.csv,196,Salary,number_with_thousands_sep,136000,"$136,000"
+hr_survey_messy.csv,196,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,197,Start Date,ambiguous_date,2022-09-10,09/10/2022
+hr_survey_messy.csv,198,Start Date,ambiguous_date,2021-09-10,09/10/2021
+hr_survey_messy.csv,199,Start Date,ambiguous_date,2019-02-03,02/03/2019
+hr_survey_messy.csv,199,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,200,Department,typo_category,Marketing,Markting
+hr_survey_messy.csv,200,Start Date,ambiguous_date,2020-04-05,04/05/2020
+hr_survey_messy.csv,201,Start Date,ambiguous_date,2024-01-11,01/11/2024
+hr_survey_messy.csv,202,Start Date,ambiguous_date,2023-05-02,05/02/2023
+hr_survey_messy.csv,202,,stray_marker,,x
+hr_survey_messy.csv,203,Start Date,ambiguous_date,2022-07-09,07/09/2022
+hr_survey_messy.csv,203,Salary,currency_symbol,64000,"$64,000"
+hr_survey_messy.csv,203,Salary,number_with_thousands_sep,64000,"$64,000"
+hr_survey_messy.csv,204,Start Date,ambiguous_date,2023-08-02,08/02/2023
+hr_survey_messy.csv,204,,stray_marker,,x
+hr_survey_messy.csv,205,Start Date,ambiguous_date,2022-08-03,08/03/2022
+hr_survey_messy.csv,205,,stray_marker,,x
+hr_survey_messy.csv,206,Department,typo_category,Engineering,Enginering
+hr_survey_messy.csv,206,Start Date,ambiguous_date,2020-12-11,12/11/2020
+hr_survey_messy.csv,206,Satisfaction,missing_value,5,
+hr_survey_messy.csv,207,Start Date,ambiguous_date,2021-09-02,09/02/2021
+hr_survey_messy.csv,207,Manager,extra_whitespace,Priya Smith,Priya Smith 
+hr_survey_messy.csv,207,Salary,outlier,44000,1
+hr_survey_messy.csv,208,Start Date,ambiguous_date,2024-06-08,06/08/2024
+hr_survey_messy.csv,209,Start Date,ambiguous_date,2017-09-05,09/05/2017
+hr_survey_messy.csv,209,Remote,boolean_variant,N,n
+hr_survey_messy.csv,210,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,210,Start Date,ambiguous_date,2021-02-07,02/07/2021
+hr_survey_messy.csv,211,Department,case_variant,Finance,finance
+hr_survey_messy.csv,211,Start Date,ambiguous_date,2016-03-09,03/09/2016
+hr_survey_messy.csv,212,Start Date,ambiguous_date,2024-01-03,01/03/2024
+hr_survey_messy.csv,212,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,213,Start Date,ambiguous_date,2018-04-01,04/01/2018
+hr_survey_messy.csv,213,Salary,currency_symbol,124000,"$124,000"
+hr_survey_messy.csv,213,Salary,number_with_thousands_sep,124000,"$124,000"
+hr_survey_messy.csv,214,Start Date,ambiguous_date,2024-12-07,12/07/2024
+hr_survey_messy.csv,215,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,215,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,215,Start Date,ambiguous_date,2023-08-03,08/03/2023
+hr_survey_messy.csv,215,Salary,number_with_thousands_sep,72000,"72,000"
+hr_survey_messy.csv,215,,duplicate_row,,
+hr_survey_messy.csv,216,Start Date,ambiguous_date,2016-03-02,03/02/2016
+hr_survey_messy.csv,217,Start Date,ambiguous_date,2016-10-07,10/07/2016
+hr_survey_messy.csv,217,Salary,number_with_thousands_sep,95000,"95,000"
+hr_survey_messy.csv,218,Start Date,ambiguous_date,2017-04-07,04/07/2017
+hr_survey_messy.csv,218,Satisfaction,missing_value,4,
+hr_survey_messy.csv,219,Start Date,ambiguous_date,2018-08-03,08/03/2018
+hr_survey_messy.csv,220,Start Date,ambiguous_date,2018-03-03,03/03/2018
+hr_survey_messy.csv,221,Start Date,ambiguous_date,2017-07-02,07/02/2017
+hr_survey_messy.csv,222,Department,case_variant,Finance,finance
+hr_survey_messy.csv,222,Start Date,ambiguous_date,2017-04-09,04/09/2017
+hr_survey_messy.csv,223,Start Date,ambiguous_date,2018-05-06,05/06/2018
+hr_survey_messy.csv,224,Start Date,ambiguous_date,2020-02-02,02/02/2020
+hr_survey_messy.csv,224,Manager,extra_whitespace,Priya Dubois,Priya Dubois 
+hr_survey_messy.csv,225,Start Date,ambiguous_date,2020-03-10,03/10/2020
+hr_survey_messy.csv,226,Start Date,ambiguous_date,2022-06-05,06/05/2022
+hr_survey_messy.csv,226,Salary,currency_symbol,96000,"$96,000"
+hr_survey_messy.csv,226,Salary,number_with_thousands_sep,96000,"$96,000"
+hr_survey_messy.csv,226,,stray_marker,,x
+hr_survey_messy.csv,227,Start Date,ambiguous_date,2023-06-12,06/12/2023
+hr_survey_messy.csv,228,Start Date,ambiguous_date,2023-06-08,06/08/2023
+hr_survey_messy.csv,228,Salary,number_with_thousands_sep,88000,"88,000"
+hr_survey_messy.csv,229,Start Date,ambiguous_date,2022-08-12,08/12/2022
+hr_survey_messy.csv,229,Salary,currency_symbol,102000,"$102,000"
+hr_survey_messy.csv,229,Salary,number_with_thousands_sep,102000,"$102,000"
+hr_survey_messy.csv,229,Remote,boolean_variant,N,n
+hr_survey_messy.csv,230,Start Date,ambiguous_date,2017-10-09,10/09/2017
+hr_survey_messy.csv,230,Salary,number_with_thousands_sep,45000,"45,000"
+hr_survey_messy.csv,231,Start Date,ambiguous_date,2018-08-08,08/08/2018
+hr_survey_messy.csv,231,Manager,missing_value,Omar Lefèvre,
+hr_survey_messy.csv,231,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,231,,stray_marker,,x
+hr_survey_messy.csv,232,Start Date,ambiguous_date,2023-05-09,05/09/2023
+hr_survey_messy.csv,232,Satisfaction,null_token,5,?
+hr_survey_messy.csv,232,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,232,,stray_marker,,x
+hr_survey_messy.csv,233,Start Date,ambiguous_date,2021-12-03,12/03/2021
+hr_survey_messy.csv,233,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,233,Manager,extra_whitespace,Ava García,Ava García 
+hr_survey_messy.csv,233,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,234,Start Date,ambiguous_date,2020-11-06,11/06/2020
+hr_survey_messy.csv,234,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,235,Start Date,ambiguous_date,2016-12-12,12/12/2016
+hr_survey_messy.csv,236,Start Date,ambiguous_date,2015-08-08,08/08/2015
+hr_survey_messy.csv,237,Start Date,ambiguous_date,2023-11-10,11/10/2023
+hr_survey_messy.csv,237,Salary,currency_symbol,53000,"$53,000"
+hr_survey_messy.csv,237,Salary,number_with_thousands_sep,53000,"$53,000"
+hr_survey_messy.csv,237,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,238,Start Date,ambiguous_date,2022-06-06,06/06/2022
+hr_survey_messy.csv,238,Manager,extra_whitespace,Noah Lefèvre,Noah Lefèvre 
+hr_survey_messy.csv,238,,stray_marker,,x
+hr_survey_messy.csv,239,Start Date,ambiguous_date,2023-05-10,05/10/2023
+hr_survey_messy.csv,240,Start Date,ambiguous_date,2019-08-10,08/10/2019
+hr_survey_messy.csv,240,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,241,Start Date,ambiguous_date,2016-10-06,10/06/2016
+hr_survey_messy.csv,242,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,242,Start Date,ambiguous_date,2024-07-02,07/02/2024
+hr_survey_messy.csv,243,Start Date,ambiguous_date,2015-08-10,08/10/2015
+hr_survey_messy.csv,244,Start Date,ambiguous_date,2021-05-12,05/12/2021
+hr_survey_messy.csv,244,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,244,Satisfaction,missing_value,1,
+hr_survey_messy.csv,244,Manager,extra_whitespace,Emma Nuñez,Emma Nuñez 
+hr_survey_messy.csv,244,,stray_marker,,x
+hr_survey_messy.csv,245,Start Date,ambiguous_date,2022-01-04,01/04/2022
+hr_survey_messy.csv,246,Start Date,ambiguous_date,2021-10-03,10/03/2021
+hr_survey_messy.csv,247,Start Date,ambiguous_date,2016-12-02,12/02/2016
+hr_survey_messy.csv,248,Start Date,ambiguous_date,2015-01-02,01/02/2015
+hr_survey_messy.csv,248,Manager,extra_whitespace,Müller Åberg,Müller Åberg 
+hr_survey_messy.csv,249,Start Date,ambiguous_date,2019-09-07,09/07/2019
+hr_survey_messy.csv,250,Start Date,ambiguous_date,2024-08-06,08/06/2024
+hr_survey_messy.csv,251,Start Date,ambiguous_date,2017-05-10,05/10/2017
+hr_survey_messy.csv,251,Remote,boolean_variant,N,n
+hr_survey_messy.csv,252,Start Date,ambiguous_date,2017-01-11,01/11/2017
+hr_survey_messy.csv,252,Salary,currency_symbol,59000,"$59,000"
+hr_survey_messy.csv,252,Salary,number_with_thousands_sep,59000,"$59,000"
+hr_survey_messy.csv,252,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,252,Manager,missing_value,Zoë García,
+hr_survey_messy.csv,252,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,253,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,253,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,253,Start Date,ambiguous_date,2023-07-07,07/07/2023
+hr_survey_messy.csv,254,Start Date,ambiguous_date,2017-01-03,01/03/2017
+hr_survey_messy.csv,254,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,255,Start Date,ambiguous_date,2022-06-05,06/05/2022
+hr_survey_messy.csv,255,Salary,currency_symbol,96000,"$96,000"
+hr_survey_messy.csv,255,Salary,number_with_thousands_sep,96000,"$96,000"
+hr_survey_messy.csv,255,,stray_marker,,x
+hr_survey_messy.csv,255,,duplicate_row,,
+hr_survey_messy.csv,256,Start Date,ambiguous_date,2016-12-05,12/05/2016
+hr_survey_messy.csv,257,Start Date,ambiguous_date,2018-02-11,02/11/2018
+hr_survey_messy.csv,257,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,258,Start Date,ambiguous_date,2022-05-08,05/08/2022
+hr_survey_messy.csv,258,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,259,Start Date,ambiguous_date,2020-05-02,05/02/2020
+hr_survey_messy.csv,260,Start Date,ambiguous_date,2021-03-02,03/02/2021
+hr_survey_messy.csv,261,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,261,Start Date,ambiguous_date,2017-10-07,10/07/2017
+hr_survey_messy.csv,261,Salary,currency_symbol,122000,"$122,000"
+hr_survey_messy.csv,261,Salary,number_with_thousands_sep,122000,"$122,000"
+hr_survey_messy.csv,261,Remote,boolean_variant,N,n
+hr_survey_messy.csv,262,Start Date,ambiguous_date,2019-07-08,07/08/2019
+hr_survey_messy.csv,262,Manager,extra_whitespace,Ethan Novak,Ethan Novak 
+hr_survey_messy.csv,263,Start Date,ambiguous_date,2020-02-03,02/03/2020
+hr_survey_messy.csv,264,Start Date,ambiguous_date,2017-10-03,10/03/2017
+hr_survey_messy.csv,264,Salary,number_with_thousands_sep,116000,"116,000"
+hr_survey_messy.csv,264,,stray_marker,,x
+hr_survey_messy.csv,265,Start Date,ambiguous_date,2015-12-11,12/11/2015
+hr_survey_messy.csv,266,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,266,Start Date,ambiguous_date,2017-09-01,09/01/2017
+hr_survey_messy.csv,266,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,267,Department,case_variant,Engineering,engineering 
+hr_survey_messy.csv,267,Department,extra_whitespace,Engineering,engineering 
+hr_survey_messy.csv,267,Start Date,ambiguous_date,2024-05-02,05/02/2024
+hr_survey_messy.csv,268,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,268,Start Date,ambiguous_date,2016-01-07,01/07/2016
+hr_survey_messy.csv,269,Start Date,ambiguous_date,2021-05-10,05/10/2021
+hr_survey_messy.csv,270,Department,case_variant,Finance,finance
+hr_survey_messy.csv,270,Start Date,ambiguous_date,2017-07-09,07/09/2017
+hr_survey_messy.csv,270,Manager,missing_value,Sofía Tanaka,
+hr_survey_messy.csv,270,,stray_marker,,x
+hr_survey_messy.csv,271,Start Date,ambiguous_date,2019-03-03,03/03/2019
+hr_survey_messy.csv,271,,stray_marker,,x
+hr_survey_messy.csv,272,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,272,Start Date,ambiguous_date,2021-06-04,06/04/2021
+hr_survey_messy.csv,272,Salary,currency_symbol,66000,"$66,000"
+hr_survey_messy.csv,272,Salary,number_with_thousands_sep,66000,"$66,000"
+hr_survey_messy.csv,273,Start Date,ambiguous_date,2018-08-12,08/12/2018
+hr_survey_messy.csv,273,Manager,extra_whitespace,Priya Åberg,Priya Åberg 
+hr_survey_messy.csv,274,Start Date,ambiguous_date,2018-12-04,12/04/2018
+hr_survey_messy.csv,275,Start Date,ambiguous_date,2020-12-01,12/01/2020
+hr_survey_messy.csv,276,Start Date,ambiguous_date,2018-04-06,04/06/2018
+hr_survey_messy.csv,276,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,277,Start Date,ambiguous_date,2018-07-10,07/10/2018
+hr_survey_messy.csv,278,Start Date,ambiguous_date,2017-10-01,10/01/2017
+hr_survey_messy.csv,279,Start Date,ambiguous_date,2023-10-10,10/10/2023
+hr_survey_messy.csv,280,Start Date,ambiguous_date,2018-04-11,04/11/2018
+hr_survey_messy.csv,281,Start Date,ambiguous_date,2018-06-05,06/05/2018
+hr_survey_messy.csv,282,Start Date,ambiguous_date,2023-06-10,06/10/2023
+hr_survey_messy.csv,283,Start Date,ambiguous_date,2019-05-08,05/08/2019
+hr_survey_messy.csv,283,Manager,extra_whitespace,José Novak,José Novak 
+hr_survey_messy.csv,284,Start Date,ambiguous_date,2020-11-04,11/04/2020
+hr_survey_messy.csv,284,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,284,Manager,extra_whitespace,Wei Rossi,Wei Rossi 
+hr_survey_messy.csv,285,Start Date,ambiguous_date,2020-02-03,02/03/2020
+hr_survey_messy.csv,285,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,286,Start Date,ambiguous_date,2016-08-11,08/11/2016
+hr_survey_messy.csv,286,Satisfaction,missing_value,4,
+hr_survey_messy.csv,287,Start Date,ambiguous_date,2016-07-03,07/03/2016
+hr_survey_messy.csv,287,Remote,boolean_variant,N,n
+hr_survey_messy.csv,288,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,288,Start Date,ambiguous_date,2019-05-03,05/03/2019
+hr_survey_messy.csv,289,Department,category_synonym,HR,Human Resources
+hr_survey_messy.csv,289,Start Date,ambiguous_date,2023-04-01,04/01/2023
+hr_survey_messy.csv,289,Salary,missing_value,109000,
+hr_survey_messy.csv,290,Start Date,ambiguous_date,2017-01-11,01/11/2017
+hr_survey_messy.csv,290,Salary,currency_symbol,59000,"$59,000"
+hr_survey_messy.csv,290,Salary,number_with_thousands_sep,59000,"$59,000"
+hr_survey_messy.csv,290,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,290,Manager,missing_value,Zoë García,
+hr_survey_messy.csv,290,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,290,,duplicate_row,,
+hr_survey_messy.csv,291,Start Date,ambiguous_date,2017-07-08,07/08/2017
+hr_survey_messy.csv,292,Start Date,ambiguous_date,2024-01-12,01/12/2024
+hr_survey_messy.csv,293,Start Date,ambiguous_date,2018-09-07,09/07/2018
+hr_survey_messy.csv,293,Salary,currency_symbol,40000,"$40,000"
+hr_survey_messy.csv,293,Salary,number_with_thousands_sep,40000,"$40,000"
+hr_survey_messy.csv,293,Manager,extra_whitespace,Jürgen Peña,Jürgen Peña 
+hr_survey_messy.csv,294,Start Date,ambiguous_date,2023-09-09,09/09/2023
+hr_survey_messy.csv,295,Start Date,ambiguous_date,2018-02-10,02/10/2018
+hr_survey_messy.csv,295,Manager,extra_whitespace,Sofía Peña,Sofía Peña 
+hr_survey_messy.csv,296,Start Date,ambiguous_date,2021-01-06,01/06/2021
+hr_survey_messy.csv,296,,stray_marker,,x
+hr_survey_messy.csv,297,Department,case_variant,Sales,SALES
+hr_survey_messy.csv,297,Start Date,ambiguous_date,2021-12-06,12/06/2021
+hr_survey_messy.csv,298,Start Date,ambiguous_date,2018-04-08,04/08/2018
+hr_survey_messy.csv,299,Start Date,ambiguous_date,2022-10-04,10/04/2022
+hr_survey_messy.csv,300,Start Date,ambiguous_date,2016-01-08,01/08/2016
+hr_survey_messy.csv,300,Manager,extra_whitespace,Mia Dubois,Mia Dubois 
+hr_survey_messy.csv,301,Start Date,ambiguous_date,2016-01-12,01/12/2016
+hr_survey_messy.csv,301,Remote,boolean_variant,Y,y
+hr_survey_messy.csv,301,Manager,missing_value,Zoë Rossi,
+hr_survey_messy.csv,301,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,302,Start Date,ambiguous_date,2021-02-07,02/07/2021
+hr_survey_messy.csv,302,Satisfaction,null_token,2,?
+hr_survey_messy.csv,303,Start Date,ambiguous_date,2016-09-05,09/05/2016
+hr_survey_messy.csv,303,Remote,boolean_variant,N,n
+hr_survey_messy.csv,303,Comments,mojibake,Café area is too small,CafÃ© area is too small
+hr_survey_messy.csv,304,Start Date,ambiguous_date,2020-08-05,08/05/2020
+hr_survey_messy.csv,304,Comments,mojibake,I don’t get enough feedback,I donâ€™t get enough feedback
+hr_survey_messy.csv,305,Start Date,ambiguous_date,2019-12-07,12/07/2019
+hr_survey_messy.csv,305,Satisfaction,null_token,2,?
+hr_survey_messy.csv,305,Manager,extra_whitespace,Mia Tanaka,Mia Tanaka 
+hr_survey_messy.csv,306,Start Date,ambiguous_date,2019-08-07,08/07/2019
