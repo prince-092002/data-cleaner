@@ -7,7 +7,7 @@ import shutil
 from dataclasses import dataclass
 
 from sqlalchemy import Engine
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from backend.config import Settings
 from backend.db import Dataset, Job, save_if_current, utcnow
@@ -57,6 +57,15 @@ SUPERSEDED = "A newer run was started for this file, so this result was not kept
 def _generation(ctx: Context, job_id: str) -> int:
     with Session(ctx.engine) as session:
         return session.get(Job, job_id).generation
+
+
+def _active_clean_runs(ctx: Context, dataset_id: str) -> set[str]:
+    """Clean jobs of this dataset that may still be writing their run folder."""
+    with Session(ctx.engine) as session:
+        return set(session.exec(
+            select(Job.id).where(Job.dataset_id == dataset_id, Job.type == "clean",
+                                 Job.status.in_(["queued", "running"]))
+        ).all())
 
 
 def _run(ctx: Context, job_id: str, work) -> None:
@@ -112,7 +121,8 @@ def run_clean_job(ctx: Context, job_id: str, dataset: Dataset, plan: ApprovedPla
             shutil.rmtree(out_dir, ignore_errors=True)
             raise
         if saved:
-            ctx.storage.delete_runs_except(dataset.id, keep=job_id)
+            # Never delete a folder another clean job may still be writing; it removes its own.
+            ctx.storage.delete_runs_except(dataset.id, keep={job_id} | _active_clean_runs(ctx, dataset.id))
         else:
             shutil.rmtree(out_dir, ignore_errors=True)
         return saved

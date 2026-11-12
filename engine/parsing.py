@@ -113,6 +113,8 @@ def is_name_column(name: str) -> bool:
 
 def _name_part(part: str) -> str:
     low = part.lower()
+    if "." in low:                                              # initials: J.R.R., A.J.
+        return ".".join(_name_part(p) for p in low.split("."))
     if "'" in low:                                              # O'Brien, D'Angelo
         return "'".join(_name_part(p) for p in low.split("'"))
     if low.startswith("mc") and len(low) > 2:                   # McDonald
@@ -522,6 +524,11 @@ def suggest_category_merges(counts: dict[str, int]) -> dict[str, tuple[str, str]
     Returns raw value -> (target spelling, reason).
     """
     return _tier2(counts)[0]
+
+
+def category_group_counts(counts: dict[str, int]) -> dict[str, int]:
+    """Tier 1 spelling -> rows of every spelling in its group (the keys category_left_alone uses)."""
+    return {canonical: n for canonical, n, _ in _variant_groups(counts).values()}
 
 
 def category_left_alone(counts: dict[str, int]) -> dict[str, str]:

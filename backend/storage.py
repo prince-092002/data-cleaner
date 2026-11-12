@@ -54,11 +54,11 @@ class Storage:
             raise ValueError("invalid run id")
         return self.dataset_dir(dataset_id) / "runs" / run_id
 
-    def delete_runs_except(self, dataset_id: str, keep: str | None) -> None:
+    def delete_runs_except(self, dataset_id: str, keep: set[str]) -> None:
         runs = self.dataset_dir(dataset_id) / "runs"
         if runs.is_dir():
             for folder in runs.iterdir():
-                if folder.name != keep:
+                if folder.name not in keep:
                     shutil.rmtree(folder, ignore_errors=True)
 
     def save_upload(self, dataset_id: str, file_type: str, stream: BinaryIO, max_bytes: int) -> int:

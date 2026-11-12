@@ -311,6 +311,13 @@ def test_standardize_categories_accepts_an_edited_mapping():
     assert out["c"].to_list() == ["USA", "USA", "UK"] and len(records) == 1
 
 
+def test_category_left_alone_counts_every_spelling_of_the_value():
+    rule = RULES_BY_ID["standardize_categories"]
+    values = ["North"] * 80 + ["ZED"] * 2 + ["Zed"]           # 3 of 83 rows: too rare to be a target
+    left = rule.left_alone(frame({"c": values}), "c", {"tier": 2})
+    assert [(x.value, x.count) for x in left] == [("Zed", 3)]
+
+
 # --------------------------------------------------------------------------- 10 outliers
 
 def test_flag_outliers_adds_a_column_and_changes_nothing_else():

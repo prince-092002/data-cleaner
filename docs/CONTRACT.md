@@ -441,7 +441,7 @@ Error body for every non-2xx response:
 
 A failed job's `error.code` is one of `unreadable_file`, `invalid_request`, `internal_error`, `interrupted` (the server restarted while the job was queued or running), or `superseded` (a newer profile or clean job was started for the same dataset, so this job's result was discarded).
 
-`GET /api/health` returns `{"status": "ok", "max_upload_mb": 50}`; the website uses `max_upload_mb` for its own check and text.
+`GET /api/health` returns `{"status": "ok", "max_upload_mb": 50}` (a number; `DC_MAX_UPLOAD_MB` may be a decimal such as 4.5, and a value that is not a positive number stops the server with a clear error); the website uses `max_upload_mb` for its own check and text.
 
 ### 8.1 `POST /api/datasets` (upload)
 
@@ -535,7 +535,7 @@ storage/
       clean.csv  clean.xlsx  report.html  recipe.yaml  changelog.csv
 ```
 
-The profile and results are stored in the `Dataset` row (section 8.8), not as files. Downloads come from `runs/{results_run_id}/`. When a clean job's result is saved, the other run folders of that dataset are deleted; a superseded or failed clean job deletes its own folder.
+The profile and results are stored in the `Dataset` row (section 8.8), not as files. Downloads come from `runs/{results_run_id}/`. When a clean job's result is saved, the other run folders of that dataset are deleted, except those of clean jobs still queued or running; a superseded or failed clean job deletes its own folder. A download whose file is missing answers `409 not_ready`.
 
 - `clean.csv`: UTF-8, comma-delimited, header = column `name`s, no `_row_id`. `clean.xlsx`: one sheet named `clean`, numbers/dates/booleans written as real Excel types.
 - A cleanup task runs at startup and every hour: deletes any dataset folder and its database rows where `expires_at` (upload time + 24 hours) has passed. An expired dataset answers `404` even before the task has run. Folders with no database row are removed once they are over an hour old.

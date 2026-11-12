@@ -211,6 +211,8 @@ def test_tidy_text():
     ("HENRY FORD II", "Henry Ford II"),
     ("JAMES SMITH III", "James Smith III"),
     ("ANNE-MARIE DUPONT", "Anne-Marie Dupont"),
+    ("J.R.R. TOLKIEN", "J.R.R. Tolkien"),
+    ("a.j. smith", "A.J. Smith"),
 ])
 def test_proper_name(raw, expected):
     assert P.proper_name(raw) == expected

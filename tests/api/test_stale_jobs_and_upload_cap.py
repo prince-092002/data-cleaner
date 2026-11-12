@@ -83,7 +83,10 @@ def test_newest_clean_wins_when_two_cleans_overlap(client, app, monkeypatch):
     monkeypatch.setattr(routes, "run_clean_job", run_clean_job)
     new_job = client.post(f"/api/datasets/{dataset_id}/clean", json={}).json()["job_id"]
 
+    old_dir = app.state.ctx.storage.run_dir(dataset_id, old_job)
+    assert old_dir.exists()                                 # never deleted while its job may still write
     run_clean_job(*held[0])
+    assert not old_dir.exists()                             # removed by the superseded job itself
     assert client.get(f"/api/datasets/{dataset_id}/results").json()["run_id"] == new_job
     assert _job(app, old_job).error_code == "superseded"
     assert client.get(f"/api/datasets/{dataset_id}/downloads/changelog.csv").text.count(old_job) == 0
@@ -157,3 +160,23 @@ def test_upload_limit_comes_from_dc_max_upload_mb(monkeypatch, tmp_path):
         assert client.get("/api/health").json() == {"status": "ok", "max_upload_mb": 4}
     monkeypatch.delenv("DC_MAX_UPLOAD_MB")
     assert Settings().max_upload_bytes == 50 * MB
+
+
+def test_download_of_a_missing_output_file_is_409_not_500(client, app):
+    dataset_id = _upload(client)
+    client.post(f"/api/datasets/{dataset_id}/profile")
+    run_id = client.post(f"/api/datasets/{dataset_id}/clean", json={}).json()["job_id"]
+    (app.state.ctx.storage.run_dir(dataset_id, run_id) / "clean.csv").unlink()
+    r = client.get(f"/api/datasets/{dataset_id}/downloads/clean.csv")
+    assert r.status_code == 409 and r.json()["error"]["code"] == "not_ready"
+
+
+def test_upload_limit_accepts_decimal_megabytes_and_rejects_nonsense(monkeypatch, tmp_path):
+    monkeypatch.setenv("DC_MAX_UPLOAD_MB", "4.5")
+    settings = Settings(storage_dir=tmp_path / "s")
+    assert settings.max_upload_bytes == int(4.5 * MB)
+    with TestClient(create_app(settings)) as client:
+        assert client.get("/api/health").json()["max_upload_mb"] == 4.5
+    monkeypatch.setenv("DC_MAX_UPLOAD_MB", "4MB")
+    with pytest.raises(ValueError, match="DC_MAX_UPLOAD_MB"):
+        Settings(storage_dir=tmp_path / "s")

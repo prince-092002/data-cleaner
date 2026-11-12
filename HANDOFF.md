@@ -7,16 +7,17 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6 (Fix, Evaluate, Ship). Plan: Part A fixes (Steps 1-6), Part B performance and honest evaluation (7-9), Part C ship on GitHub + Vercel (10-15).
-- **Step:** M6 Step 5 (name casing) done and committed. Waiting for the owner's "go" for Step 6 (Part A checkpoint).
+- **Phase:** 1, milestone M6 (Fix, Evaluate, Ship). Part A (Steps 1-6) is done and tagged `phase1-m6a`.
+- **Next:** Part B, Step 7 (measure, then optimize). Waiting for the owner's "go".
 
-## Last milestone summary (M6 Step 5, 2026-11-12)
-- Name casing is a suggestion-only second candidate of `trim_and_normalize_text` (still 10 rules), titled "Give names normal capital letters". Only ALL CAPS or all lower-case values change; mixed case is left alone. Handles Mc, Mac (not Machado), O', van/de/von, II/III/IV. Skipped when over 20% of values end in LLC, Inc, Ltd or Corp.
-- Person-name columns only: a name token and no business word. Live check on the Chicago file caught `dba_name` / `aka_name` (business names, 4,700 rows each); those words are now excluded.
-- Never in "Approve all safe fixes" (UI and CONTRACT 10). New `Candidate.title`; a titled candidate's description is its own note.
-- Sales sample: 48 upper/lower-case names fixed when approved; evaluation unchanged (recall 99.9%, precision 100%, 0 damaged cells, 0 false positives).
+## Last milestone summary (M6 Step 6, Part A checkpoint, 2026-11-12)
+- Full run: 291 Python passed, 56 frontend passed, build OK, lint unchanged (21 old warnings).
+- messy_orders_demo.csv through engine.pipeline only, every suggestion approved: rows 127 -> 120 (2 empty, 5 duplicates); Region 23 spellings -> West 35, East 33, South 27, North 19; Quantity 3 formats -> 1; Amount 10 formats -> always 2 decimals; quality 80.5 -> 98.0 (consistency 65.8 -> 100, conformity 52.2 -> 100).
+- Code review (high) since phase1-m5: 8 findings. Fixed 5: a newer clean could delete an older running clean's folder (now kept until that job ends); download of a missing file gave 500 (now 409); initials "J.R.R." lost capitals; left-alone row counts used the wrong grouping; a decimal or bad DC_MAX_UPLOAD_MB crashed startup (decimals now allowed, bad values give a clear error).
+- Left as is: mixed-width leading-zero ids without an id-like name are coerced (owner's Step 2 rule); Tier 2 runs up to three times per column (Step 7); every route loads the profile/results JSON (Step 12).
+- Evaluation unchanged: recall 99.9% on fixable errors, precision 100%, 0 damaged cells.
 
-Tests: **286 Python passed, 56 frontend passed**, build OK.
+Tests: **291 Python passed, 56 frontend passed**, build OK.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -69,10 +70,11 @@ Tests: **286 Python passed, 56 frontend passed**, build OK.
 - 2026-11-12 (M6.3) Left-alone values come from a separate `Rule.left_alone()` hook, not from params, so recipes stay clean. A rule whose dry run changes nothing makes no proposal, so its left-alone values are not shown.
 - 2026-11-12 (M6.3) Headings stay in sentence case to match the rest of the site (the guidelines prefer Title Case).
 - 2026-11-12 (M6.4) Generation counter is bumped by clean jobs too, so the newest clean wins when two overlap. Profile and results moved from files into the Dataset row so the save is one guarded UPDATE (also fits Postgres in Step 12).
-- 2026-11-12 (M6.4) A run folder is never deleted while it might be written: old folders go when a newer clean is saved or at the 24-hour cleanup.
+- 2026-11-12 (M6.4) Old run folders go when a newer clean is saved or at the 24-hour cleanup; since M6.6 a folder of a clean job still queued or running is kept until that job removes it.
 - 2026-11-12 (M6.4) The streaming cap allows 1 MB of multipart overhead on top of the file limit; the exact file-size check stays in `save_upload`.
 - 2026-11-12 (M6.5) Name casing lives in rule 3 as a forced suggestion, not an 11th rule (CLAUDE.md: exactly 10 rules).
 - 2026-11-12 (M6.5) "Mac" gets a second capital only before a consonant other than h, k or y, so Machado and Mackenzie stay as normal words; MacArthur becomes Macarthur (accepted: suggestion only).
+- 2026-11-12 (M6.6) Code review before tagging: high-severity fixes applied; owner-spec and efficiency findings logged under known issues.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
@@ -87,11 +89,13 @@ Tests: **286 Python passed, 56 frontend passed**, build OK.
 - Jobs run in the API process; two big files at once slow each other.
 - Change-log filter on column fires a request per keystroke (no debounce); the change log re-reads `changelog.csv` on every page request.
 - Samples shown after a Day first / Month first toggle still show the original suggestion.
+- Review (M6.6), not fixed: an id column with leading zeros at mixed widths and no id-like name (cust_no: 00123, 045) is coerced to numbers automatically. Follows the owner's Step 2 rule; revisit if it bites.
+- Review (M6.6), efficiency: Tier 2 category analysis runs up to 3 times per column (Step 7); every route loads profile/results JSON from the Dataset row (Step 12).
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. M6 Step 6: Part A checkpoint (full test run, messy_orders_demo.csv before/after through the engine, tag phase1-m6a).
-2. Part B (Steps 7-9) and Part C (Steps 10-15) as in the M6 plan.
+1. M6 Step 7: profile time and memory on the 100k-row and 47.5 MB files before changing anything; then read-once Parquet cache, distinct-value rules, change records to disk only if they cause the peak.
+2. Steps 8-9 (held-out evaluation, Part B review, tag phase1-m6b), then Part C (GitHub + Vercel).
 3. After M6 ships: BA documents and demo video, then Phase 2.
 
 ## How to run
@@ -119,3 +123,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-12 | M6 Step 3 Fixes screen | Done. Grouped by column, automatic merges with Undo, left-alone lists, label fix, 375 px and keyboard checked. 264 Python + 54 frontend tests passing.
 - 2026-11-12 | M6 Step 4 Reviewer bugs | Done. Generation guard for stale jobs, streaming upload cap (DC_MAX_UPLOAD_MB), UI limit from /api/health. 270 Python + 56 frontend tests passing.
 - 2026-11-12 | M6 Step 5 Name casing | Done. Suggest-only name capitals with Mc/Mac/O'/particles/numerals, business-name guard, excluded from approve-all-safe. 286 Python + 56 frontend tests passing.
+- 2026-11-12 | M6 Step 6 Part A checkpoint | Done. Demo file 4 regions / 1 quantity format / 2 decimals, quality 80.5 -> 98.0; review: 5 fixes. 291 Python + 56 frontend tests passing. Tagged phase1-m6a.

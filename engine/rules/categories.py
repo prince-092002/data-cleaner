@@ -47,10 +47,7 @@ class StandardizeCategories(Rule):
         if params.get("tier") != 2:
             return []
         counts = value_counts(df, column)
-        groups: dict[str, int] = {}
-        for v, n in counts.items():                    # count per Tier 1 spelling
-            groups[P.tidy_text(v)] = groups.get(P.tidy_text(v), 0) + n
-        return left_alone_list(groups, P.category_left_alone(counts))
+        return left_alone_list(P.category_group_counts(counts), P.category_left_alone(counts))
 
     def apply(self, df, column, params):
         mapping: dict[str, str] = params.get("mapping", {})

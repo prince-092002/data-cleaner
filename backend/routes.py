@@ -84,7 +84,7 @@ def upload_dataset(request: Request, file: UploadFile):
     try:
         size = ctx.storage.save_upload(dataset_id, file_type, file.file, limit)
     except TooLarge:
-        raise errors.ApiError(413, "file_too_large", f"Files must be {limit // (1024 * 1024)} MB or smaller.")
+        raise errors.ApiError(413, "file_too_large", f"Files must be {limit / (1024 * 1024):g} MB or smaller.")
 
     original = ctx.storage.original(dataset_id, file_type)
     try:
@@ -272,6 +272,8 @@ def download(request: Request, dataset_id: str, name: str):
     if dataset.results_json is None:
         raise errors.not_ready("This file is not ready yet. Clean the file first.")
     path = ctx.storage.run_dir(dataset_id, dataset.results_run_id) / name
+    if not path.exists():
+        raise errors.not_ready("This file is not ready yet. Clean the file first.")
     suffix, media_type = DOWNLOADS[name]
     stem = Path(dataset.filename).stem or "data"
     return FileResponse(path, media_type=media_type, filename=stem + suffix)

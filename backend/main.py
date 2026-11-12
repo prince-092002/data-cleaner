@@ -35,7 +35,7 @@ class UploadLimit:
 
     async def _reject(self, send) -> None:
         response = errors.error_response(
-            413, "file_too_large", f"Files must be {self.max_bytes // MB} MB or smaller."
+            413, "file_too_large", f"Files must be {self.max_bytes / MB:g} MB or smaller."
         )
         await response({"type": "http"}, None, send)
 
@@ -111,7 +111,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "max_upload_mb": settings.max_upload_bytes // MB}
+        return {"status": "ok", "max_upload_mb": round(settings.max_upload_bytes / MB, 2)}
 
     return app
 
