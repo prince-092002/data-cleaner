@@ -413,28 +413,23 @@ def _evidence(src: str, tgt: str, src_text: str, tgt_text: str) -> tuple[int, st
     return None
 
 
-def suggest_category_merges(counts: dict[str, int]) -> dict[str, tuple[str, str]]:
-    """Tier 2 (suggestions): abbreviations and typos of an established value.
-
-    A value is mapped to a target only when the target has at least 3 rows and 5% of the
-    column, more rows than the value, the same first letter, and the evidence (abbreviation map,
-    one-letter difference, or letters in order covering half the target) is strictly stronger
-    than for any other target. Works on Tier 1 groups, so every spelling of the value moves.
-    Returns raw value -> (target spelling, reason).
-    """
+def _tier2(counts: dict[str, int]) -> tuple[dict[str, tuple[str, str]], dict[str, str]]:
+    """(merges: raw value -> (target, reason), left alone: spelling -> reason)."""
     groups = _variant_groups(counts)
     if len(groups) > CATEGORY_TIER2_MAX_DISTINCT:
-        return {}
+        return {}, {}
     total = sum(n for _, n, _ in groups.values())
     order = sorted(groups, key=lambda k: (-groups[k][1], k))
     targets: list[str] = []
     out: dict[str, tuple[str, str]] = {}
+    left: dict[str, str] = {}
     for key in order:
         canonical, n, members = groups[key]
         found = [
             (ev, t) for t in targets
             if groups[t][1] > n and (ev := _evidence(key, t, canonical, groups[t][0]))
         ]
+        winners = []
         if found:
             best = max(ev[0] for ev, _ in found)
             winners = [(ev, t) for ev, t in found if ev[0] == best]
@@ -445,7 +440,29 @@ def suggest_category_merges(counts: dict[str, int]) -> dict[str, tuple[str, str]
                 continue
         if n >= CATEGORY_TARGET_MIN_COUNT and n / total >= CATEGORY_TARGET_MIN_SHARE:
             targets.append(key)
-    return out
+        elif winners:
+            a, b = sorted(groups[t][0] for _, t in winners)[:2]
+            left[canonical] = f'"{canonical}" is equally close to "{a}" and "{b}", so it was not merged'
+        else:
+            left[canonical] = f'"{canonical}" does not look like a short form or typo of a common value'
+    return out, left
+
+
+def suggest_category_merges(counts: dict[str, int]) -> dict[str, tuple[str, str]]:
+    """Tier 2 (suggestions): abbreviations and typos of an established value.
+
+    A value is mapped to a target only when the target has at least 3 rows and 5% of the
+    column, more rows than the value, the same first letter, and the evidence (abbreviation map,
+    one-letter difference, or letters in order covering half the target) is strictly stronger
+    than for any other target. Works on Tier 1 groups, so every spelling of the value moves.
+    Returns raw value -> (target spelling, reason).
+    """
+    return _tier2(counts)[0]
+
+
+def category_left_alone(counts: dict[str, int]) -> dict[str, str]:
+    """Rare values Tier 2 saw but did not merge (not established, no single clear match) -> reason."""
+    return _tier2(counts)[1]
 
 
 def cluster_categories(counts: dict[str, int]) -> dict[str, str]:

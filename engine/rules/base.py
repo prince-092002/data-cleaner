@@ -11,7 +11,7 @@ import polars as pl
 
 from engine import parsing as P
 from engine.changelog import ChangeRecord
-from engine.models import ColumnProfile, DatasetProfile
+from engine.models import ColumnProfile, DatasetProfile, LeftAlone
 
 ROW_ID = "_row_id"
 OUTLIER_SUFFIX = "_outlier_flag"
@@ -54,6 +54,10 @@ class Rule:
         """
         return params, None
 
+    def left_alone(self, df: pl.DataFrame, column: str | None, params: dict) -> list[LeftAlone]:
+        """Values this rule saw but will not change, with a reason (shown on the fixes screen)."""
+        return []
+
     def apply(
         self, df: pl.DataFrame, column: str | None, params: dict
     ) -> tuple[pl.DataFrame, list[ChangeRecord]]:
@@ -87,6 +91,24 @@ class Rule:
         if not records:
             return df, []
         return df.with_columns(pl.Series(column, out, dtype=pl.Utf8)), records
+
+
+LEFT_ALONE_MAX = 20
+
+
+def value_counts(df: pl.DataFrame, column: str) -> dict[str, int]:
+    """Non-null, non-null-token values of a column -> count."""
+    counts: dict[str, int] = {}
+    for value in df.get_column(column).drop_nulls().to_list():
+        if not P.is_null_token(value):
+            counts[value] = counts.get(value, 0) + 1
+    return counts
+
+
+def left_alone_list(counts: dict[str, int], reasons: dict[str, str]) -> list[LeftAlone]:
+    """Most frequent first, at most LEFT_ALONE_MAX entries."""
+    items = sorted(reasons, key=lambda v: (-counts.get(v, 0), v))[:LEFT_ALONE_MAX]
+    return [LeftAlone(value=v, count=counts.get(v, 0), reason=reasons[v]) for v in items]
 
 
 def data_columns(df: pl.DataFrame) -> list[str]:

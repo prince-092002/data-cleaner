@@ -100,6 +100,13 @@ class ProposalSample(BaseModel):
     after: str | None = None
 
 
+class LeftAlone(BaseModel):
+    """A value the rule saw but did not change, and why."""
+    value: str
+    count: int
+    reason: str
+
+
 class Proposal(BaseModel):
     id: str
     rule_id: str
@@ -115,6 +122,7 @@ class Proposal(BaseModel):
     params: dict[str, Any] = Field(default_factory=dict)
     editable_params: list[str] = Field(default_factory=list)
     samples: list[ProposalSample] = Field(default_factory=list)
+    left_alone: list[LeftAlone] = Field(default_factory=list)
 
 
 class DatasetProfile(BaseModel):

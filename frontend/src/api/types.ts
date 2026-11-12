@@ -10,6 +10,13 @@ export interface ProposalSample {
   after: string | null
 }
 
+/** A value a rule saw but did not change, and why. */
+export interface LeftAlone {
+  value: string
+  count: number
+  reason: string
+}
+
 export interface Proposal {
   id: string
   rule_id: string
@@ -25,6 +32,7 @@ export interface Proposal {
   params: Record<string, unknown>
   editable_params: string[]
   samples: ProposalSample[]
+  left_alone: LeftAlone[]
 }
 
 export interface QualityScore {

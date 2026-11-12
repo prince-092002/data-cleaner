@@ -8,17 +8,17 @@ Data Cleaner is a website where a user uploads a messy CSV or Excel file; the sy
 
 ## Current position
 - **Phase:** 1, milestone M6 (Fix, Evaluate, Ship). Plan: Part A fixes (Steps 1-6), Part B performance and honest evaluation (7-9), Part C ship on GitHub + Vercel (10-15).
-- **Step:** M6 Step 2 (Region, Quantity, money decimals) done and committed. Waiting for the owner's "go" for Step 3.
+- **Step:** M6 Step 3 (Fixes screen redesign) done and committed. Waiting for the owner's "go" for Step 4.
 
-## Last milestone summary (M6 Step 2, 2026-11-12)
-- `standardize_categories` now makes two proposals per column. Tier 1 (auto): case, accent and space variants go to an existing Title Case spelling if there is one, otherwise the most frequent spelling (owner decision). Tier 2 (suggest): abbreviations and typos, with a reason per merge (abbreviation map, one letter away, letters in order). Ties are never merged (N stays apart from NE and NW).
-- Leading zeros mean "id" only at one fixed width (zip 02134) or with an id-like name (now includes sku). "03" in Quantity becomes 3; "03" no longer counts as standard form.
-- Money columns (any currency symbol) get 2 decimals by padding only; clean.xlsx uses format 0.00.
-- `sample_data/messy_orders_demo.csv` copied in (owner approved); `tests/engine/test_demo_orders.py`: 120 rows, Region exactly North/South/East/West, one Quantity format, 2 decimals.
-- Sales sample: "Wset" -> "West" now caught (+9 changes). Evaluation unchanged: recall 99.9%, precision 100%, 0 damaged cells.
-- CONTRACT 2.1, 2.2, 2.3, 3 and 4.2 updated to match.
+## Last milestone summary (M6 Step 3, 2026-11-12)
+- Fixes screen: "Automatic merges" section with Undo/Redo per value (undo all = fix rejected); then "Whole table" and one section per column. Tier 2 cards list each merge with its reason. "Approve all safe fixes" still skips every category merge.
+- New "Left alone" list per column: values a rule saw but did not change, with count and reason. Engine: `Rule.left_alone()` and `Proposal.left_alone` (CONTRACT 2.1, 2.4, 10).
+- Progress label now "Applying <rule label>" as written (was lower-cased).
+- Checked live at 375 px (no overflow, 44 px Undo buttons) and by keyboard (Tab, Enter toggles Undo/Redo, focus ring visible). README screenshot `desktop-3-fixes.jpg` replaced.
+- Design pass: ui-ux-pro-max searches gave no specific match for undo, so the project's shadcn components and general accessibility rules were used; web-design-guidelines review found one fix ("Starting…" ellipsis). The frontend-design skill is not installed in this environment.
+- `.claude/launch.json` added (backend on 8000, frontend on 5173).
 
-Tests: **262 Python passed, 50 frontend passed**.
+Tests: **264 Python passed, 54 frontend passed**, build OK.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -68,6 +68,8 @@ Tests: **262 Python passed, 50 frontend passed**.
 - 2026-11-12 (M6.2) Tier 2 targets must have more rows than the value they absorb; values are processed largest first, so merges never chain.
 - 2026-11-12 (M6.2) "Fixed width" = every number in the column has the same length. Money = any value with a currency symbol (not the column name). standardize_categories and coerce_numeric bumped to 1.1.0.
 - 2026-11-12 (M6.2) Owner decision: Tier 1 prefers an existing Title Case spelling, else the most frequent. It never invents a spelling, so acronyms such as USA stay as written.
+- 2026-11-12 (M6.3) Left-alone values come from a separate `Rule.left_alone()` hook, not from params, so recipes stay clean. A rule whose dry run changes nothing makes no proposal, so its left-alone values are not shown.
+- 2026-11-12 (M6.3) Headings stay in sentence case to match the rest of the site (the guidelines prefer Title Case).
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
@@ -79,7 +81,7 @@ Tests: **262 Python passed, 50 frontend passed**.
 - README evaluation table and the "(123)" / duplicates explanation are stale until M6 Step 8.
 - Uniqueness can fall about 0.1 point on free-text columns that count as key candidates (Chicago sample). Candidate fix: exclude long free text from key candidates.
 - Reviewer, medium: starting a new profile while a job is still running can let the old job write results after the cleanup (section 8.5). The UI blocks this in one browser; the API does not.
-- Reviewer, low: the upload size limit is checked after FastAPI has spooled the upload to a temp file; an upload without Content-Length skips the early check. `engine/pipeline.py` lowercases the step label ("Applying <rule label>" in section 7).
+- Reviewer, low: the upload size limit is checked after FastAPI has spooled the upload to a temp file; an upload without Content-Length skips the early check. (Step label fixed in M6.3.)
 - Large files: 47.5 MB takes about 3.5 minutes and 2 GB of memory; peak memory is 40 to 50 times the file size. Change records are held in memory.
 - Jobs run in the API process; two big files at once slow each other.
 - Change-log filter on column fires a request per keystroke (no debounce); the change log re-reads `changelog.csv` on every page request.
@@ -87,8 +89,8 @@ Tests: **262 Python passed, 50 frontend passed**.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. M6 Step 3: Fixes screen redesign (group by column with reasons, automatic merges with Undo, "Left alone" list, step label capital letter).
-2. Steps 4-6 of Part A, then Part B and Part C as in the M6 plan.
+1. M6 Step 4: reviewer bugs (generation guard for stale jobs; streaming upload cap with DC_MAX_UPLOAD_MB).
+2. Steps 5-6 of Part A, then Part B and Part C as in the M6 plan.
 3. After M6 ships: BA documents and demo video, then Phase 2.
 
 ## How to run
@@ -113,3 +115,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-11 | M5 Evaluation, timing, review, README | Done. 239 Python + 50 frontend tests passing. Recall 98.8%, precision 100%, 0 damaged cells. Tagged phase1-m5.
 - 2026-11-12 | M6 Step 1 Diagnosis | Done. 16 duplicate and 4 "(123)" misses were answer-key errors (fixed); 1 outlier inside the fence. 243 Python + 50 frontend tests passing.
 - 2026-11-12 | M6 Step 2 Region, Quantity, money | Done. Category Tier 1/2, fixed-width leading zeros, money 2 decimals, demo regression test. 260 Python + 50 frontend tests passing.
+- 2026-11-12 | M6 Step 3 Fixes screen | Done. Grouped by column, automatic merges with Undo, left-alone lists, label fix, 375 px and keyboard checked. 264 Python + 54 frontend tests passing.

@@ -27,6 +27,7 @@ const prop = (over: Partial<Proposal>): Proposal => ({
   params: {},
   editable_params: [],
   samples: [{ row_id: 1, before: null, after: 'a' }],
+  left_alone: [],
   ...over,
 })
 const proposals = [
@@ -41,7 +42,27 @@ const proposals = [
   }),
   prop({ id: 'c', title: 'Dedupe', severity: 'medium', is_destructive: true }),
   prop({ id: 'd', title: 'Outliers', severity: 'low', mode: 'flag' }),
-  prop({ id: 'e', title: 'Categories', severity: 'low', rule_id: 'standardize_categories' }),
+  prop({
+    id: 'e',
+    title: 'Categories',
+    severity: 'low',
+    rule_id: 'standardize_categories',
+    column: 'region',
+    is_destructive: true,
+    params: { tier: 2, mapping: { Wst: 'West' }, reasons: { Wst: '"Wst" is one letter away from "West"' } },
+    editable_params: ['mapping'],
+    left_alone: [{ value: 'Zed', count: 2, reason: '"Zed" does not look like a typo' }],
+  }),
+  prop({
+    id: 'h',
+    title: 'Case merges',
+    rule_id: 'standardize_categories',
+    column: 'region',
+    mode: 'auto',
+    is_destructive: true,
+    params: { tier: 1, mapping: { WEST: 'West', west: 'West' } },
+    editable_params: ['mapping'],
+  }),
   prop({
     id: 'f',
     title: 'Ambiguous dates',
@@ -100,12 +121,54 @@ beforeEach(() => {
 })
 
 describe('FixesScreen', () => {
-  it('groups by severity with counts', () => {
+  it('groups fixes by column', () => {
     setup()
-    expect(screen.getByRole('heading', { name: 'High severity (3)' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Medium severity (2)' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Low severity (2)' })).toBeInTheDocument()
+    const col = (name: string) =>
+      screen.getByRole('region', { name: new RegExp(`^Column ${name}`) })
+    expect(within(col('c')).getAllByTestId('proposal-card')).toHaveLength(5)
+    expect(within(col('amb')).getByRole('heading', { name: 'Ambiguous dates' })).toBeInTheDocument()
+    expect(within(col('region')).getByRole('heading', { name: 'Categories' })).toBeInTheDocument()
     expect(within(card('Auto fix')).getByText('(empty)')).toBeInTheDocument()
+  })
+
+  it('shows each suggested merge with its reason', () => {
+    setup()
+    const c = within(card('Categories'))
+    expect(c.getByText('"Wst" is one letter away from "West"')).toBeInTheDocument()
+  })
+
+  it('lists values left alone with a count and reason', () => {
+    setup()
+    const left = within(screen.getByRole('region', { name: /^Column region/ }))
+    expect(left.getByText('Zed')).toBeInTheDocument()
+    expect(left.getByText('"Zed" does not look like a typo')).toBeInTheDocument()
+  })
+
+  it('automatic merges have their own section with an Undo per merge', async () => {
+    const u = userEvent.setup()
+    vi.mocked(startClean).mockResolvedValue({ job_id: 'j2' })
+    setup()
+    const auto = within(screen.getByRole('region', { name: 'Automatic merges' }))
+    expect(screen.queryByRole('heading', { name: 'Case merges' })).not.toBeInTheDocument()
+    await u.click(auto.getByRole('button', { name: 'Undo merge of WEST into West' }))
+    expect(auto.getByRole('button', { name: 'Redo merge of WEST into West' })).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Start cleaning' }))
+    expect(startClean).toHaveBeenCalledWith('d1', {
+      approved: ['a', 'h'],
+      rejected: [],
+      edited: [{ id: 'h', params: { tier: 1, mapping: { west: 'West' } } }],
+    })
+  })
+
+  it('undoing every automatic merge rejects that fix', async () => {
+    const u = userEvent.setup()
+    vi.mocked(startClean).mockResolvedValue({ job_id: 'j3' })
+    setup()
+    const auto = within(screen.getByRole('region', { name: 'Automatic merges' }))
+    await u.click(auto.getByRole('button', { name: 'Undo merge of WEST into West' }))
+    await u.click(auto.getByRole('button', { name: 'Undo merge of west into West' }))
+    await u.click(screen.getByRole('button', { name: 'Start cleaning' }))
+    expect(startClean).toHaveBeenCalledWith('d1', { approved: ['a'], rejected: ['h'], edited: [] })
   })
 
   it('auto starts approved; approve and reject toggle', async () => {
@@ -156,7 +219,7 @@ describe('FixesScreen', () => {
     expect(status('Dates')).toBe('Approved')
     await u.click(screen.getByRole('button', { name: 'Start cleaning' }))
     expect(startClean).toHaveBeenCalledWith('d1', {
-      approved: ['a', 'b'],
+      approved: ['a', 'b', 'h'],
       rejected: [],
       edited: [{ id: 'b', params: { dayfirst: true } }],
     })
@@ -168,7 +231,7 @@ describe('FixesScreen', () => {
     setup()
     await u.click(within(card('Dedupe')).getByRole('button', { name: 'Reject' }))
     await u.click(screen.getByRole('button', { name: 'Start cleaning' }))
-    expect(startClean).toHaveBeenCalledWith('d1', { approved: ['a'], rejected: ['c'], edited: [] })
+    expect(startClean).toHaveBeenCalledWith('d1', { approved: ['a', 'h'], rejected: ['c'], edited: [] })
     expect(await screen.findByText('3:j1')).toBeInTheDocument()
   })
 

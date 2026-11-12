@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from engine import parsing as P
-from engine.rules.base import Candidate, Rule, columns_with
+from engine.rules.base import Candidate, Rule, columns_with, left_alone_list, value_counts
 
 
 class ParseDates(Rule):
@@ -37,6 +37,16 @@ class ParseDates(Rule):
         parsed = {v: (p, n) for v, n in counts.items() if (p := P.parse_date(v))}
         order = P.decide_date_order(parsed)
         return {**params, "dayfirst": order.dayfirst}, None
+
+    def left_alone(self, df, column, params):
+        dayfirst = bool(params.get("dayfirst", False))
+        counts = value_counts(df, column)
+        reasons = {}
+        for v in counts:
+            parsed = P.parse_date(v)
+            if not (parsed and parsed.to_iso(dayfirst)):
+                reasons[v] = "Not a valid date, so it is kept as written."
+        return left_alone_list(counts, reasons)
 
     def apply(self, df, column, params):
         dayfirst = bool(params.get("dayfirst", False))

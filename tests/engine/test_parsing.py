@@ -174,6 +174,15 @@ def test_tier2_skips_columns_with_more_than_500_distinct_values():
     assert _targets(counts) == {}
 
 
+def test_tier2_reports_values_it_left_alone_and_why():
+    left = P.category_left_alone({"NE": 20, "NW": 20, "N": 2, "North": 20, "Zed": 1})
+    assert set(left) == {"Zed"}                                   # "N" is an abbreviation of North
+    left = P.category_left_alone({"NE": 20, "NW": 20, "N": 2, "Zed": 1})
+    assert '"NE"' in left["N"] and '"NW"' in left["N"]
+    assert "not" in left["Zed"]
+    assert "NE" not in left                                         # established values are not listed
+
+
 def test_cluster_categories_combines_both_tiers():
     mapping = P.cluster_categories({"North": 20, "north": 3, "Nrth": 2, "South": 20})
     assert mapping == {"North": "North", "north": "North", "Nrth": "North", "South": "South"}

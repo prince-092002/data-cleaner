@@ -77,6 +77,16 @@ def test_proposal_ids_are_stable_across_profiles(hr_profile):
     assert len({p.id for p in hr_profile.proposals}) == len(hr_profile.proposals)
 
 
+def test_proposals_list_values_left_alone_with_a_reason():
+    profile = pipeline.profile(SALES)
+    amount = _prop(profile, "coerce_numeric", "amount_usd")
+    left = {x.value: x for x in amount.left_alone}
+    assert {"abc", "12..5"} <= set(left)
+    assert left["abc"].count > 0 and "not a number" in left["abc"].reason.lower()
+    dates = _prop(profile, "parse_dates", "order_date")
+    assert {"soon", "31/02/2024"} <= {x.value for x in dates.left_alone}
+
+
 def test_no_coerce_proposal_for_id_columns():
     profile = pipeline.profile(SALES)
     assert not [p for p in profile.proposals if p.rule_id == "coerce_numeric" and p.column == "zip_code"]
@@ -242,6 +252,7 @@ def test_progress_steps(sales_run):
     assert steps[0] == (3, "Reading file") and steps[-1] == (100, "Done")
     assert [p for p, _ in steps] == sorted(p for p, _ in steps)
     assert any(s.startswith("Applying ") for _, s in steps)
+    assert "Applying Convert dates to ISO 8601" in [s for _, s in steps]      # label as written
     assert ("Scoring results" in [s for _, s in steps]) and ("Writing files" in [s for _, s in steps])
 
 

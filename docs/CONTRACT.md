@@ -65,6 +65,10 @@ class Rule:
         Called once at profile time, on the data as it stands after the earlier rules.
         Returns (params, confidence or None to keep the candidate's)."""
 
+    def left_alone(self, df, column, params) -> list[LeftAlone]:
+        """Optional (added M6). Values the rule saw but will not change, each with a reason.
+        Called once at profile time, just before the dry-run apply. Default: []."""
+
     def apply(self, df: pl.DataFrame, column: str | None, params: dict
               ) -> tuple[pl.DataFrame, list[ChangeRecord]]:
         """Pure function. Returns a NEW dataframe and one change record per change.
@@ -132,13 +136,15 @@ Rules for rules:
   "rows_affected": 1840,
   "params": {"dayfirst": true},
   "editable_params": ["dayfirst"],
-  "samples": [{"row_id": 4, "before": "03/04/2024", "after": "2024-04-03"}]
+  "samples": [{"row_id": 4, "before": "03/04/2024", "after": "2024-04-03"}],
+  "left_alone": [{"value": "31/02/2024", "count": 2, "reason": "Not a valid date, so it is kept as written."}]
 }
 ```
 
 - `id` = `"sug_"` + first 12 hex chars of `sha1(rule_id + "|" + (column or "") + "|" + canonical_json(params))`. Stable across re-profiling the same file.
 - `column` is `null` for table-scope rules. `confidence` is `null` when the rule reports none.
 - `samples`: up to 5.
+- `left_alone` (added M6): up to 20 values the rule saw but will not change, most frequent first. `coerce_numeric` lists values that are not numbers, `parse_dates` values that are not valid dates, `standardize_categories` Tier 2 rare values with no single clear match (including ties). Other rules return `[]`.
 
 ---
 
@@ -533,6 +539,7 @@ storage/
 ## 10. Frontend rules and sample data (added after M4)
 
 - **Approve all safe fixes** approves a proposal only if it is not destructive, its mode is not `flag`, its rule is not `standardize_categories`, and it is not a `parse_dates` proposal on a column with the `ambiguous_dates` issue. Category merges and ambiguous dates need an explicit choice by the user (for dates: day-first or month-first). Auto and flag proposals still run unless rejected; suggest proposals run only if approved (section 7).
+- **Fixes screen layout (M6):** Tier 1 category merges are shown in an "Automatic merges" section with an Undo per value. Undo removes that value from the proposal's mapping (sent as an edit); undoing every value rejects the proposal. The other proposals are grouped as "Whole table" (no column) and one section per column, each with its `left_alone` values. Tier 2 merges show each value's reason.
 - **One job at a time per browser session:** the UI disables "Start cleaning" and the stepper while a profile or clean job runs.
 - **Encoding detection:** when charset-normalizer guesses a Latin-script single-byte encoding other than windows-1252 (iso8859-2/4/9/10/13/14/16, cp1254, cp1257) the file is read as windows-1252 if it decodes cleanly; Cyrillic, Greek and Arabic guesses are kept.
 - **Ground truth:** `sample_data/make_samples.py` writes `sample_data/ground_truth.csv` with one row per injected error: `file, row, column, error_type, original_value, injected_value`. `row` is the 1-based data row (same as `_row_id`); structural errors use row 0.

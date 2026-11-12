@@ -112,6 +112,7 @@ def _propose(df: pl.DataFrame, prof: DatasetProfile) -> list[Proposal]:
             mode = resolve_mode(rule, confidence, cand.force_suggest, cand.auto_safe)
             if mode is None:
                 continue
+            left = rule.left_alone(df, cand.column, params)
             new_df, records = rule.apply(df, cand.column, params)
             if not records:
                 continue
@@ -134,6 +135,7 @@ def _propose(df: pl.DataFrame, prof: DatasetProfile) -> list[Proposal]:
                     params=params,
                     editable_params=list(rule.editable_params),
                     samples=_samples(records),
+                    left_alone=left,
                 )
             )
     return proposals
@@ -295,7 +297,7 @@ def clean(
         if rule is None:
             raise PlanError(f'Unknown rule "{step.rule_id}".')
         _check_version(rule, step)
-        report(10 + int(65 * i / max(len(steps), 1)), f"Applying {rule.label.lower()}")
+        report(10 + int(65 * i / max(len(steps), 1)), f"Applying {rule.label}")
         column = None
         if step.column is not None:
             column = current.get(step.column, step.column)

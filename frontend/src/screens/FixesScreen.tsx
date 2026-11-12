@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { startClean, ApiError } from '@/api/client'
-import type { Decisions, EditedProposal, Proposal, Severity } from '@/api/types'
+import type { Decisions, EditedProposal, LeftAlone, Proposal } from '@/api/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,11 +18,11 @@ import { useAppState } from '@/state/AppState'
 export type Status = 'approved' | 'rejected' | 'undecided'
 type Params = Record<string, unknown>
 
-const SEVERITIES: { key: Severity; label: string }[] = [
-  { key: 'high', label: 'High severity' },
-  { key: 'medium', label: 'Medium severity' },
-  { key: 'low', label: 'Low severity' },
-]
+type Mapping = Record<string, string>
+
+/** Tier 1 category merges (case, accents, spaces): shown in their own section with Undo. */
+const isAutoMerge = (p: Proposal) =>
+  p.rule_id === 'standardize_categories' && p.params.tier === 1
 
 const STATUS_STYLE: Record<Status, string> = {
   approved: 'bg-green-100 text-green-900',
@@ -103,6 +103,103 @@ function Samples({ p }: { p: Proposal }) {
         </tbody>
       </table>
     </div>
+  )
+}
+
+function MergeList({ mapping, reasons }: { mapping: Mapping; reasons: Mapping }) {
+  const entries = Object.entries(mapping)
+  if (entries.length === 0) return null
+  return (
+    <ul className="space-y-2" aria-label="Values to merge">
+      {entries.map(([from, to]) => (
+        <li key={from} className="rounded-md border p-2">
+          <p className="font-mono break-all">
+            {from} <span aria-hidden="true">&rarr;</span>
+            <span className="sr-only">becomes</span> {to}
+          </p>
+          {reasons[from] && <p className="mt-1 text-xs text-slate-700">{reasons[from]}</p>}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function LeftAloneList({ items }: { items: LeftAlone[] }) {
+  if (items.length === 0) return null
+  return (
+    <details className="rounded-md border bg-slate-50 p-3 text-sm" open={items.length <= 5}>
+      <summary className="cursor-pointer font-medium">Left alone ({items.length})</summary>
+      <p className="mt-1 text-xs text-slate-700">
+        Values the cleaner saw in this column but did not change.
+      </p>
+      <ul className="mt-2 space-y-2">
+        {items.map((x) => (
+          <li key={x.value}>
+            <span className="font-mono break-all">{x.value}</span>{' '}
+            <span className="text-xs text-slate-600">
+              ({x.count.toLocaleString()} {x.count === 1 ? 'row' : 'rows'})
+            </span>
+            <p className="text-xs text-slate-700">{x.reason}</p>
+          </li>
+        ))}
+      </ul>
+    </details>
+  )
+}
+
+function AutoMerges({
+  items,
+  isUndone,
+  onToggle,
+}: {
+  items: Proposal[]
+  isUndone: (p: Proposal, from: string) => boolean
+  onToggle: (p: Proposal, from: string) => void
+}) {
+  return (
+    <section
+      aria-labelledby="auto-merges-heading"
+      className="space-y-3 rounded-lg border bg-white p-4"
+    >
+      <div>
+        <h3 id="auto-merges-heading" className="text-lg font-semibold">
+          Automatic merges
+        </h3>
+        <p className="mt-1 text-sm text-slate-700">
+          These spellings differ only by capital letters, accents or spaces, so they are merged
+          without asking. Undo any you want to keep as written.
+        </p>
+      </div>
+      {items.map((p) => (
+        <div key={p.id}>
+          <h4 className="text-sm font-semibold break-all">Column {p.column}</h4>
+          <ul className="mt-1 divide-y">
+            {Object.entries(p.params.mapping as Mapping).map(([from, to]) => {
+              const undone = isUndone(p, from)
+              return (
+                <li key={from} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
+                  <span
+                    className={`font-mono text-sm break-all ${undone ? 'text-slate-500 line-through' : ''}`}
+                  >
+                    {from} <span aria-hidden="true">&rarr;</span>
+                    <span className="sr-only">becomes</span> {to}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="min-h-11 min-w-20"
+                    aria-label={`${undone ? 'Redo' : 'Undo'} merge of ${from} into ${to}`}
+                    onClick={() => onToggle(p, from)}
+                  >
+                    {undone ? 'Redo' : 'Undo'}
+                  </Button>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      ))}
+    </section>
   )
 }
 
@@ -241,7 +338,11 @@ function ProposalCard({
     <Card data-testid="proposal-card">
       <CardHeader>
         <CardTitle className="flex flex-wrap items-start justify-between gap-2">
-          <h4 className="text-base font-semibold">{p.title}</h4>
+          <h4 className="text-base font-semibold">
+            {p.column && p.title.endsWith(`: ${p.column}`)
+              ? p.title.slice(0, -(p.column.length + 2))
+              : p.title}
+          </h4>
           <span
             data-testid="status"
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLE[status]}`}
@@ -253,7 +354,9 @@ function ProposalCard({
       <CardContent className="space-y-3 text-sm">
         <p>{p.description}</p>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">{p.column ? `Column: ${p.column}` : 'Whole table'}</Badge>
+          <Badge variant="outline">
+            {p.severity[0].toUpperCase() + p.severity.slice(1)} severity
+          </Badge>
           <Badge variant="secondary">{p.rows_affected.toLocaleString()} rows affected</Badge>
           <Badge variant="secondary">Mode: {p.mode}</Badge>
           {p.is_destructive && <Badge variant="destructive">Destructive</Badge>}
@@ -290,7 +393,14 @@ function ProposalCard({
             </p>
           </div>
         )}
-        <Samples p={p} />
+        {p.rule_id === 'standardize_categories' ? (
+          <MergeList
+            mapping={(params.mapping as Mapping) ?? {}}
+            reasons={(p.params.reasons as Mapping) ?? {}}
+          />
+        ) : (
+          <Samples p={p} />
+        )}
         <div className="flex flex-wrap gap-2">
           <Button
             variant={status === 'approved' ? 'default' : 'outline'}
@@ -359,6 +469,46 @@ export function FixesScreen() {
 
   const count = (s: Status) => proposals.filter((p) => statuses[p.id] === s).length
 
+  // Automatic merges: undoing removes one value from the mapping; undoing all rejects the fix.
+  const currentMapping = (p: Proposal): Mapping =>
+    statuses[p.id] === 'rejected' ? {} : ((paramsOf(p).mapping as Mapping) ?? {})
+  const isUndone = (p: Proposal, from: string) => !(from in currentMapping(p))
+  const toggleMerge = (p: Proposal, from: string) => {
+    const original = p.params.mapping as Mapping
+    const next = { ...currentMapping(p) }
+    if (from in next) delete next[from]
+    else next[from] = original[from]
+    const size = Object.keys(next).length
+    const full = size === Object.keys(original).length
+    setEdits((m) => {
+      const rest = { ...m }
+      delete rest[p.id]
+      return size === 0 || full ? rest : { ...rest, [p.id]: { ...p.params, mapping: next } }
+    })
+    setStatus(p.id, size === 0 ? 'rejected' : 'approved')
+  }
+
+  const autoMerges = proposals.filter(isAutoMerge)
+  const others = proposals.filter((p) => !isAutoMerge(p))
+  const tableFixes = others.filter((p) => p.column === null)
+  const columns = [
+    ...new Set(others.filter((p) => p.column !== null).map((p) => p.column as string)),
+  ]
+  const plural = (n: number) => `${n} ${n === 1 ? 'fix' : 'fixes'}`
+  const renderCard = (p: Proposal) => (
+    <ProposalCard
+      key={p.id}
+      p={p}
+      status={statuses[p.id]}
+      params={paramsOf(p)}
+      ambiguous={isAmbiguous(p)}
+      onStatus={(s) => setStatus(p.id, s)}
+      onEdit={() => setEditing(p)}
+      choiceMade={!!chosen[p.id]}
+      onChooseDayfirst={(dayfirst) => saveEdit(p.id, { ...paramsOf(p), dayfirst })}
+    />
+  )
+
   async function start() {
     if (!state.datasetId) return
     const decisions = buildDecisions(proposals, statuses, edits)
@@ -413,29 +563,30 @@ export function FixesScreen() {
 
       {proposals.length === 0 && <p>No fixes were suggested for this file.</p>}
 
-      {SEVERITIES.map(({ key, label }) => {
-        const group = proposals.filter((p) => p.severity === key)
-        if (group.length === 0) return null
+      {autoMerges.length > 0 && (
+        <AutoMerges items={autoMerges} isUndone={isUndone} onToggle={toggleMerge} />
+      )}
+
+      {tableFixes.length > 0 && (
+        <section aria-labelledby="table-fixes" className="space-y-3">
+          <h3 id="table-fixes" className="text-lg font-semibold">
+            Whole table ({plural(tableFixes.length)})
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2">{tableFixes.map(renderCard)}</div>
+        </section>
+      )}
+
+      {columns.map((name, i) => {
+        const group = others.filter((p) => p.column === name)
+        const left = group.flatMap((p) => p.left_alone ?? [])
         return (
-          <section key={key} aria-labelledby={`sev-${key}`} className="space-y-3">
-            <h3 id={`sev-${key}`} className="text-lg font-semibold">
-              {label} ({group.length})
+          <section key={name} aria-labelledby={`col-${i}`} className="space-y-3">
+            <h3 id={`col-${i}`} className="text-lg font-semibold break-all">
+              Column {name}{' '}
+              <span className="text-base font-normal text-slate-600">({plural(group.length)})</span>
             </h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              {group.map((p) => (
-                <ProposalCard
-                  key={p.id}
-                  p={p}
-                  status={statuses[p.id]}
-                  params={paramsOf(p)}
-                  ambiguous={isAmbiguous(p)}
-                  onStatus={(s) => setStatus(p.id, s)}
-                  onEdit={() => setEditing(p)}
-                  choiceMade={!!chosen[p.id]}
-                  onChooseDayfirst={(dayfirst) => saveEdit(p.id, { ...paramsOf(p), dayfirst })}
-                />
-              ))}
-            </div>
+            <div className="grid gap-4 md:grid-cols-2">{group.map(renderCard)}</div>
+            <LeftAloneList items={left} />
           </section>
         )
       })}
@@ -455,7 +606,7 @@ export function FixesScreen() {
         </Button>
         <div className="flex flex-col items-end gap-1">
           <Button onClick={start} disabled={busy || state.jobRunning}>
-            {busy ? 'Starting...' : 'Start cleaning'}
+            {busy ? 'Starting…' : 'Start cleaning'}
           </Button>
           {state.jobRunning && (
             <p className="text-sm text-slate-700">A job is still running. Wait for it to finish.</p>

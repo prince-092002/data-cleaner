@@ -7,7 +7,7 @@ the profiler types those as "id", not as numbers.
 from __future__ import annotations
 
 from engine import parsing as P
-from engine.rules.base import Candidate, Rule, columns_with
+from engine.rules.base import Candidate, Rule, columns_with, left_alone_list, value_counts
 
 
 def to_plain_number(value: str, decimals: int | None = None) -> str:
@@ -48,6 +48,11 @@ class CoerceNumeric(Rule):
         if any((p := P.parse_number(v)) and any(c in p.style for c in "$£€") for v in values):
             return {**params, "decimals": 2}, None
         return params, None
+
+    def left_alone(self, df, column, params):
+        counts = value_counts(df, column)
+        reasons = {v: "Not a number, so it is kept as written." for v in counts if P.parse_number(v) is None}
+        return left_alone_list(counts, reasons)
 
     def apply(self, df, column, params):
         decimals = params.get("decimals")
