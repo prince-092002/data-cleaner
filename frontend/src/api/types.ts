@@ -5,7 +5,7 @@ export type Mode = 'auto' | 'suggest' | 'flag'
 export type Severity = 'high' | 'medium' | 'low'
 
 export interface ProposalSample {
-  row_id: number
+  row_id: number | null
   before: string | null
   after: string | null
 }

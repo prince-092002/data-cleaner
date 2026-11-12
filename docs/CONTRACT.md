@@ -535,3 +535,14 @@ storage/
 - **Encoding detection:** when charset-normalizer guesses a Latin-script single-byte encoding other than windows-1252 (iso8859-2/4/9/10/13/14/16, cp1254, cp1257) the file is read as windows-1252 if it decodes cleanly; Cyrillic, Greek and Arabic guesses are kept.
 - **Ground truth:** `sample_data/make_samples.py` writes `sample_data/ground_truth.csv` with one row per injected error: `file, row, column, error_type, original_value, injected_value`. `row` is the 1-based data row (same as `_row_id`); structural errors use row 0.
 - **Invalid values stay:** text that cannot be parsed (for example "abc" in a number column, "31/02/2024" in a date column) is left as it was and reported as a warning; it is never guessed.
+
+## 11. Success criteria (Phase 1)
+
+There is no single "average points lift" target. Phase 1 is judged on three measures, computed by `evaluation/run_evaluation.py` on the three ground-truth samples (`sample_data/ground_truth.csv`) with every proposal approved:
+
+1. **Per-dimension lift.** For each of the five quality dimensions (section 4): the after-score is not lower than the before-score, and every dimension that has injected errors rises. Reported per file and per dimension, never only as an overall number. The Results screen shows the same table (before, after, change) for the overall score and each dimension.
+2. **Recall on injected errors.** Fixed injected errors divided by scored injected errors. An error is *fixed* when the cleaned cell equals the expected clean form, the row or column was removed on purpose, or the cell was flagged (outliers). Errors that no rule is designed to fix (missing values, ambiguous dates, invalid values, synonyms and similar) are reported separately as "not fixable by design" and are not in the recall denominator. Precision (changes on injected cells divided by all non-neutral changes) is reported next to it.
+3. **Zero damaged cells.** A cell with no injected error must keep its meaning after cleaning. Count must be 0 (`tests/engine/test_evaluation.py` asserts it).
+
+Measured at the end of M5: recall 98.8%, precision 100%, damaged cells 0, no dimension lower after cleaning on the three samples. The fourth sample (a real public dataset, `sample_data/chicago_food_inspections.csv`) has no ground truth and is excluded from these measures; it is reported only as before and after scores. Its uniqueness score can fall by up to 0.1 point (long free text counts as a key candidate and trimming merges values that differed only by spaces); `tests/engine/test_real_dataset.py` tolerates at most 0.5.
+

@@ -1,0 +1,695 @@
+{
+  "headline": {
+    "scored": 1742,
+    "fixed": 1721,
+    "missed": 21,
+    "recall": 98.8,
+    "not_fixable": 1310,
+    "out_of_scope": 5,
+    "unmatched": 0
+  },
+  "precision": 100.0,
+  "neutral_changes": 715,
+  "false_positive_changes": 0,
+  "files": {
+    "sales_orders_messy.csv": {
+      "headline": {
+        "scored": 1151,
+        "fixed": 1138,
+        "missed": 13,
+        "recall": 98.9
+      },
+      "precision": 100.0,
+      "rows_before": 433,
+      "rows_after": 400,
+      "quality_before": {
+        "overall": 78.3,
+        "completeness": 63.0,
+        "validity": 98.0,
+        "consistency": 80.8,
+        "uniqueness": 93.6,
+        "conformity": 52.4
+      },
+      "quality_after": {
+        "overall": 92.0,
+        "completeness": 71.3,
+        "validity": 98.5,
+        "consistency": 98.5,
+        "uniqueness": 100.0,
+        "conformity": 98.8
+      },
+      "lift": {
+        "overall": 13.7,
+        "completeness": 8.3,
+        "validity": 0.5,
+        "consistency": 17.7,
+        "uniqueness": 6.4,
+        "conformity": 46.4
+      },
+      "alignment": {
+        "checked": 1931,
+        "matched": 1931
+      },
+      "damaged_cells": 0,
+      "cells_compared": 1871,
+      "rule_stats": {
+        "drop_empty_rows_and_columns": {
+          "row_correct": 9
+        },
+        "trim_and_normalize_text": {
+          "on_injected": 240
+        },
+        "standardize_null_tokens": {
+          "on_injected": 389
+        },
+        "coerce_numeric": {
+          "on_injected": 137
+        },
+        "parse_dates": {
+          "on_injected": 97
+        },
+        "standardize_booleans": {
+          "neutral": 251,
+          "on_injected": 90
+        },
+        "remove_exact_duplicate_rows": {
+          "row_correct": 16,
+          "row_wrong": 9
+        },
+        "standardize_categories": {
+          "on_injected": 87
+        },
+        "flag_outliers": {
+          "on_injected": 3
+        }
+      }
+    },
+    "customers_messy.xlsx": {
+      "headline": {
+        "scored": 298,
+        "fixed": 294,
+        "missed": 4,
+        "recall": 98.7
+      },
+      "precision": 100.0,
+      "rows_before": 257,
+      "rows_after": 250,
+      "quality_before": {
+        "overall": 91.5,
+        "completeness": 96.7,
+        "validity": 99.2,
+        "consistency": 89.8,
+        "uniqueness": 97.7,
+        "conformity": 65.8
+      },
+      "quality_after": {
+        "overall": 99.2,
+        "completeness": 97.5,
+        "validity": 99.7,
+        "consistency": 99.7,
+        "uniqueness": 100.0,
+        "conformity": 99.7
+      },
+      "lift": {
+        "overall": 7.7,
+        "completeness": 0.8,
+        "validity": 0.5,
+        "consistency": 9.9,
+        "uniqueness": 2.3,
+        "conformity": 33.9
+      },
+      "alignment": {
+        "checked": 386,
+        "matched": 386
+      },
+      "damaged_cells": 0,
+      "cells_compared": 1898,
+      "rule_stats": {
+        "drop_empty_rows_and_columns": {
+          "row_correct": 2
+        },
+        "trim_and_normalize_text": {
+          "on_injected": 55
+        },
+        "coerce_numeric": {
+          "on_injected": 27
+        },
+        "parse_dates": {
+          "on_injected": 58
+        },
+        "standardize_booleans": {
+          "neutral": 189,
+          "on_injected": 58
+        },
+        "remove_exact_duplicate_rows": {
+          "row_wrong": 4,
+          "row_correct": 1
+        },
+        "standardize_categories": {
+          "on_injected": 55
+        },
+        "flag_outliers": {
+          "on_injected": 1
+        }
+      }
+    },
+    "hr_survey_messy.csv": {
+      "headline": {
+        "scored": 293,
+        "fixed": 289,
+        "missed": 4,
+        "recall": 98.6
+      },
+      "precision": 100.0,
+      "rows_before": 306,
+      "rows_after": 300,
+      "quality_before": {
+        "overall": 86.3,
+        "completeness": 75.9,
+        "validity": 96.7,
+        "consistency": 94.7,
+        "uniqueness": 98.2,
+        "conformity": 63.1
+      },
+      "quality_after": {
+        "overall": 96.1,
+        "completeness": 84.3,
+        "validity": 100.0,
+        "consistency": 100.0,
+        "uniqueness": 100.0,
+        "conformity": 100.0
+      },
+      "lift": {
+        "overall": 9.8,
+        "completeness": 8.4,
+        "validity": 3.3,
+        "consistency": 5.3,
+        "uniqueness": 1.8,
+        "conformity": 36.9
+      },
+      "alignment": {
+        "checked": 644,
+        "matched": 644
+      },
+      "damaged_cells": 0,
+      "cells_compared": 2121,
+      "rule_stats": {
+        "drop_empty_rows_and_columns": {
+          "row_wrong": 1
+        },
+        "trim_and_normalize_text": {
+          "on_injected": 112
+        },
+        "standardize_null_tokens": {
+          "on_injected": 12
+        },
+        "coerce_numeric": {
+          "on_injected": 47
+        },
+        "parse_dates": {
+          "on_injected": 306
+        },
+        "standardize_booleans": {
+          "neutral": 275,
+          "on_injected": 31
+        },
+        "remove_exact_duplicate_rows": {
+          "row_wrong": 3,
+          "row_correct": 3
+        },
+        "standardize_categories": {
+          "on_injected": 44
+        },
+        "flag_outliers": {
+          "on_injected": 1
+        }
+      }
+    }
+  },
+  "by_error_type": {
+    "ambiguous_date": {
+      "not_fixable": 306
+    },
+    "blank_row_above_header": {
+      "out_of_scope": 1
+    },
+    "boolean_variant": {
+      "fixed": 193
+    },
+    "case_variant": {
+      "fixed": 150,
+      "not_fixable": 60
+    },
+    "category_synonym": {
+      "not_fixable": 23
+    },
+    "currency_symbol": {
+      "fixed": 136
+    },
+    "duplicate_header": {
+      "fixed": 1
+    },
+    "duplicate_key": {
+      "not_fixable": 1
+    },
+    "duplicate_row": {
+      "fixed": 20,
+      "missed": 16
+    },
+    "empty_column": {
+      "fixed": 1
+    },
+    "empty_header": {
+      "fixed": 1
+    },
+    "empty_row": {
+      "fixed": 10
+    },
+    "extra_whitespace": {
+      "fixed": 294
+    },
+    "header_whitespace": {
+      "fixed": 1
+    },
+    "invalid_value": {
+      "not_fixable": 47
+    },
+    "missing_value": {
+      "not_fixable": 795
+    },
+    "mixed_date_format": {
+      "fixed": 155
+    },
+    "mojibake": {
+      "fixed": 85
+    },
+    "non_breaking_space": {
+      "fixed": 18
+    },
+    "non_default_delimiter": {
+      "out_of_scope": 1
+    },
+    "non_default_encoding": {
+      "out_of_scope": 1
+    },
+    "null_token": {
+      "fixed": 413
+    },
+    "number_with_thousands_sep": {
+      "fixed": 129
+    },
+    "outlier": {
+      "fixed": 2,
+      "missed": 1
+    },
+    "parentheses_negative": {
+      "missed": 4,
+      "fixed": 1
+    },
+    "percent_symbol": {
+      "fixed": 58
+    },
+    "placeholder_token": {
+      "not_fixable": 28
+    },
+    "stray_marker": {
+      "not_fixable": 41
+    },
+    "title_row": {
+      "out_of_scope": 1
+    },
+    "typo_category": {
+      "not_fixable": 9,
+      "fixed": 43
+    },
+    "utf8_bom": {
+      "out_of_scope": 1
+    },
+    "zero_width_space": {
+      "fixed": 10
+    }
+  },
+  "rules": {
+    "normalize_headers": {
+      "injected": 3,
+      "fixed": 3,
+      "recall": 100.0,
+      "cell_changes_on_injected": 0,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": null,
+      "row_or_column_correct": 0,
+      "row_or_column_wrong": 0
+    },
+    "drop_empty_rows_and_columns": {
+      "injected": 11,
+      "fixed": 11,
+      "recall": 100.0,
+      "cell_changes_on_injected": 0,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": null,
+      "row_or_column_correct": 11,
+      "row_or_column_wrong": 1
+    },
+    "trim_and_normalize_text": {
+      "injected": 407,
+      "fixed": 407,
+      "recall": 100.0,
+      "cell_changes_on_injected": 407,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": 100.0,
+      "row_or_column_correct": 0,
+      "row_or_column_wrong": 0
+    },
+    "standardize_null_tokens": {
+      "injected": 413,
+      "fixed": 413,
+      "recall": 100.0,
+      "cell_changes_on_injected": 401,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": 100.0,
+      "row_or_column_correct": 0,
+      "row_or_column_wrong": 0
+    },
+    "coerce_numeric": {
+      "injected": 328,
+      "fixed": 324,
+      "recall": 98.8,
+      "cell_changes_on_injected": 211,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": 100.0,
+      "row_or_column_correct": 0,
+      "row_or_column_wrong": 0
+    },
+    "parse_dates": {
+      "injected": 155,
+      "fixed": 155,
+      "recall": 100.0,
+      "cell_changes_on_injected": 461,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": 100.0,
+      "row_or_column_correct": 0,
+      "row_or_column_wrong": 0
+    },
+    "standardize_booleans": {
+      "injected": 193,
+      "fixed": 193,
+      "recall": 100.0,
+      "cell_changes_on_injected": 179,
+      "neutral": 715,
+      "false_positives": 0,
+      "precision": 100.0,
+      "row_or_column_correct": 0,
+      "row_or_column_wrong": 0
+    },
+    "remove_exact_duplicate_rows": {
+      "injected": 36,
+      "fixed": 20,
+      "recall": 55.6,
+      "cell_changes_on_injected": 0,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": null,
+      "row_or_column_correct": 20,
+      "row_or_column_wrong": 16
+    },
+    "standardize_categories": {
+      "injected": 193,
+      "fixed": 193,
+      "recall": 100.0,
+      "cell_changes_on_injected": 186,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": 100.0,
+      "row_or_column_correct": 0,
+      "row_or_column_wrong": 0
+    },
+    "flag_outliers": {
+      "injected": 3,
+      "fixed": 2,
+      "recall": 66.7,
+      "cell_changes_on_injected": 5,
+      "neutral": 0,
+      "false_positives": 0,
+      "precision": 100.0,
+      "row_or_column_correct": 0,
+      "row_or_column_wrong": 0
+    }
+  },
+  "not_fixable": {
+    "ambiguous_date": {
+      "count": 306,
+      "no_op": 0,
+      "reason": "day/month choice needed; the rule applies one order column-wide"
+    },
+    "case_variant": {
+      "count": 60,
+      "no_op": 0,
+      "reason": "standardize_categories clusters category columns only"
+    },
+    "category_synonym": {
+      "count": 23,
+      "no_op": 0,
+      "reason": "no rule maps synonyms; clustering is by spelling only"
+    },
+    "duplicate_key": {
+      "count": 1,
+      "no_op": 0,
+      "reason": "no rule detects an id copied from the previous row"
+    },
+    "invalid_value": {
+      "count": 47,
+      "no_op": 0,
+      "reason": "unparseable text stays as it was (by design: 'never guessed')"
+    },
+    "missing_value": {
+      "count": 795,
+      "no_op": 339,
+      "reason": "a deleted value cannot be restored; no rule imputes"
+    },
+    "placeholder_token": {
+      "count": 28,
+      "no_op": 0,
+      "reason": "filler such as 'unknown' is not in the null-token list"
+    },
+    "stray_marker": {
+      "count": 41,
+      "no_op": 0,
+      "reason": "no rule removes a marker inside a non-empty column"
+    },
+    "typo_category": {
+      "count": 9,
+      "no_op": 0,
+      "reason": "short-value guard: under 5 characters, no safe merge"
+    }
+  },
+  "out_of_scope": {
+    "blank_row_above_header": 1,
+    "non_default_delimiter": 1,
+    "non_default_encoding": 1,
+    "title_row": 1,
+    "utf8_bom": 1
+  },
+  "damaged_cells": {
+    "total": 0,
+    "cells_compared": 5890,
+    "examples": []
+  },
+  "missed": [
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 57,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 69,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 107,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 119,
+      "column": "Amount (USD)",
+      "error_type": "parentheses_negative",
+      "original": "4027.35",
+      "injected": "(4027.35)",
+      "method": "output '-4027.35', expected '4027.35'"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 153,
+      "column": "Amount (USD)",
+      "error_type": "parentheses_negative",
+      "original": "3279.95",
+      "injected": "(3279.95)",
+      "method": "output '-3279.95', expected '3279.95'"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 154,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 203,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 234,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 250,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 271,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 281,
+      "column": "Amount (USD)",
+      "error_type": "parentheses_negative",
+      "original": "1081.61",
+      "injected": "(1081.61)",
+      "method": "output '-1081.61', expected '1081.61'"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 295,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "sales_orders_messy.csv",
+      "row": 418,
+      "column": "Amount (USD)",
+      "error_type": "parentheses_negative",
+      "original": "4911.32",
+      "injected": "(4911.32)",
+      "method": "output '-4911.32', expected '4911.32'"
+    },
+    {
+      "file": "customers_messy.xlsx",
+      "row": 12,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "customers_messy.xlsx",
+      "row": 36,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "customers_messy.xlsx",
+      "row": 40,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "customers_messy.xlsx",
+      "row": 227,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "hr_survey_messy.csv",
+      "row": 22,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "hr_survey_messy.csv",
+      "row": 44,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "hr_survey_messy.csv",
+      "row": 112,
+      "column": "",
+      "error_type": "duplicate_row",
+      "original": "",
+      "injected": "",
+      "method": "row kept: no identical row after cleaning"
+    },
+    {
+      "file": "hr_survey_messy.csv",
+      "row": 207,
+      "column": "Salary",
+      "error_type": "outlier",
+      "original": "44000",
+      "injected": "1",
+      "method": "flagged by flag_outliers"
+    }
+  ],
+  "false_positive_examples": []
+}

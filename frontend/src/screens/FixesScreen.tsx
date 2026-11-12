@@ -94,8 +94,8 @@ function Samples({ p }: { p: Proposal }) {
           </tr>
         </thead>
         <tbody>
-          {p.samples.slice(0, 5).map((s) => (
-            <tr key={s.row_id} className="border-t">
+          {p.samples.slice(0, 5).map((s, i) => (
+            <tr key={`${s.row_id ?? "x"}-${i}`} className="border-t">
               <td className="py-1 pr-3 font-mono break-all">{show(s.before)}</td>
               <td className="py-1 font-mono break-all">{show(s.after)}</td>
             </tr>

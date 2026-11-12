@@ -7,27 +7,28 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1 (MVP)
-- **Milestone:** M4 finished and hardened (pre-M5 fixes done). Committed and tagged `phase1-m4`. Waiting for the owner's "go" to start M5.
-- **Done:** M0 to M4.
-- **Next:** M5 = end-to-end test, evaluation (precision/recall against `sample_data/ground_truth.csv`), reviewer pass, README with setup steps and screenshots. Added by the owner: a 100k-row timing test and a mobile + keyboard-only check with screenshots.
+- **Phase:** 1 (MVP) complete. All milestones M0 to M5 done.
+- **Milestone:** M5 finished, committed and tagged `phase1-m5`. Waiting for the owner.
+- **Next:** owner decides on Phase 2 or polish. Candidate fixes are under Open questions and known issues.
 
-## Last milestone summary (pre-M5 fixes on top of M4, 2026-11-11)
-- "Approve all safe fixes" now skips category merges, ambiguous dates, destructive and flag-only fixes; ambiguous dates need a Day first / Month first click before Approve works. Test added.
-- Start cleaning and the stepper are disabled while a job runs (`jobRunning` in app state). Tests added.
-- `make_samples.py` now writes `sample_data/ground_truth.csv` (file, row, column, error_type, original_value, injected_value; about 2,900 entries). Test added.
-- Sales sample made messier (433 rows incl. 25 duplicates, 8 empty rows). Starting score **78.3**, after cleaning 92.0. The owner's target was 55 to 65: NOT reached (see Open questions).
-- Short-value guard in `standardize_categories` (values under 5 characters need a reference-list match or similarity of 95+).
-- Bug found by the new sample: iso8859-10 guess for a cp1252 file. Encoding detection now maps Latin-script guesses to windows-1252. CONTRACT section 10 added.
-- New tests: `test_quality_scores.py` (each dimension drops when its errors are injected; no dimension drops after cleaning), `test_ground_truth.py`.
+## Last milestone summary (M5, 2026-11-11)
+- Success criteria replaced: per-dimension lift, recall on injected errors, zero damaged cells (CONTRACT section 11, README).
+- Results screen shows overall + five dimensions with before, after and change. Profile screen shows detected encoding and delimiter, with a note for windows-1252.
+- Fourth sample: Chicago Food Inspections, 5,000 real rows, outside the ground-truth evaluation (`sample_data/DATASETS.md`). Before 95.7, after 99.4.
+- Evaluation (`evaluation/run_evaluation.py`, `evaluation/RESULTS.md`): recall 98.8% (1,721 of 1,742 fixable), precision 100%, damaged cells 0.
+- Timing (`evaluation/TIMING.md`): 100k rows 23 s, 405 MB; 47.5 MB file (872k rows) 201 s, 2.0 GB.
+- Mobile (375 px) and keyboard-only run through the whole flow: no page overflow, logical tab order, visible focus rings, Enter starts cleaning. One bug found and fixed (clipped text on Upload). 6 screenshots in `docs/screenshots/`.
+- Bug found by the check: the website's bundled sales sample was a stale copy; resynced and guarded by `tests/engine/test_frontend_samples.py`.
+- Reviewer pass: no high findings; fixed duplicate React keys on null `row_id`; rest listed below.
 
-Tests: **228 Python passed, 46 frontend passed**, frontend build OK.
+Tests: **239 Python passed, 50 frontend passed**, frontend build OK.
 
-| File | Before | After |
-|---|---|---|
-| sales_orders_messy.csv | 78.3 | 92.0 |
-| customers_messy.xlsx | 91.5 | 99.2 |
-| hr_survey_messy.csv | 86.3 | 96.1 |
+| File | Before | After | Recall | Damaged cells |
+|---|---|---|---|---|
+| sales_orders_messy.csv | 78.3 | 92.0 | 98.9% | 0 |
+| customers_messy.xlsx | 91.5 | 99.2 | 98.7% | 0 |
+| hr_survey_messy.csv | 86.3 | 96.1 | 98.6% | 0 |
+| chicago_food_inspections.csv (no ground truth) | 95.7 | 99.4 | n/a | n/a |
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -65,27 +66,31 @@ Tests: **228 Python passed, 46 frontend passed**, frontend build OK.
 - 2026-11-11 (pre-M5) Unparseable values ("abc", "31/02/2024") are kept as text and warned about, never guessed.
 - 2026-11-11 (pre-M5) Sales sample realism over score: duplicates capped at about 6% and empty rows at 8, so the starting score stays near 78.
 
+- 2026-11-11 (M5) Owner decision: the sales sample stays at a starting score of about 78; the score weights are not changed.
+- 2026-11-11 (M5) Owner decision: success = per-dimension lift, recall on injected errors, zero damaged cells (CONTRACT section 11). Recall excludes errors that are not fixable by design, and they are listed separately.
+- 2026-11-11 (M5) The real public dataset (Chicago) is outside the ground-truth evaluation. Its test tolerates a 0.5-point uniqueness drop because of the free-text key-candidate artifact; engine left unchanged.
+- 2026-11-11 (M5) Reviewer findings on job overwrite and streaming size check were not fixed in M5 (demo scope); logged as known issues.
+
 ## Open questions and known issues
-- Ambiguous dates default to month-first when approved without editing. The UI (M4) must make the day-first/month-first choice obvious on that suggestion.
-- Category clustering does not catch swapped letters in short words ("Wset" vs "West"). Expect missed recall in the M5 evaluation.
-- Profiling runs the dry run, and cleaning re-reads and re-profiles the file, so each file is processed about three times. Fine for the samples (under 1 second); not yet timed on a 50 MB file.
-- Change records are held in memory until written. A very large, very dirty file could use a lot of memory.
-- Every header that is not already snake_case counts as `messy_header`, so conformity tops out at 80 before cleaning. Intended.
-- Background jobs run in the API process (FastAPI BackgroundTasks). Two large files at once will slow each other; fine for a demo.
-- Two clean jobs started at the same moment on one dataset would overwrite each other's files. The UI should disable the button while a job runs.
-- The change log table re-reads `changelog.csv` on every page request. Fine for the samples; slow for millions of changes.
-- Sales sample starts at 78.3, not the 55 to 65 the owner asked for. Quality dimensions are column means, so a realistic file (about 6% duplicates) cannot go lower; reaching 65 needed about 40% duplicate or empty rows. Owner to decide: accept about 78, change the score weights, or allow an unrealistic file.
-- Clean-file test: invalid values stay as text in clean output by design.
+- **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
+- Ambiguous dates default to month-first if approved without editing; the UI forces a Day first / Month first click before Approve.
+- Category clustering misses swapped letters and short typos (under 5 characters need a reference-list match or 95+ similarity).
+- Weakest recall: exact duplicates 55.6% (copies that carry a missing value the original lacks stop being identical), outliers 66.7% (one extreme value inside the IQR fence), "(123)" amounts become -123 by contract while the ground truth expected +123.
+- Uniqueness can fall about 0.1 point on free-text columns that count as key candidates (Chicago sample). Candidate fix: exclude long free text from key candidates.
+- Reviewer, medium: starting a new profile while a job is still running can let the old job write results after the cleanup (section 8.5). The UI blocks this in one browser; the API does not.
+- Reviewer, low: the upload size limit is checked after FastAPI has spooled the upload to a temp file; an upload without Content-Length skips the early check. `engine/pipeline.py` lowercases the step label ("Applying <rule label>" in section 7).
+- Large files: 47.5 MB takes about 3.5 minutes and 2 GB of memory; peak memory is 40 to 50 times the file size. Change records are held in memory.
+- Jobs run in the API process; two big files at once slow each other.
+- Change-log filter on column fires a request per keystroke (no debounce); the change log re-reads `changelog.csv` on every page request.
+- Samples shown after a Day first / Month first toggle still show the original suggestion.
+- Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-M5, one agent call each (after the owner says "go"):
-1. test-data-qa: run all three sample files end to end through the API and check outputs.
-2. test-data-qa: evaluation table (precision/recall per rule against `ground_truth.csv`).
-3. test-data-qa: 100k-row timing test (profile + clean), report seconds and memory.
-4. web-ui-builder / main session: mobile layout and keyboard-only check, screenshots.
-5. reviewer-explainer: final pass over engine, backend and frontend against CONTRACT.md.
-6. Main session: README (setup steps, screenshots, evaluation table), milestone tick.
-Known gaps: category recall on swapped letters in short words, 50 MB timing, change-log column filter fires per keystroke (no debounce), samples after a day-first toggle still show the original suggestion.
+Nothing is queued. Options for the owner, in rough order of value:
+1. Fix the two reviewer findings (job overwrite after re-profile; streaming size check).
+2. Exclude long free text from key candidates; recheck the Chicago uniqueness score.
+3. Add the Chicago file as a fourth "Try a sample file" button.
+4. Phase 2 scope (to be defined by the owner in the BRD).
 
 ## How to run
 ```bash
@@ -106,3 +111,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-11 | M3 FastAPI backend | Done. 210 tests passing (165 engine + 45 API). Live upload-to-download flow checked with curl.
 - 2026-11-11 | M4 Website | Done. 41 frontend tests passing, build OK. Live flow checked in the browser (sales sample 83.1 -> 96.6). Reviewer findings fixed.
 - 2026-11-11 | Pre-M5 fixes | Done. Safe-approve rule, job lock, ground truth, messier sales sample (78.3, target missed), category guard, encoding fix. 228 Python + 46 frontend tests passing. Tagged phase1-m4.
+- 2026-11-11 | M5 Evaluation, timing, review, README | Done. 239 Python + 50 frontend tests passing. Recall 98.8%, precision 100%, 0 damaged cells. Tagged phase1-m5.

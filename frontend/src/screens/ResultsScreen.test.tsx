@@ -85,6 +85,17 @@ describe('ResultsScreen', () => {
     expect(screen.getByText('Showing 1-1 of 120')).toBeTruthy()
   })
 
+  it('shows before, after and change for overall and five dimensions', () => {
+    setup(results({ before: { ...q(60), validity: 70 }, after: { ...q(90.5), validity: 68.96, uniqueness: 60 } }))
+    const rows = screen.getAllByTestId('dimension-row')
+    expect(rows).toHaveLength(6)
+    expect(rows[0].textContent).toMatch(/Overall/)
+    expect(rows[0].textContent).toMatch(/60\.090\.5\+30\.5up 30\.5/)
+    expect(rows[2].textContent).toMatch(/Validity.*70.069.0-1\.0down 1\.0/)
+    expect(rows[4].textContent).toMatch(/unchanged/)
+    expect(rows[5].textContent).toMatch(/up 30\.5/)
+  })
+
   it('shows a message when there are no results', () => {
     setup(null)
     expect(screen.getByText(/No results are available/)).toBeTruthy()

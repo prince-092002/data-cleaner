@@ -31,13 +31,15 @@ const upload = { dataset_id: 'd1' } as UploadResponse
 const job = (over: Partial<JobStatus>): JobStatus =>
   ({ job_id: 'j1', status: 'running', progress_pct: 40, current_step: 'Scanning', error: null, ...over }) as JobStatus
 
+let current: ProfileResponse = profile
+
 function Seed({ withProfile, children }: { withProfile?: boolean; children: ReactNode }) {
   const { dispatch } = useAppState()
   const [ready, setReady] = useState(false)
   useEffect(() => {
     dispatch({ type: 'uploaded', upload })
     dispatch({ type: 'job_started', jobId: 'j1' })
-    if (withProfile) dispatch({ type: 'profile_loaded', profile })
+    if (withProfile) dispatch({ type: 'profile_loaded', profile: current })
     setReady(true)
   }, [dispatch, withProfile])
   return ready ? <>{children}</> : null
@@ -54,6 +56,7 @@ function setup(withProfile = false) {
 }
 
 beforeEach(() => {
+  current = profile
   vi.useFakeTimers()
   vi.mocked(getJob).mockReset()
   vi.mocked(getProfile).mockReset()
@@ -101,6 +104,31 @@ describe('ProfileScreen', () => {
     setup()
     await act(() => vi.advanceTimersByTimeAsync(2000))
     expect(screen.getByRole('alert').textContent).toMatch(/server restarted/)
+  })
+
+  const withSource = (source: object) =>
+    ({ ...profile, source: { filename: 'people.csv', ...source } }) as unknown as ProfileResponse
+
+  it('shows encoding and delimiter for csv without the note for utf-8', () => {
+    current = withSource({ file_type: 'csv', encoding: 'utf-8', delimiter: ';' })
+    setup(true)
+    expect(screen.getByText('Encoding: utf-8')).toBeTruthy()
+    expect(screen.getByText('Delimiter: semicolon')).toBeTruthy()
+    expect(screen.queryByText(/read as Windows-1252/)).toBeNull()
+  })
+
+  it('shows the note for windows-1252', () => {
+    current = withSource({ file_type: 'csv', encoding: 'windows-1252', delimiter: ',' })
+    setup(true)
+    expect(screen.getByText('Encoding: windows-1252')).toBeTruthy()
+    expect(screen.getByText(/Latin-script files are read as Windows-1252/)).toBeTruthy()
+  })
+
+  it('shows no encoding for xlsx', () => {
+    current = withSource({ file_type: 'xlsx', encoding: null, delimiter: null })
+    setup(true)
+    expect(screen.getByText('Excel file')).toBeTruthy()
+    expect(screen.queryByText(/Encoding/)).toBeNull()
   })
 
   it('skips polling when the profile is already in state', async () => {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getJob, getProfile } from '@/api/client'
-import type { ColumnProfile, IssueCode, ProfileResponse, QualityScore } from '@/api/types'
+import type { ColumnProfile, IssueCode, ProfileResponse, QualityScore, SourceInfo } from '@/api/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -180,6 +180,26 @@ export function ProfileScreen() {
   return <ProfileView profile={profile} />
 }
 
+const DELIMITER_NAMES: Record<string, string> = { ',': 'comma', ';': 'semicolon', '\t': 'tab', '|': 'pipe' }
+
+function FileFacts({ source }: { source: SourceInfo }) {
+  if (source.file_type === 'xlsx') {
+    return <p className="mt-3 text-sm text-slate-600">Excel file</p>
+  }
+  return (
+    <div className="mt-3 text-sm" data-testid="file-facts">
+      {source.encoding && <p>Encoding: {source.encoding}</p>}
+      {source.delimiter && <p>Delimiter: {DELIMITER_NAMES[source.delimiter] ?? source.delimiter}</p>}
+      {source.encoding?.toLowerCase() === 'windows-1252' && (
+        <p className="mt-1 text-xs text-slate-600">
+          Latin-script files are read as Windows-1252. If accented letters look wrong (for example Polish or Czech
+          text), the file may use a different encoding.
+        </p>
+      )}
+    </div>
+  )
+}
+
 function ProfileView({ profile }: { profile: ProfileResponse }) {
   const { dispatch } = useAppState()
   return (
@@ -211,6 +231,7 @@ function ProfileView({ profile }: { profile: ProfileResponse }) {
                 <dd className="font-medium">{profile.column_count}</dd>
               </div>
             </dl>
+            <FileFacts source={profile.source} />
           </div>
           <div className="space-y-3">
             {DIMENSIONS.map((d) => (

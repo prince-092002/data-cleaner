@@ -17,12 +17,13 @@ import { useAppState } from '@/state/AppState'
 
 export const PAGE_SIZE = 50
 
-const DIMENSIONS: (keyof Omit<QualityScore, 'overall'>)[] = [
-  'completeness',
-  'validity',
-  'consistency',
-  'uniqueness',
-  'conformity',
+const SCORE_ROWS: { key: keyof QualityScore; label: string; hint: string }[] = [
+  { key: 'overall', label: 'Overall', hint: 'Combined score across all dimensions' },
+  { key: 'completeness', label: 'Completeness', hint: 'Share of cells that are filled' },
+  { key: 'validity', label: 'Validity', hint: 'Values that fit their column type' },
+  { key: 'consistency', label: 'Consistency', hint: 'Same thing written the same way' },
+  { key: 'uniqueness', label: 'Uniqueness', hint: 'Rows that are not duplicates' },
+  { key: 'conformity', label: 'Conformity', hint: 'Values that follow expected formats' },
 ]
 const CHANGE_TYPES: ChangeType[] = ['cell', 'row_removed', 'column_removed', 'header_renamed', 'column_added']
 const SELECT_CLASS =
@@ -266,30 +267,39 @@ export function ResultsScreen() {
             Quality score: {r(before.overall)} {'->'} {r(after.overall)}{' '}
             <span className={delta >= 0 ? 'text-green-700' : 'text-red-700'}>({fmtDelta(delta)})</span>
           </p>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Dimension</TableHead>
-                <TableHead>Before</TableHead>
-                <TableHead>After</TableHead>
-                <TableHead className="w-1/3">After (bar)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {DIMENSIONS.map((d) => (
-                <TableRow key={d}>
-                  <TableCell className="capitalize">{d}</TableCell>
-                  <TableCell>{r(before[d])}</TableCell>
-                  <TableCell>{r(after[d])}</TableCell>
-                  <TableCell>
-                    <div aria-hidden="true" className="h-2 rounded-full bg-slate-200">
-                      <div className="h-2 rounded-full bg-blue-600" style={{ width: `${Math.max(0, Math.min(100, after[d]))}%` }} />
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table className="min-w-[20rem]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Dimension</TableHead>
+                  <TableHead>Before</TableHead>
+                  <TableHead>After</TableHead>
+                  <TableHead>Change</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {SCORE_ROWS.map(({ key, label, hint }) => {
+                  const d = r(after[key] - before[key])
+                  const word = d === 0 ? 'unchanged' : `${d > 0 ? 'up' : 'down'} ${Math.abs(d).toFixed(1)}`
+                  const color = d > 0 ? 'text-green-700' : d < 0 ? 'text-red-700' : 'text-slate-700'
+                  return (
+                    <TableRow key={key} data-testid="dimension-row">
+                      <TableCell className="whitespace-normal">
+                        <span className="font-medium">{label}</span>
+                        <span className="block text-xs font-normal text-slate-600">{hint}</span>
+                      </TableCell>
+                      <TableCell>{before[key].toFixed(1)}</TableCell>
+                      <TableCell>{after[key].toFixed(1)}</TableCell>
+                      <TableCell className={`font-medium ${color}`}>
+                        <span aria-hidden="true">{d > 0 ? '+' : ''}{d.toFixed(1)}</span>
+                        <span className="sr-only">{word}</span>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

@@ -183,9 +183,9 @@ export function UploadScreen() {
         </div>
 
         {upload && sheet && (
-          <section className="flex flex-col gap-4" aria-label="Uploaded file details">
-            <p className="text-sm">
-              <span className="font-medium">{upload.filename}</span>{' '}
+          <section className="flex min-w-0 flex-col gap-4" aria-label="Uploaded file details">
+            <p className="break-words text-sm">
+              <span className="break-all font-medium" title={upload.filename}>{upload.filename}</span>{' '}
               <span className="text-slate-600">({formatSize(upload.size_bytes)})</span>
             </p>
 
@@ -211,7 +211,7 @@ export function UploadScreen() {
               </div>
             )}
 
-            <fieldset>
+            <fieldset className="min-w-0">
               <legend className="text-sm font-medium">Which row holds the column names?</legend>
               <p className="mb-2 text-sm text-slate-600">
                 We detected Row {sheet.detected_header_row + 1}. Pick a different row if that is wrong.
