@@ -195,6 +195,7 @@ export interface ChangeRecord {
   new_value: string | null
   action: ChangeAction
   timestamp: string
+  reason?: string | null
 }
 
 export interface ChangesPage {
