@@ -3,7 +3,7 @@
 import csv
 import uuid
 
-from engine import pipeline
+from engine import pipeline, recipe
 from engine.models import Decisions
 
 
@@ -61,3 +61,20 @@ def test_reason_is_empty_for_other_rules(tmp_path):
     src = _write(tmp_path / "t.csv", ["id", "name"], [[i, f" a{i} "] for i in range(1, 30)])
     _, rows = _clean(tmp_path, src)
     assert rows and all(r["reason"] == "" for r in rows)
+
+
+def test_report_and_recipe_are_written_when_changes_carry_a_reason(tmp_path):
+    """The 11th changelog column must not break the other outputs of the same run."""
+    cities = ["CHICAGO"] * 95 + ["Chicago"] * 5
+    src = _write(tmp_path / "c.csv", ["id", "city"], [[i, c] for i, c in enumerate(cities, 1)])
+    _, rows = _clean(tmp_path, src)
+    out = tmp_path / "out"
+    with open(out / "changelog.csv", encoding="utf-8", newline="") as fh:
+        assert {len(r) for r in csv.reader(fh)} == {11}
+    assert {r["reason"] for r in rows if r["rule_id"] == "standardize_categories"} == {"majority spelling"}
+    html = (out / "report.html").read_text(encoding="utf-8")
+    assert "Chicago" in html and "CHICAGO" in html
+    saved = recipe.load(out / "recipe.yaml")
+    step = next(s for s in saved.steps if s.rule_id == "standardize_categories")
+    assert step.params["mapping"] == {"Chicago": "CHICAGO"}
+    assert "majority spelling" not in (out / "recipe.yaml").read_text(encoding="utf-8")

@@ -1,4 +1,5 @@
 import ast
+import csv
 import datetime as dt
 import hashlib
 import io
@@ -284,6 +285,23 @@ def test_change_log_filters_and_paging(client):
     assert client.get(url, params={"offset": total}).json()["changes"]["items"] == []
     for bad in ({"limit": 501}, {"limit": 0}, {"offset": -1}):
         assert client.get(url, params=bad).status_code == 400
+
+
+def test_change_log_reason_column_is_served_paged_and_downloaded(client):
+    """M6b: the 11th column `reason` reaches the API items and the downloaded changelog.csv."""
+    dataset_id, _ = cleaned(client)
+    url = f"/api/datasets/{dataset_id}/results"
+    cats = client.get(url, params={"rule_id": "standardize_categories", "limit": 500}).json()["changes"]
+    assert cats["total"] > 0 and all(i["reason"] for i in cats["items"])
+    second = client.get(url, params={"rule_id": "standardize_categories", "limit": 1, "offset": 1}).json()["changes"]
+    assert second["items"][0]["reason"] == cats["items"][1]["reason"]
+    dates = client.get(url, params={"rule_id": "parse_dates"}).json()["changes"]["items"]
+    assert dates and all(i["reason"] is None for i in dates)
+
+    text = client.get(f"/api/datasets/{dataset_id}/downloads/changelog.csv").text
+    rows = list(csv.reader(io.StringIO(text)))
+    assert rows[0][-1] == "reason" and {len(r) for r in rows} == {11}
+    assert {r[-1] for r in rows[1:] if r[1] == "standardize_categories"} == {i["reason"] for i in cats["items"]}
 
 
 def test_decisions_are_respected(client):
