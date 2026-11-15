@@ -76,3 +76,30 @@ def test_display_name_comes_from_the_current_call(tmp_path):
                             display_name="second.csv")
     assert "second.csv" in (tmp_path / "out" / "report.html").read_text(encoding="utf-8")
     assert result.summary.rows_before == prof.row_count
+
+
+def test_an_engine_change_misses_the_cache(tmp_path, monkeypatch):
+    """Code review (M6 step 9): a cache written by older engine code must not serve its stale types."""
+    from engine import cache as _cache
+    from engine import parsing as P
+
+    src = tmp_path / "p.csv"
+    src.write_text("permit_no,qty\n" + "".join(f"{v},1\n" for v in ["0123", "45678"] * 15), encoding="utf-8")
+    cache = tmp_path / "cache"
+    # older engine: "permit" and "no" were not id tokens, so the column was cached as integer
+    monkeypatch.setattr(P, "ID_NAME_TOKENS", P.ID_NAME_TOKENS - {"permit", "no"})
+    old = pipeline.profile(src, header_row=0, cache_dir=cache)
+    assert {c.name: c.inferred_type for c in old.columns}["permit_no"] == "integer"
+
+    # newer engine: the id tokens are back and the engine source fingerprint differs
+    monkeypatch.undo()
+    monkeypatch.setattr(_cache, "ENGINE_FINGERPRINT", "changed-engine-source", raising=False)
+    new = pipeline.profile(src, header_row=0, cache_dir=cache)
+    assert {c.name: c.inferred_type for c in new.columns}["permit_no"] == "id"
+
+
+def test_an_unchanged_engine_still_hits_the_cache(tmp_path, monkeypatch):
+    cache = tmp_path / "cache"
+    pipeline.profile(SALES, header_row=0, cache_dir=cache)
+    monkeypatch.setattr(_ingest, "ingest", lambda *a, **k: pytest.fail("file parsed again"))
+    pipeline.profile(SALES, header_row=0, cache_dir=cache)

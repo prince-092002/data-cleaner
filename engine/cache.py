@@ -1,7 +1,7 @@
 """Read-once cache (M6). Parsing a big CSV or Excel file is slow, so profile() saves the parsed
 all-text table as Parquet, with its "before" profile, and clean() reuses both.
 
-The key is the file's content hash plus sheet, header row and engine version, so a copy of the
+The key is the file's content hash plus sheet, header row, engine version and a hash of the engine source code, so a copy of the
 same upload (for example downloaded again to another folder) still hits, and any change misses.
 Never writes next to the original upload: only into the cache_dir the caller gives.
 """
@@ -22,12 +22,25 @@ from engine.models import DatasetProfile, SourceInfo
 CACHE_VERSION = "1"
 
 
+def _engine_fingerprint() -> str:
+    """Hash of every engine source file, so any engine code change misses the cache with no manual bump."""
+    digest = hashlib.sha256()
+    root = Path(__file__).parent
+    for file in sorted(root.rglob("*.py")):
+        digest.update(file.relative_to(root).as_posix().encode("utf-8"))
+        digest.update(file.read_bytes().replace(b"\r\n", b"\n"))   # same hash for CRLF and LF checkouts
+    return digest.hexdigest()
+
+
+ENGINE_FINGERPRINT = _engine_fingerprint()
+
+
 def _key(path: Path, sheet: str | None, header_row: int | None) -> str:
     digest = hashlib.sha256()
     with open(path, "rb") as fh:
         while chunk := fh.read(1 << 20):
             digest.update(chunk)
-    return f"{CACHE_VERSION}|{ENGINE_VERSION}|{sheet}|{header_row}|{digest.hexdigest()}"
+    return f"{CACHE_VERSION}|{ENGINE_VERSION}|{ENGINE_FINGERPRINT}|{sheet}|{header_row}|{digest.hexdigest()}"
 
 
 def _files(cache_dir: Path, key: str) -> tuple[Path, Path]:
