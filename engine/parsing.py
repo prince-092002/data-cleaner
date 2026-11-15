@@ -45,8 +45,10 @@ def has_whitespace_issue(value: str) -> bool:
 
 # --------------------------------------------------------------------------- headers
 
+# Whole tokens only (see is_id_like_name): "no" matches cust_no but never notes or nobody.
 ID_NAME_TOKENS = frozenset(
-    {"id", "zip", "zipcode", "postal", "postcode", "phone", "code", "account", "ssn", "sku"}
+    {"id", "zip", "zipcode", "postal", "postcode", "phone", "code", "account", "ssn", "sku",
+     "license", "licence", "lic", "permit", "inspection", "no", "num", "number", "nbr", "ref", "key"}
 )
 
 
