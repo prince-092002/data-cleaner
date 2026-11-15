@@ -39,7 +39,7 @@ Requirements: Python 3.12, Node 20 or newer.
 python -m venv .venv
 .venv/Scripts/activate                 # Windows (Git Bash: source .venv/Scripts/activate); macOS/Linux: source .venv/bin/activate
 pip install -e ".[backend,dev]"
-pytest -q                              # 239 tests, about 80 seconds
+pytest -q                              # 384 tests, about 90 seconds
 uvicorn backend.main:app --port 8000   # backend; API docs at http://localhost:8000/docs
 ```
 In a second terminal:
@@ -124,6 +124,8 @@ Uniqueness falls by 0.1: the long free-text column "violations" counts as a key 
 | Useless flag (license numbers) | 3 | 0 |
 | Wrong | 0 | 0 |
 | No longer made | 0 | 34 |
+
+A second, fresh sample of 100 changes (new seed, M6 step 9) was read the same way on the final engine: 98 correct, 2 useful flags, 0 debatable, 0 useless flags, 0 wrong. Both flags are O'Hare airport, a real location far west of the rest of the city.
 
 The two fixes: a spelling used in 80% or more of its group now stays as written and the rare spellings follow it (Title Case is only suggested when there is no clear majority), and columns named like license, permit or number are treated as ids, so they get no outlier flags. The file now gets 11,840 changes instead of 17,347. The held-out and tuning numbers above did not move.
 

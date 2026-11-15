@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Data Cleaner (Phase 1 MVP)
 
 A website where a user uploads a messy CSV or Excel file. The system profiles and cleans it in the background and returns a clean file, a cleaning report, a reusable recipe and a change log.
@@ -50,14 +54,14 @@ Each agent works alone on one task, reads CONTRACT.md first, reads only the file
 - CONTRACT.md holds the technical rules. HANDOFF.md holds progress and status. Do not mix them.
 
 ## Working agreement
-- Work in milestones M0 to M5 (see README). After each milestone: STOP, summarise in under 150 words (files created, tests passing, open questions), wait for "go".
+- Work in milestones (M0 to M5 done, see README; M6 in progress, see HANDOFF.md). After each milestone: STOP, summarise in under 150 words (files created, tests passing, open questions), wait for "go".
 - The BA documents in `docs/` (BRD.md, USER_STORIES.md, PROCESS_MAPS.md) belong to the project owner. Never write or edit them.
 
 ## Commands
 ```bash
 python -m venv .venv && .venv/Scripts/activate      # Windows
 pip install -e ".[backend,dev]"
-pytest -q                                           # engine + API tests (239, ~80 s; some are marked slow but still run by default)
+pytest -q                                           # engine + API tests (~384; some are marked slow but still run by default)
 pytest tests/engine/test_rules.py -q                # one file
 pytest tests/engine/test_rules.py::test_name -q     # one test
 pytest -q -m "not slow"                             # skip the 1-2 minute tests
@@ -65,7 +69,7 @@ python sample_data/make_samples.py                  # regenerate the 3 messy sam
 python evaluation/run_evaluation.py                 # recall / precision / damaged-cell evaluation
 uvicorn backend.main:app --reload --port 8000       # API docs at /docs
 cd frontend && npm install && npm run dev           # port 5173, proxies /api to 8000
-cd frontend && npm run test -- --run                # Vitest (one file: npm run test -- --run src/screens/FixesScreen.test.tsx)
+cd frontend && npm test                             # Vitest, already "vitest run" (one file: npm test -- src/screens/FixesScreen.test.tsx)
 cd frontend && npm run lint                         # oxlint
 cd frontend && npm run build                        # tsc -b && vite build
 ```
@@ -74,6 +78,7 @@ Env vars: `DC_STORAGE_DIR` (default `./storage`), `DC_CORS_ORIGINS`.
 ## Architecture (the parts that span files)
 - **Pipeline is the only engine surface.** `engine/pipeline.py` exposes `inspect` → `profile` → `build_plan` → `clean` (CONTRACT section 7). `backend/routes.py` and `backend/jobs.py` call only these.
 - **Two-pass flow.** `profile()` runs a dry run of every rule's candidates in registry order (`engine/rules/registry.py`) to produce `Proposal`s with true `rows_affected` and before/after samples. The user's decisions go through `build_plan()` to an `ApprovedPlan`, which `clean()` replays, writing the clean file, change log CSV, recipe YAML and HTML report.
+- **Read-once cache.** `engine/cache.py`: `profile()` saves the parsed all-text table as Parquet (keyed by content hash, sheet, header row, `ENGINE_VERSION` and a hash of the engine source, so any engine code change misses) and `clean()` reuses it.
 - **Shared parsing.** `engine/parsing.py` holds the value parsers used by both the profiler and the rules so they cannot disagree. Add parsing logic there, not in a single rule.
 - **Rules** live one per file in `engine/rules/`, share `engine/rules/base.py`, and may define an optional `prepare(df, column, params)` for params that depend on data (date order, category mapping).
 - **Data conventions:** empty cells are null at ingest, Excel values are read as text, and columns keep the uploaded header until `normalize_headers` runs.

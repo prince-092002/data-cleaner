@@ -7,16 +7,17 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`. Part B: Steps 7, 7b, 8 and 8b done and committed on `master`. Not pushed, not tagged.
-- **Waiting for:** the owner's "go" for Step 9 (code review, tag phase1-m6b). Do not start it before.
+- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`; Part B (Steps 7 to 9) tagged `phase1-m6b`. The branch is now `main` (renamed from master). Not pushed.
+- **Waiting for:** the owner's "go" for Step 10 (GitHub). Do not start it before.
 
-## Last milestone summary (M6 Step 8b, 2026-11-15)
-- Two engine fixes, each built by its own Opus subagent in a worktree (branches `m6b-majority`, `m6b-idcols`), verified by the coordinator against the owner's checklists (both passed in round 1) and merged into `master`. One merge conflict, in CONTRACT.md only.
-- **Majority spelling:** within a group of spellings of the same value, a spelling with 80% or more of the rows is canonical; the rare spellings merge into it automatically and the majority cells are untouched. With no majority there is no automatic change; a Title Case suggestion (existing Title Case spelling, else the most frequent) needs approval. Different values are never merged. changelog.csv has an 11th column `reason` ("majority spelling", ...). standardize_categories is 1.2.0.
-- **Id-like names:** license, licence, lic, permit, inspection, no, num, number, nbr, ref, key added as whole tokens. Id columns keep leading zeros and get no outlier flags; dates, booleans and categories are never blocked.
-- **Re-measured:** same 100 Chicago changes: correct 65 -> 65, debatable 31 -> 0, useless flags 3 -> 0, useful flag 1 -> 1, wrong 0 -> 0, no longer made 34. Chicago changes 17,347 -> 11,840. Both evaluation batches identical to Step 8 (held-out: detection 96.7%, fix 69.1%, precision 100%, 0 damaged).
+## Last milestone summary (M6 Step 9, 2026-11-15)
+- Fable coordinated three Opus subagents and verified each report itself (diff, tests, checklists). Fixer: 2 rounds, both passed. Reviewer: 1 round. Hand-checker: 1 round.
+- **Owner decisions:** the `reason` column stays (every reader already picks columns by name; tests now prove the API, report, recipe and UI viewer handle 11 columns). A count-like word in a column name wins over an id word. Lowercase majorities stay as they are. Region case variants stay a suggestion (README demo line added).
+- **Code review since phase1-m6a:** 1 high, 3 medium, 3 low. High fixed: the cache key now includes a hash of the engine source, so an engine upgrade can no longer serve old column types. Medium and low are under known issues.
+- **Fresh Chicago hand check** (new seed 20261115, 100 new changes of 11,840): 98 correct, 2 useful flags, 0 debatable, 0 useless flags, 0 wrong. Coordinator re-drew the sample and re-checked 14 verdicts against the raw file: all agree.
+- **Evaluation unchanged:** held-out detection 96.7%, fix 69.1%, precision 100%, 0 damaged; tuning 97.3%, 66.9%, 100%, 0.
 
-Tests: **370 Python passed, 59 frontend passed**, build OK.
+Tests: **384 Python passed, 60 frontend passed**, build OK.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -84,6 +85,10 @@ Tests: **370 Python passed, 59 frontend passed**, build OK.
 - 2026-11-15 (M6.8b) Owner rule: 80% majority spelling wins automatically; Title Case only as a suggestion when there is no majority. Replaces the M6.2 "prefer Title Case" decision. Side effect: "New York" 2 / "new york" 9 now becomes "new york" automatically.
 - 2026-11-15 (M6.8b) changelog.csv gained an 11th column `reason` (CONTRACT 5) to show why a category merge happened.
 - 2026-11-15 (M6.8b) Owner's id-like token list applied as given. Risk: a real count column named like "Number of items" or "num_visits" is typed as id (no outlier flags, no numeric clean-up). No bundled file has one.
+- 2026-11-15 (M6.9) Owner decision: a count-like token (count, qty, quantity, total, sum, amount, items, of) overrides an id token, so "Number of items" is a number. Replaces the risk noted above.
+- 2026-11-15 (M6.9) Owner decisions: keep the `reason` column; keep lowercase majorities; keep Region case variants as a suggestion.
+- 2026-11-15 (M6.9) CONTRACT change: the cache key also holds a hash of the engine source (`cache.ENGINE_FINGERPRINT`). Why: ENGINE_VERSION was never bumped, so an upgraded engine could serve cached column types from the old one. Any engine edit now costs one re-parse.
+- 2026-11-15 (M6.9) Branch renamed from master to main before GitHub.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
@@ -100,12 +105,16 @@ Tests: **370 Python passed, 59 frontend passed**, build OK.
 - Review (M6.6), efficiency: Tier 2 category analysis runs up to 3 times per column (Step 7); every route loads profile/results JSON from the Dataset row (Step 12).
 - With no 80% majority, case variants are no longer merged unless the user approves the suggestion (demo file Region: west 17, WEST 7, West 6 now needs one click).
 - Held-out misses: "Northest" (tie between Northeast and Northwest), "Ctr" (not recognised as Central), one mojibake name ("Ã…berg"), emails in capitals, "unknown"/"n.a." placeholders, stray markers, synonyms.
+- Review (M6.9), medium, not fixed: two profile jobs storing the same cache entry at once share one temp file name and can fail one job (`engine/cache.py` store; a cache write error also fails the profile).
+- Review (M6.9), medium, not fixed: `build_xlsx` has no lock; two downloads at once both build the file, and on Windows the second can get a 500 while the first is streaming.
+- Review (M6.9), medium, not fixed: a category value the user adds or retargets in an edited mapping is logged with the rule's reason ("majority spelling", ...) instead of "merge chosen by the user".
+- Review (M6.9), low, not fixed: a dataset deleted during an Excel build answers 500 instead of 404; the id tokens "no" and "key" catch names like "Amount (no tax)"; `evaluation/stage_timing.py` still times a function clean no longer calls; a cache miss hashes the file twice.
+- The `reason` is stored in changelog.csv only; the report and the UI table do not show it.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Wait for the owner's "go". Then M6 Step 9: code review over everything since phase1-m5, fix high-severity items, tag phase1-m6b.
-2. Part C (Steps 10-15): GitHub, Vercel feasibility spike, adapters, deploy. The owner must run `gh auth login` and `vercel login` when asked.
-3. Branches `m6b-majority` and `m6b-idcols` are merged and can be deleted.
+1. Wait for the owner's "go". Then Part C (Steps 10-15): GitHub, Vercel feasibility spike, adapters, deploy. The owner must run `gh auth login` and `vercel login` when asked.
+2. Branches `m6b-majority`, `m6b-idcols` and `m6b-fixes` are merged and can be deleted, with the leftover worktree under `.claude/worktrees/`.
 
 ## How to run
 ```bash
@@ -136,3 +145,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-15 | M6 Step 7 Measure, then optimize | Done. Stage profiler, read-once Parquet cache, distinct-value map_values, streamed change log. Clean 13-20% faster, 47.5 MB peak -8%. 298 Python tests passing.
 - 2026-11-15 | M6 Steps 7b + 8 | Done. Excel on download; held-out batch; detection 96.7%, fix recall 69.1%, precision 100%, 0 damaged; Chicago hand check 0 wrong. 312 Python + 58 frontend tests passing.
 - 2026-11-15 | M6 Step 8b | Done. Majority spelling and id-like names (two subagents, round 1 each). Chicago: debatable 31 -> 0, useless flags 3 -> 0, 0 wrong; evaluation unchanged. 370 Python + 59 frontend tests passing.
+- 2026-11-15 | M6 Step 9 | Done. Owner decisions, code review (1 high fixed, 6 deferred), fresh Chicago hand check 98 correct / 2 useful flags / 0 wrong; evaluation unchanged. 384 Python + 60 frontend tests passing. Tagged phase1-m6b, branch renamed to main.
