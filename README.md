@@ -113,7 +113,18 @@ Chicago Food Inspections, 5,000 rows, 17 columns, about 4.9 MB, City of Chicago 
 
 Uniqueness falls by 0.1: the long free-text column "violations" counts as a key candidate, and trimming merges values that differed only by spaces. No row was lost and no cell was damaged. This is listed as a known issue.
 
-**Hand check.** 100 of its 17,347 changes were drawn at random and read one by one ([evaluation/CHICAGO_HANDCHECK.md](evaluation/CHICAGO_HANDCHECK.md)): 65 correct, 31 correct in meaning but debatable ("CHICAGO" rewritten to "Chicago" although 99% of rows use capitals), 1 reasonable outlier flag, 3 flags that are not useful (license numbers), 0 wrong.
+**Hand check.** 100 of its changes were drawn at random and read one by one, then the same 100 were checked again after two fixes in M6 step 8b ([evaluation/CHICAGO_HANDCHECK.md](evaluation/CHICAGO_HANDCHECK.md)):
+
+| Verdict | Before (step 8) | After (step 8b) |
+|---|---|---|
+| Correct | 65 | 65 |
+| Debatable ("CHICAGO" rewritten to "Chicago" against 99% of rows) | 31 | 0 |
+| Useful flag | 1 | 1 |
+| Useless flag (license numbers) | 3 | 0 |
+| Wrong | 0 | 0 |
+| No longer made | 0 | 34 |
+
+The two fixes: a spelling used in 80% or more of its group now stays as written and the rare spellings follow it (Title Case is only suggested when there is no clear majority), and columns named like license, permit or number are treated as ids, so they get no outlier flags. The file now gets 11,840 changes instead of 17,347. The held-out and tuning numbers above did not move.
 
 ### Speed and memory
 ([evaluation/TIMING.md](evaluation/TIMING.md))

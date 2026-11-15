@@ -7,18 +7,16 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`. Part B: Steps 7, 7b (Excel on download) and 8 done and committed.
-- **Waiting for:** the owner's "go" for Step 9 (code review, tag phase1-m6b), and answers to the two Chicago findings below.
+- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`. Part B: Steps 7, 7b, 8 and 8b done and committed on `master`. Not pushed, not tagged.
+- **Waiting for:** the owner's "go" for Step 9 (code review, tag phase1-m6b). Do not start it before.
 
-## Last milestone summary (M6 Steps 7b and 8, 2026-11-15)
-- **7b:** clean.xlsx is built on first download (`pipeline.build_xlsx`, `POST .../downloads/clean.xlsx/prepare`), kept per run, atomic; failure is `500 excel_failed` and touches nothing else; UI shows "Preparing your Excel file". Content proven identical to the old code (fingerprints for 4 files). 100k rows: clean about 25 s to 12 s.
-- **8a:** held-out batch in `sample_data/heldout/` (seed 20261115) plus `store_visits_messy.csv` (NE, SW, Ctr, N.E., Cent.). Engine not tuned against it.
-- **8b:** honest metrics over all injected errors. Held-out: detection 96.7% (80.9% at the cell), fix recall 69.1% (77.7% if the user picks the right date order), precision 100%, 0 damaged cells. Tuning: 97.3% / 66.9%. Fixable-only recall: 99.7% held-out, 99.9% tuning.
-- Fix recall is above the 55 to 60% the owner expected because 339 no-op injections (an "empty" Notes cell that was already empty) are not counted as errors; counting them gives 59.5% on the tuning batch.
-- **8c:** 100 random Chicago changes read one by one (`evaluation/CHICAGO_HANDCHECK.md`): 65 correct, 31 debatable, 1 useful flag, 3 useless flags, 0 wrong.
-- **8d:** RESULTS.md, README and CONTRACT 11 rewritten around these metrics, with timing and memory.
+## Last milestone summary (M6 Step 8b, 2026-11-15)
+- Two engine fixes, each built by its own Opus subagent in a worktree (branches `m6b-majority`, `m6b-idcols`), verified by the coordinator against the owner's checklists (both passed in round 1) and merged into `master`. One merge conflict, in CONTRACT.md only.
+- **Majority spelling:** within a group of spellings of the same value, a spelling with 80% or more of the rows is canonical; the rare spellings merge into it automatically and the majority cells are untouched. With no majority there is no automatic change; a Title Case suggestion (existing Title Case spelling, else the most frequent) needs approval. Different values are never merged. changelog.csv has an 11th column `reason` ("majority spelling", ...). standardize_categories is 1.2.0.
+- **Id-like names:** license, licence, lic, permit, inspection, no, num, number, nbr, ref, key added as whole tokens. Id columns keep leading zeros and get no outlier flags; dates, booleans and categories are never blocked.
+- **Re-measured:** same 100 Chicago changes: correct 65 -> 65, debatable 31 -> 0, useless flags 3 -> 0, useful flag 1 -> 1, wrong 0 -> 0, no longer made 34. Chicago changes 17,347 -> 11,840. Both evaluation batches identical to Step 8 (held-out: detection 96.7%, fix 69.1%, precision 100%, 0 damaged).
 
-Tests: **312 Python passed, 58 frontend passed**, build OK.
+Tests: **370 Python passed, 59 frontend passed**, build OK.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -83,6 +81,9 @@ Tests: **312 Python passed, 58 frontend passed**, build OK.
 - 2026-11-15 (M6.8) "Fixed" is strict: right value AND standard form; null tokens and placeholders must become real empty cells; no partial credit. Ambiguous dates count as detected, not fixed (right only by default order).
 - 2026-11-15 (M6.8) Detection has two levels: cell (fixed, changed, flagged, listed as left alone) and column (profile issue). Both are reported; missing values are column level.
 - 2026-11-15 (M6.8) No engine change in Step 8. Held-out misses are reported, not fixed.
+- 2026-11-15 (M6.8b) Owner rule: 80% majority spelling wins automatically; Title Case only as a suggestion when there is no majority. Replaces the M6.2 "prefer Title Case" decision. Side effect: "New York" 2 / "new york" 9 now becomes "new york" automatically.
+- 2026-11-15 (M6.8b) changelog.csv gained an 11th column `reason` (CONTRACT 5) to show why a category merge happened.
+- 2026-11-15 (M6.8b) Owner's id-like token list applied as given. Risk: a real count column named like "Number of items" or "num_visits" is typed as id (no outlier flags, no numeric clean-up). No bundled file has one.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
@@ -97,15 +98,14 @@ Tests: **312 Python passed, 58 frontend passed**, build OK.
 - Samples shown after a Day first / Month first toggle still show the original suggestion.
 - Review (M6.6), not fixed: an id column with leading zeros at mixed widths and no id-like name (cust_no: 00123, 045) is coerced to numbers automatically. Follows the owner's Step 2 rule; revisit if it bites.
 - Review (M6.6), efficiency: Tier 2 category analysis runs up to 3 times per column (Step 7); every route loads profile/results JSON from the Dataset row (Step 12).
-- **Owner question 1 (Chicago):** Title Case beats a 99% majority: 4,953 "CHICAGO" are rewritten to "Chicago" (20 rows) automatically. Option: prefer Title Case only when no spelling has a clear majority.
-- **Owner question 2 (Chicago):** `license` is read as a number and gets 573 outlier flags. Option: add license-style names to the id list, or skip outlier flags on nearly all-distinct columns.
+- With no 80% majority, case variants are no longer merged unless the user approves the suggestion (demo file Region: west 17, WEST 7, West 6 now needs one click).
 - Held-out misses: "Northest" (tie between Northeast and Northwest), "Ctr" (not recognised as Central), one mojibake name ("Ã…berg"), emails in capitals, "unknown"/"n.a." placeholders, stray markers, synonyms.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Owner answers on the two Chicago findings (change, or leave for Phase 2).
-2. M6 Step 9: code review over everything since phase1-m5, fix high-severity items, tag phase1-m6b.
-3. Part C (Steps 10-15): GitHub, Vercel feasibility spike, adapters, deploy. The owner must run `gh auth login` and `vercel login` when asked.
+1. Wait for the owner's "go". Then M6 Step 9: code review over everything since phase1-m5, fix high-severity items, tag phase1-m6b.
+2. Part C (Steps 10-15): GitHub, Vercel feasibility spike, adapters, deploy. The owner must run `gh auth login` and `vercel login` when asked.
+3. Branches `m6b-majority` and `m6b-idcols` are merged and can be deleted.
 
 ## How to run
 ```bash
@@ -135,3 +135,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-12 | M6 Step 6 Part A checkpoint | Done. Demo file 4 regions / 1 quantity format / 2 decimals, quality 80.5 -> 98.0; review: 5 fixes. 291 Python + 56 frontend tests passing. Tagged phase1-m6a.
 - 2026-11-15 | M6 Step 7 Measure, then optimize | Done. Stage profiler, read-once Parquet cache, distinct-value map_values, streamed change log. Clean 13-20% faster, 47.5 MB peak -8%. 298 Python tests passing.
 - 2026-11-15 | M6 Steps 7b + 8 | Done. Excel on download; held-out batch; detection 96.7%, fix recall 69.1%, precision 100%, 0 damaged; Chicago hand check 0 wrong. 312 Python + 58 frontend tests passing.
+- 2026-11-15 | M6 Step 8b | Done. Majority spelling and id-like names (two subagents, round 1 each). Chicago: debatable 31 -> 0, useless flags 3 -> 0, 0 wrong; evaluation unchanged. 370 Python + 59 frontend tests passing.
