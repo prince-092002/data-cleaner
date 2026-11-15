@@ -11,6 +11,7 @@ from typing import Callable
 
 import polars as pl
 
+from engine import cache as _cache
 from engine import changelog as _changelog
 from engine import ingest as _ingest
 from engine import parsing as P
@@ -28,7 +29,6 @@ from engine.models import (
     PlanStep,
     Proposal,
     ProposalSample,
-    RuleSummary,
 )
 from engine.rules.base import ROW_ID, Rule, proposal_id, resolve_mode
 from engine.rules.registry import ORDER, RULES, RULES_BY_ID
@@ -57,13 +57,25 @@ def profile(
     header_row: int | None = None,
     progress: ProgressFn | None = None,
     display_name: str | None = None,
+    cache_dir: Path | None = None,
 ) -> DatasetProfile:
-    """Read the file (never modifying it); return column profiles, quality score and proposals."""
+    """Read the file (never modifying it); return column profiles, quality score and proposals.
+
+    cache_dir: optional folder for the read-once cache (the parsed table as Parquet plus this
+    profile's scores), so clean() with the same cache_dir does not parse the file again.
+    """
     report = progress or _noop
     report(5, "Reading file")
-    loaded = _ingest.ingest(Path(path), sheet=sheet, header_row=header_row, display_name=display_name)
-    report(25, "Detecting structure")
-    result = _profile.profile_dataframe(loaded.df, loaded.source, loaded.source_names, progress=report)
+    path = Path(path)
+    hit = _cache.load(cache_dir, path, sheet, header_row, display_name)
+    if hit:
+        loaded, result = hit
+        report(25, "Detecting structure")
+    else:
+        loaded = _ingest.ingest(path, sheet=sheet, header_row=header_row, display_name=display_name)
+        report(25, "Detecting structure")
+        result = _profile.profile_dataframe(loaded.df, loaded.source, loaded.source_names, progress=report)
+        _cache.store(cache_dir, path, loaded, result)
     report(90, "Finding fixes")
     result.proposals = _propose(loaded.df, result)
     report(100, "Done")
@@ -193,19 +205,10 @@ def _check_version(rule: Rule, step: PlanStep) -> None:
         )
 
 
-def _summarise(records: list[ChangeRecord], before: DatasetProfile, after: DatasetProfile) -> ChangeSummary:
-    by_rule: dict[tuple[str, str], RuleSummary] = {}
-    counts = dict.fromkeys(_changelog.CHANGE_TYPES, 0)
-    for r in records:
-        counts[r.change_type] += 1
-        entry = by_rule.setdefault(
-            (r.rule_id, r.action), RuleSummary(rule_id=r.rule_id, action=r.action, changes=0)
-        )
-        entry.changes += 1
-        if r.column and r.column not in entry.columns:
-            entry.columns.append(r.column)
+def _summarise(log: _changelog.ChangeLogWriter, before: DatasetProfile, after: DatasetProfile) -> ChangeSummary:
+    counts = log.counts
     return ChangeSummary(
-        total_changes=len(records),
+        total_changes=log.total,
         cells_changed=counts["cell"],
         rows_removed=counts["row_removed"],
         columns_removed=counts["column_removed"],
@@ -214,7 +217,7 @@ def _summarise(records: list[ChangeRecord], before: DatasetProfile, after: Datas
         rows_after=after.row_count,
         columns_before=before.column_count,
         columns_after=after.column_count,
-        by_rule=sorted(by_rule.values(), key=lambda s: (ORDER.get(s.rule_id, 99), s.action)),
+        by_rule=sorted(log.by_rule(), key=lambda s: (ORDER.get(s.rule_id, 99), s.action)),
     )
 
 
@@ -268,12 +271,12 @@ def clean(
     progress: ProgressFn | None = None,
     recipe_name: str | None = None,
     display_name: str | None = None,
+    cache_dir: Path | None = None,
 ) -> CleanResult:
     """Run the approved steps on a fresh read of the file and write the five output files.
 
     The original file is only read. Outputs go to out_dir.
     """
-    from engine import recipe as _recipe
     from engine import report as _report
 
     report = progress or _noop
@@ -282,17 +285,28 @@ def clean(
 
     report(3, "Reading file")
     src = approved_plan.source
-    loaded = _ingest.ingest(
-        Path(path), sheet=src.sheet, header_row=src.header_row, display_name=display_name
-    )
+    hit = _cache.load(cache_dir, Path(path), src.sheet, src.header_row, display_name)
+    if hit:                                       # parsed and scored once, at profile time
+        loaded, before = hit
+    else:
+        loaded = _ingest.ingest(
+            Path(path), sheet=src.sheet, header_row=src.header_row, display_name=display_name
+        )
+        before = _profile.profile_dataframe(loaded.df, loaded.source, loaded.source_names)
     df = loaded.df
-    before = _profile.profile_dataframe(df, loaded.source, loaded.source_names)
 
     # Steps name columns by their tidy name; map that to the current dataframe column.
     current = {col.name: raw for col, raw in zip(before.columns, [c for c in df.columns if c != ROW_ID])}
-    records: list[ChangeRecord] = []
     warnings: list[str] = []
     steps = approved_plan.steps
+    # Change records go to changelog.csv step by step; only counts and a sample stay in memory.
+    with _changelog.ChangeLogWriter(out_dir / "changelog.csv", sample_size=_report.SAMPLE_CHANGES) as log:
+        df = _apply_steps(df, steps, current, warnings, log, run_id, report)
+    return _finish(df, loaded, before, current, warnings, log, approved_plan, out_dir, run_id,
+                   recipe_name, report)
+
+
+def _apply_steps(df, steps, current, warnings, log, run_id, report):
     for i, step in enumerate(steps):
         rule = RULES_BY_ID.get(step.rule_id)
         if rule is None:
@@ -307,13 +321,20 @@ def clean(
                 continue
         df, changes = rule.apply(df, column, step.params)
         _changelog.stamp(changes, run_id, step.action)
-        records += changes
+        log.add(changes)
         for change in changes:
             if change.change_type == "header_renamed":
                 for name, col in current.items():
                     if col == change.old_value:
                         current[name] = change.new_value
+    return df
 
+
+def _finish(df, loaded, before, current, warnings, log, approved_plan, out_dir, run_id, recipe_name, report):
+    from engine import recipe as _recipe
+    from engine import report as _report
+
+    steps = approved_plan.steps
     report(80, "Scoring results")
     after = _profile.profile_dataframe(df, loaded.source)
     after_by_col = {c.name: c for c in after.columns}
@@ -331,7 +352,7 @@ def clean(
         for c in after.columns
         if c.name not in known
     ]
-    summary = _summarise(records, before, after)
+    summary = _summarise(log, before, after)
     result = CleanResult(
         run_id=run_id,
         before=before.quality,
@@ -348,11 +369,10 @@ def clean(
     money = {current.get(s.column, s.column) for s in steps
              if s.rule_id == "coerce_numeric" and s.params.get("decimals")}
     _write_xlsx(output, {c.name: c.inferred_type for c in after.columns}, out_dir / "clean.xlsx", money)
-    _changelog.write_csv(records, out_dir / "changelog.csv")
     saved = _recipe.from_plan(approved_plan, loaded.source, name=recipe_name)
     _recipe.save(saved, out_dir / "recipe.yaml")
     (out_dir / "report.html").write_text(
-        _report.render(result, before, after, saved, records), encoding="utf-8"
+        _report.render(result, before, after, saved, log.sample, log.total), encoding="utf-8"
     )
     report(100, "Done")
     return result

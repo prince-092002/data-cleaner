@@ -114,7 +114,9 @@ Uniqueness falls by 0.1: the long free-text column "violations" counts as a key 
 | 100,000 | 5.4 MB | 6 s | 17 s | 23 s | 405 MB |
 | 872,050 | 47.5 MB | 47 s | 155 s | 201 s (3.4 min) | 2.0 GB |
 
-A file near the 50 MB limit works but takes about 3.5 minutes and about 2 GB of memory. Fine for a demo; a production version would need chunked processing.
+Measured at M5. In M6 the file is read once (a Parquet cache shared by profile and clean), rules work on distinct values, and change records stream to disk: clean is 13 to 20% faster and the peak on a 47.5 MB file is 8% lower (1.8 GB). Writing clean.xlsx is still about half of the clean time. Details: [evaluation/TIMING.md](evaluation/TIMING.md).
+
+**Supported file size:** up to 50 MB when run locally (about 4 to 5 minutes and 1.8 GB of memory at the top end), and 4 MB on the live site (Vercel's request limit is 4.5 MB; a 4 MB file is about 75,000 rows and takes well under a minute).
 
 ## Known limitations
 - Latin-script files are read as Windows-1252. Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.

@@ -346,14 +346,15 @@ def inspect(path: Path) -> FileInspection
     """Cheap look at an upload: sheets, detected header row, first 10 raw rows per sheet."""
 
 def profile(path: Path, sheet: str | None = None, header_row: int | None = None,
-            progress: ProgressFn | None = None, display_name: str | None = None) -> DatasetProfile
+            progress: ProgressFn | None = None, display_name: str | None = None,
+            cache_dir: Path | None = None) -> DatasetProfile
 
 def build_plan(profile: DatasetProfile, decisions: Decisions) -> ApprovedPlan
     """Turn user decisions into the ordered list of steps to run."""
 
 def clean(path: Path, approved_plan: ApprovedPlan, out_dir: Path, run_id: str,
           progress: ProgressFn | None = None, recipe_name: str | None = None,
-          display_name: str | None = None) -> CleanResult
+          display_name: str | None = None, cache_dir: Path | None = None) -> CleanResult
     """Writes clean.csv, clean.xlsx, report.html, recipe.yaml, changelog.csv into out_dir."""
 ```
 
@@ -414,6 +415,8 @@ Progress step labels:
 - clean: `Reading file` · one `Applying <rule label>` per step · `Scoring results` · `Writing files` · `Done`
 
 `display_name` is the file name as uploaded. The backend stores files under fixed names, so it passes this for `source.filename`, the report and the recipe.
+
+**Read-once cache (M6).** With `cache_dir`, `profile` saves the parsed all-text table as Parquet plus its own scores (`ingest-<key>.parquet`, `ingest-<key>.json`); `clean` with the same `cache_dir` reuses them instead of parsing the file and scoring "before" again. The key is the file's SHA-256 plus sheet, header row and engine version, so any change misses. Profiling is never sampled and the dry run is never reused for the final clean. `clean` streams change records to `changelog.csv` after each step and keeps only counts and a 50-record sample in memory.
 
 Engine errors: `engine.errors.IngestError` (unreadable or empty file), `engine.errors.PlanError` (bad decisions). Both carry a user-safe `message`.
 
@@ -530,6 +533,7 @@ storage/
   {dataset_id}/
     original.csv | original.xlsx   # never modified
     inspection.json                # sheets and header rows found at upload
+    ingest-<key>.parquet / .json   # read-once cache (section 7), written by the profile job
     runs/{run_id}/                 # one folder per clean job (M6)
       plan.json
       clean.csv  clean.xlsx  report.html  recipe.yaml  changelog.csv

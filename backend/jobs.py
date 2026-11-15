@@ -96,6 +96,7 @@ def run_profile_job(ctx: Context, job_id: str, dataset: Dataset) -> None:
             header_row=dataset.header_row,
             progress=_progress(ctx, job_id),
             display_name=dataset.filename,
+            cache_dir=ctx.storage.dataset_dir(dataset.id),      # read-once cache for the clean job
         )
         return save_if_current(ctx.engine, dataset.id, generation, profile_json=result.model_dump_json())
 
@@ -114,6 +115,7 @@ def run_clean_job(ctx: Context, job_id: str, dataset: Dataset, plan: ApprovedPla
                 run_id=job_id,
                 progress=_progress(ctx, job_id),
                 display_name=dataset.filename,
+                cache_dir=ctx.storage.dataset_dir(dataset.id),
             )
             saved = save_if_current(ctx.engine, dataset.id, generation,
                                     results_json=result.model_dump_json(), results_run_id=job_id)

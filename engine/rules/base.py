@@ -72,26 +72,27 @@ class Rule:
         )
 
     def map_values(self, df: pl.DataFrame, column: str, fn: Callable[[str], str | None]):
-        """Apply fn to every non-null value of one column; log each value that changes."""
-        values = df.get_column(column).to_list()
-        row_ids = df.get_column(ROW_ID).to_list()
-        cache: dict[str, str | None] = {}
-        out: list[str | None] = []
-        records: list[ChangeRecord] = []
-        for row_id, value in zip(row_ids, values):
-            if value is None:
-                out.append(None)
-                continue
-            if value in cache:
-                new = cache[value]
-            else:
-                new = cache[value] = fn(value)
-            out.append(new)
+        """Apply fn to every non-null value of one column; log each value that changes.
+
+        Works on distinct values: fn runs once per distinct value, the column is rewritten by
+        Polars, and Python only loops over the rows that actually change (to log them).
+        """
+        series = df.get_column(column)
+        changed: dict[str, str | None] = {}
+        for value in series.drop_nulls().unique().to_list():
+            new = fn(value)
             if new != value:
-                records.append(self.record(row_id, column, "cell", value, new))
-        if not records:
+                changed[value] = new
+        if not changed:
             return df, []
-        return df.with_columns(pl.Series(column, out, dtype=pl.Utf8)), records
+        hit = df.filter(pl.col(column).is_in(list(changed))).select(ROW_ID, column)
+        records = [
+            self.record(row_id, column, "cell", old, changed[old])
+            for row_id, old in zip(hit.get_column(ROW_ID).to_list(), hit.get_column(column).to_list())
+        ]
+        new_col = series.replace_strict(list(changed), list(changed.values()), default=series,
+                                        return_dtype=pl.Utf8)
+        return df.with_columns(new_col.alias(column)), records
 
 
 LEFT_ALONE_MAX = 20

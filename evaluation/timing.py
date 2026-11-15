@@ -259,9 +259,11 @@ def run_engine(src: Path, work_dir: Path, read) -> dict:
     """pipeline.profile, then build_plan with every proposal approved, then pipeline.clean."""
     run_id = str(uuid.uuid4())
     baseline = read()
-    profile, profile_s, profile_peak = _timed(lambda: pipeline.profile(src), read)
+    cache = work_dir / "cache"                       # like the backend: read-once cache per dataset
+    profile, profile_s, profile_peak = _timed(lambda: pipeline.profile(src, cache_dir=cache), read)
     plan = pipeline.build_plan(profile, Decisions(approved=[p.id for p in profile.proposals]))
-    result, clean_s, clean_peak = _timed(lambda: pipeline.clean(src, plan, work_dir, run_id), read)
+    result, clean_s, clean_peak = _timed(
+        lambda: pipeline.clean(src, plan, work_dir, run_id, cache_dir=cache), read)
     return {
         "proposals": len(profile.proposals),
         "baseline_mib": round(baseline / MIB, 1),

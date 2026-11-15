@@ -7,17 +7,16 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6 (Fix, Evaluate, Ship). Part A (Steps 1-6) is done and tagged `phase1-m6a`.
-- **Next:** Part B, Step 7 (measure, then optimize). Waiting for the owner's "go".
+- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`. Part B: Step 7 (measure, then optimize) done and committed.
+- **Waiting for:** the owner's "go" for Step 8, and a decision on clean.xlsx (see Open questions).
 
-## Last milestone summary (M6 Step 6, Part A checkpoint, 2026-11-12)
-- Full run: 291 Python passed, 56 frontend passed, build OK, lint unchanged (21 old warnings).
-- messy_orders_demo.csv through engine.pipeline only, every suggestion approved: rows 127 -> 120 (2 empty, 5 duplicates); Region 23 spellings -> West 35, East 33, South 27, North 19; Quantity 3 formats -> 1; Amount 10 formats -> always 2 decimals; quality 80.5 -> 98.0 (consistency 65.8 -> 100, conformity 52.2 -> 100).
-- Code review (high) since phase1-m5: 8 findings. Fixed 5: a newer clean could delete an older running clean's folder (now kept until that job ends); download of a missing file gave 500 (now 409); initials "J.R.R." lost capitals; left-alone row counts used the wrong grouping; a decimal or bad DC_MAX_UPLOAD_MB crashed startup (decimals now allowed, bad values give a clear error).
-- Left as is: mixed-width leading-zero ids without an id-like name are coerced (owner's Step 2 rule); Tier 2 runs up to three times per column (Step 7); every route loads the profile/results JSON (Step 12).
-- Evaluation unchanged: recall 99.9% on fixable errors, precision 100%, 0 damaged cells.
+## Last milestone summary (M6 Step 7, 2026-11-15)
+- Measured first with new `evaluation/stage_timing.py` (per-stage time, exact OS peak). Before, 47.5 MB: profile 54 s, clean 151 s, peak about 1.9 GB; clean.xlsx (openpyxl) was 48% of clean, quality scoring 17%, trim 11%, changelog 10%.
+- Changes: read-once cache (`engine/cache.py`, Parquet + before-scores, keyed by file hash; backend passes the dataset folder); `map_values` on distinct values; change records streamed to changelog.csv (byte-identical, counts and 50-record sample kept).
+- Back-to-back pairs (machine speed varied up to 4x, so only pairs compare): clean 13 to 20% faster; peak 1,948 -> 1,787 MiB on 47.5 MB, but about 50 MiB higher on 100k rows. Records were not the main peak driver; the final scoring and the read are.
+- Supported size documented: 50 MB locally, 4 MB on the live site (README, TIMING.md, CONTRACT 7 and 9).
 
-Tests: **291 Python passed, 56 frontend passed**, build OK.
+Tests: **298 Python passed** (frontend unchanged, 56), evaluation unchanged.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -75,6 +74,9 @@ Tests: **291 Python passed, 56 frontend passed**, build OK.
 - 2026-11-12 (M6.5) Name casing lives in rule 3 as a forced suggestion, not an 11th rule (CLAUDE.md: exactly 10 rules).
 - 2026-11-12 (M6.5) "Mac" gets a second capital only before a consonant other than h, k or y, so Machado and Mackenzie stay as normal words; MacArthur becomes Macarthur (accepted: suggestion only).
 - 2026-11-12 (M6.6) Code review before tagging: high-severity fixes applied; owner-spec and efficiency findings logged under known issues.
+- 2026-11-15 (M6.7) Read-once cache keyed by file SHA-256 + sheet + header row + engine version, so a re-downloaded copy (Vercel later) still hits. Cache files live in the dataset folder.
+- 2026-11-15 (M6.7) Change log stays on Python's csv module: Polars quotes empty strings differently and the gain was 1.6 s on 2.8 million rows.
+- 2026-11-15 (M6.7) Timing compared only in back-to-back pairs because this machine's speed varies up to 4x between runs.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
@@ -85,18 +87,19 @@ Tests: **291 Python passed, 56 frontend passed**, build OK.
 - Outlier recall 66.7%: a salary of 1 sits inside the IQR fence (by design). Duplicate and "(123)" misses were answer-key errors, fixed in M6.1.
 - README evaluation table and the "(123)" / duplicates explanation are stale until M6 Step 8.
 - Uniqueness can fall about 0.1 point on free-text columns that count as key candidates (Chicago sample). Candidate fix: exclude long free text from key candidates.
-- Large files: 47.5 MB takes about 3.5 minutes and 2 GB of memory; peak memory is 40 to 50 times the file size. Change records are held in memory.
+- Large files: 47.5 MB takes about 4 to 5 minutes and about 1.8 GB (M6.7). Writing clean.xlsx with openpyxl is about half of clean.
 - Jobs run in the API process; two big files at once slow each other.
 - Change-log filter on column fires a request per keystroke (no debounce); the change log re-reads `changelog.csv` on every page request.
 - Samples shown after a Day first / Month first toggle still show the original suggestion.
 - Review (M6.6), not fixed: an id column with leading zeros at mixed widths and no id-like name (cust_no: 00123, 045) is coerced to numbers automatically. Follows the owner's Step 2 rule; revisit if it bites.
 - Review (M6.6), efficiency: Tier 2 category analysis runs up to 3 times per column (Step 7); every route loads profile/results JSON from the Dataset row (Step 12).
+- **Open question (owner):** clean.xlsx costs about half of the clean time (openpyxl itself is 90% of it). Options: add xlsxwriter (new dependency, usually several times faster), or build clean.xlsx only when it is downloaded.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. M6 Step 7: profile time and memory on the 100k-row and 47.5 MB files before changing anything; then read-once Parquet cache, distinct-value rules, change records to disk only if they cause the peak.
-2. Steps 8-9 (held-out evaluation, Part B review, tag phase1-m6b), then Part C (GitHub + Vercel).
-3. After M6 ships: BA documents and demo video, then Phase 2.
+1. Owner decision on clean.xlsx (xlsxwriter, build on download, or leave).
+2. M6 Step 8: held-out synthetic batch (new seed, new region abbreviations), detection recall and fix recall over all injected errors, 100 hand-checked Chicago changes; update RESULTS.md, README, CONTRACT 11.
+3. Step 9 (code review, tag phase1-m6b), then Part C (GitHub + Vercel).
 
 ## How to run
 ```bash
@@ -124,3 +127,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-12 | M6 Step 4 Reviewer bugs | Done. Generation guard for stale jobs, streaming upload cap (DC_MAX_UPLOAD_MB), UI limit from /api/health. 270 Python + 56 frontend tests passing.
 - 2026-11-12 | M6 Step 5 Name casing | Done. Suggest-only name capitals with Mc/Mac/O'/particles/numerals, business-name guard, excluded from approve-all-safe. 286 Python + 56 frontend tests passing.
 - 2026-11-12 | M6 Step 6 Part A checkpoint | Done. Demo file 4 regions / 1 quantity format / 2 decimals, quality 80.5 -> 98.0; review: 5 fixes. 291 Python + 56 frontend tests passing. Tagged phase1-m6a.
+- 2026-11-15 | M6 Step 7 Measure, then optimize | Done. Stage profiler, read-once Parquet cache, distinct-value map_values, streamed change log. Clean 13-20% faster, 47.5 MB peak -8%. 298 Python tests passing.

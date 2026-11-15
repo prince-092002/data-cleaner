@@ -55,3 +55,54 @@ def write_csv(records: Iterable[ChangeRecord], path: Path) -> None:
         writer.writerow(COLUMNS)
         for record in records:
             writer.writerow(["" if v is None else v for v in astuple(record)])
+
+
+class ChangeLogWriter:
+    """Streams change records to changelog.csv one rule step at a time.
+
+    A big file can produce millions of records; holding them all was a large part of a run's
+    peak memory. The writer keeps only counts, the per-rule summary and a small sample.
+    Output is byte-identical to write_csv.
+    """
+
+    def __init__(self, path: Path, sample_size: int = 50):
+        self.path = Path(path)
+        self.sample_size = sample_size
+        self.total = 0
+        self.counts: dict[str, int] = dict.fromkeys(CHANGE_TYPES, 0)
+        self.sample: list[ChangeRecord] = []
+        self._by_rule: dict[tuple[str, str], tuple[int, list[str]]] = {}
+        self._fh = open(self.path, "w", encoding="utf-8", newline="")
+        csv.writer(self._fh).writerow(COLUMNS)
+
+    def __enter__(self) -> "ChangeLogWriter":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
+
+    def close(self) -> None:
+        if not self._fh.closed:
+            self._fh.close()
+
+    def add(self, records: list[ChangeRecord]) -> None:
+        if not records:
+            return
+        for r in records:
+            self.counts[r.change_type] += 1
+            changes, columns = self._by_rule.get((r.rule_id, r.action), (0, []))
+            if r.column and r.column not in columns:
+                columns.append(r.column)
+            self._by_rule[(r.rule_id, r.action)] = (changes + 1, columns)
+        room = self.sample_size - len(self.sample)
+        if room > 0:
+            self.sample.extend(records[:room])
+        self.total += len(records)
+        writer = csv.writer(self._fh)
+        writer.writerows(["" if v is None else v for v in astuple(r)] for r in records)
+
+    def by_rule(self) -> list:
+        from engine.models import RuleSummary
+
+        return [RuleSummary(rule_id=rule_id, action=action, changes=n, columns=list(columns))
+                for (rule_id, action), (n, columns) in self._by_rule.items()]

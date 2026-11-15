@@ -1,0 +1,76 @@
+"""Read-once cache (M6). Parsing a big CSV or Excel file is slow, so profile() saves the parsed
+all-text table as Parquet, with its "before" profile, and clean() reuses both.
+
+The key is the file's content hash plus sheet, header row and engine version, so a copy of the
+same upload (for example downloaded again to another folder) still hits, and any change misses.
+Never writes next to the original upload: only into the cache_dir the caller gives.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from pathlib import Path
+
+import polars as pl
+
+from engine import ENGINE_VERSION
+from engine.ingest import IngestResult
+from engine.models import DatasetProfile, SourceInfo
+
+CACHE_VERSION = "1"
+
+
+def _key(path: Path, sheet: str | None, header_row: int | None) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as fh:
+        while chunk := fh.read(1 << 20):
+            digest.update(chunk)
+    return f"{CACHE_VERSION}|{ENGINE_VERSION}|{sheet}|{header_row}|{digest.hexdigest()}"
+
+
+def _files(cache_dir: Path, key: str) -> tuple[Path, Path]:
+    stem = "ingest-" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:16]
+    return cache_dir / f"{stem}.parquet", cache_dir / f"{stem}.json"
+
+
+def load(cache_dir: Path | None, path: Path, sheet: str | None, header_row: int | None,
+         display_name: str | None) -> tuple[IngestResult, DatasetProfile] | None:
+    """The cached table and its before-profile, or None. Needs the resolved sheet and header row."""
+    if cache_dir is None or header_row is None:
+        return None
+    key = _key(path, sheet, header_row)
+    parquet, meta_file = _files(Path(cache_dir), key)
+    if not (parquet.exists() and meta_file.exists()):
+        return None
+    meta = json.loads(meta_file.read_text(encoding="utf-8"))
+    if meta.get("key") != key:
+        return None
+    source = SourceInfo.model_validate(meta["source"]).model_copy(
+        update={"filename": display_name or Path(path).name})
+    before = DatasetProfile.model_validate(meta["before"]).model_copy(update={"source": source})
+    loaded = IngestResult(df=pl.read_parquet(parquet), source=source, source_names=meta["source_names"])
+    return loaded, before
+
+
+def store(cache_dir: Path | None, path: Path, loaded: IngestResult, before: DatasetProfile) -> None:
+    """Save the parsed table (all text) and its before-profile, keyed by the resolved sheet/header."""
+    if cache_dir is None:
+        return
+    cache_dir = Path(cache_dir)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    key = _key(path, loaded.source.sheet, loaded.source.header_row)
+    parquet, meta_file = _files(cache_dir, key)
+    tmp = parquet.with_suffix(".parquet.tmp")
+    loaded.df.write_parquet(tmp)
+    os.replace(tmp, parquet)
+    meta = {
+        "key": key,
+        "source": loaded.source.model_dump(mode="json"),
+        "source_names": loaded.source_names,
+        "before": before.model_copy(update={"proposals": []}).model_dump(mode="json"),
+    }
+    tmp = meta_file.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(meta), encoding="utf-8")
+    os.replace(tmp, meta_file)

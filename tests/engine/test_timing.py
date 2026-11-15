@@ -15,10 +15,10 @@ ROWS = 100_000
 def test_100k_rows_profile_and_clean_in_time(tmp_path):
     gen = write_messy_sales(tmp_path / "sales_100k.csv", ROWS)
     start = time.perf_counter()
-    profile = pipeline.profile(gen.path)
+    profile = pipeline.profile(gen.path, cache_dir=tmp_path / "cache")
     plan = pipeline.build_plan(profile, Decisions(approved=[p.id for p in profile.proposals]))
     out = tmp_path / "out"
-    pipeline.clean(gen.path, plan, out, str(uuid.uuid4()))
+    pipeline.clean(gen.path, plan, out, str(uuid.uuid4()), cache_dir=tmp_path / "cache")
     elapsed = time.perf_counter() - start
 
     assert elapsed < 120, f"profile + clean took {elapsed:.1f} s"

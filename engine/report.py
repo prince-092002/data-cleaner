@@ -81,8 +81,11 @@ def render(
     before: DatasetProfile,
     after: DatasetProfile,
     recipe,
-    records: list[ChangeRecord],
+    sample: list[ChangeRecord],
+    total: int,
 ) -> str:
+    """sample: the first changes of the run (at least SAMPLE_CHANGES when there are that many);
+    total: how many changes the run made. The full list is in changelog.csv."""
     s = result.summary
     src = before.source
     details = [f"File: {escape(src.filename)}"]
@@ -156,7 +159,7 @@ def render(
             escape(r.change_type.replace("_", " ")),
             _cell(r.old_value), _cell(r.new_value),
         ]
-        for r in records[:SAMPLE_CHANGES]
+        for r in sample[:SAMPLE_CHANGES]
     ]
     change_table = (
         _table([("Fix", False), ("Row", True), ("Column", False), ("Type", False), ("Before", False), ("After", False)],
@@ -190,7 +193,7 @@ def render(
 {warnings}
 <h2>Score by column</h2>
 {col_table}
-<h2>Sample of changes (first {min(len(records), SAMPLE_CHANGES)} of {len(records):,})</h2>
+<h2>Sample of changes (first {min(total, SAMPLE_CHANGES)} of {total:,})</h2>
 {change_table}
 <p class="meta" style="margin-top:12px">Every change is listed in changelog.csv. The original file was not modified.</p>
 <footer>Data Cleaner engine {escape(ENGINE_VERSION)} &middot; Recipe: {escape(recipe.name)} ({len(recipe.steps)} steps)</footer>
