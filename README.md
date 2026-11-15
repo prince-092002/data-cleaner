@@ -65,32 +65,39 @@ Uploads are kept for 24 hours under `./storage` (change with `DC_STORAGE_DIR`). 
 | ![Downloads](docs/screenshots/desktop-6-downloads.jpg) | ![Mobile upload](docs/screenshots/mobile-1-upload.jpg) |
 
 ## Success criteria
-Phase 1 is judged on three things, not on one average score (see [CONTRACT.md section 11](docs/CONTRACT.md)):
-1. **Per-dimension lift:** no quality dimension drops after cleaning, and each dimension that has injected errors goes up.
-2. **Recall on injected errors:** the share of injected, fixable errors that the cleaning fixed.
-3. **Zero damaged cells:** no cell that had no injected error changes meaning.
+Phase 1 is judged on these measures, not on one average score (see [CONTRACT.md section 11](docs/CONTRACT.md)):
+1. **Detection recall:** the share of all injected errors the cleaner fixed, changed, flagged, listed as "left alone", or named as a problem for that column.
+2. **Fix recall:** the share of all injected errors that end up correct and in the standard form. Deleted values cannot be restored, so this can never reach 100%.
+3. **Precision and zero damaged cells:** changes must land on real errors, and no cell without an injected error may change meaning.
+4. **Per-dimension lift:** no quality dimension drops after cleaning.
 
 ## Evaluation results
-Method: `sample_data/make_samples.py` injects known errors into three synthetic files and writes every one to `sample_data/ground_truth.csv` (3,057 entries). `evaluation/run_evaluation.py` profiles each file, approves every suggested fix, cleans, and compares the output with the ground truth. Full tables: [evaluation/RESULTS.md](evaluation/RESULTS.md).
+Method: `sample_data/make_samples.py` injects known errors into synthetic files and records every one in a `ground_truth.csv`. `evaluation/run_evaluation.py` profiles each file, approves every suggested fix, cleans, and compares the output with the ground truth. There are two batches:
 
-| File | Quality before | After | Recall (fixable errors) | Precision | Damaged cells |
+- **Tuning batch** (`sample_data/`, 3 files): the files the cleaner was developed on.
+- **Held-out batch** (`sample_data/heldout/`, 4 files): a different random seed, plus a store file whose region abbreviations (NE, SW, Ctr, N.E.) the cleaner was never tuned on. **This is the figure to quote.**
+
+| Batch | Injected errors | Detection recall | Fix recall | Precision | Damaged cells |
 |---|---|---|---|---|---|
-| sales_orders_messy.csv | 78.3 | 92.0 | 98.9% | 100% | 0 |
-| customers_messy.xlsx | 91.5 | 99.2 | 98.7% | 100% | 0 |
-| hr_survey_messy.csv | 86.3 | 96.1 | 98.6% | 100% | 0 |
-| **All** | | | **98.8%** (1,721 of 1,742) | **100%** | **0** (5,890 cells compared) |
+| **Held-out** | 3,474 | **96.7%** (80.9% at the cell) | **69.1%** | 100% | 0 (7,281 cells compared) |
+| Tuning | 2,718 | 97.3% (81.3% at the cell) | 66.9% | 100% | 0 (5,890 cells compared) |
 
-Per-dimension before to after (every proposal approved):
+Held-out batch per file:
 
-| Dimension | Sales | Customers | HR survey |
-|---|---|---|---|
-| Completeness | 63.0 to 71.3 | 96.7 to 97.5 | 75.9 to 84.3 |
-| Validity | 98.0 to 98.5 | 99.2 to 99.7 | 96.7 to 100 |
-| Consistency | 80.8 to 98.5 | 89.8 to 99.7 | 94.7 to 100 |
-| Uniqueness | 93.6 to 100 | 97.7 to 100 | 98.2 to 100 |
-| Conformity | 52.4 to 98.8 | 65.8 to 99.7 | 63.1 to 100 |
+| File | Quality before | After | Detection recall | Fix recall | Damaged cells |
+|---|---|---|---|---|---|
+| sales_orders_messy.csv | 77.8 | 91.9 | 99.9% | 73.8% | 0 |
+| customers_messy.xlsx | 91.5 | 99.2 | 95.2% | 81.1% | 0 |
+| hr_survey_messy.csv | 86.2 | 96.0 | 95.4% | 45.0% | 0 |
+| store_visits_messy.csv (new) | 85.9 | 97.0 | 91.5% | 74.3% | 0 |
 
-How to read the recall number: it only counts errors a rule is meant to fix. Of the 3,057 injected errors, the rest are not counted and are listed with their reasons in the results file: 795 missing values (cleaning cannot invent data), 306 ambiguous dates (the user must choose day-first or month-first), 60 case variants and 9 short typos in columns not treated as categories, 47 invalid values ("abc" in a number column, left as text and warned about), 41 stray markers, 28 placeholders such as "unknown", 23 category synonyms and 1 copied id. The weakest fixable types are exact duplicates (55.6%: some copies carry a missing value the original lacks, so they are no longer identical), outliers (66.7%: one extreme salary of 1 sits inside the statistical fence) and "(123)" amounts (1 of 5: the rule turns them into -123, while the ground truth expected +123; this is a disagreement between the injection and the contract's accounting convention, not a rule failure).
+How to read these numbers:
+- **What cannot be fixed.** 549 of the 1,073 unfixed held-out errors are deleted values: the cleaner reports them for the column but cannot invent data. 300 are ambiguous dates (03/04/2024): the cleaner asks the user for the day/month order. If the user picks the right order, fix recall is 77.7%. The HR file is low (45%) because all its dates are ambiguous.
+- **What it misses.** Email addresses in capitals (66), "unknown" style placeholders (44), unparseable values such as "pending" in a date column (57, listed as left alone), stray markers (31), category synonyms such as "U.S.A." (17).
+- **On the new store file:** "NE", "SW", "N.E." and "Cent." are merged correctly. "Northest" (4 rows) is left alone because it is equally close to Northeast and Northwest, and "Ctr" (2 rows) is not recognised as Central.
+- "Detection at the cell" means the cleaner touched or listed that exact cell. The rest of detection is at column level, mostly "this column has missing values".
+- Counting only the error types a rule is meant to fix (the M5 measure), recall is 99.7% on the held-out batch and 99.9% on the tuning batch. In M5 that figure was reported as 98.8%; the difference was two mistakes in the answer key, found and fixed in M6 ([evaluation/DIAGNOSIS.md](evaluation/DIAGNOSIS.md)).
+- No quality dimension drops on any of the seven files. Full tables: [evaluation/RESULTS.md](evaluation/RESULTS.md).
 
 ### A real public dataset (not in the evaluation)
 Chicago Food Inspections, 5,000 rows, 17 columns, about 4.9 MB, City of Chicago open data, unmodified ([sample_data/DATASETS.md](sample_data/DATASETS.md)). It has no ground truth, so it is scored only before and after:
@@ -105,6 +112,8 @@ Chicago Food Inspections, 5,000 rows, 17 columns, about 4.9 MB, City of Chicago 
 | Conformity | 87.0 | 100 |
 
 Uniqueness falls by 0.1: the long free-text column "violations" counts as a key candidate, and trimming merges values that differed only by spaces. No row was lost and no cell was damaged. This is listed as a known issue.
+
+**Hand check.** 100 of its 17,347 changes were drawn at random and read one by one ([evaluation/CHICAGO_HANDCHECK.md](evaluation/CHICAGO_HANDCHECK.md)): 65 correct, 31 correct in meaning but debatable ("CHICAGO" rewritten to "Chicago" although 99% of rows use capitals), 1 reasonable outlier flag, 3 flags that are not useful (license numbers), 0 wrong.
 
 ### Speed and memory
 ([evaluation/TIMING.md](evaluation/TIMING.md))

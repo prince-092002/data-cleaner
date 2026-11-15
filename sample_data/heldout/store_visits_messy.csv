@@ -1,0 +1,317 @@
+Store ID,Visit Date,Region,Revenue ($),Units,Manager,Open?
+0336,2025-04-15,NORTHEAST,2142.15,07,,Yes
+0279,2025-01-28,Northwest,"$6,729.49",9,Liam O'Brien,Yes
+0219,2025-04-21,Southwest,"$7,407.18",3 ,LUCAS PEÑA,Yes
+0369,2025-06-01,Central,6027.51,5,AVA PEÑA,N/A
+0377,"Apr 11, 2025",Southeats,,3,müller silva,Yes
+0239,2025-07-31, Southeast ,3640.43,1,Anna Rossi,No
+0197,2025-04-11,Southwest,7333.59,8,Chloé Nuñez,No
+0170,2025-07-27,Southeast,6268.67,1 ,Sofía Brown,No
+0097,2025-06-28,Northwest,"$2,549.93",9,Ethan Brown,0
+0076,2025-07-04,,(2534.76),4,Omar Peña,
+0169,2025-01-12,Cent.,5177.69,8,Søren Åberg,N
+0305,2025-09-20,Central,5870.49,8,Søren Nuñez,No
+0286,2025-11-03,Central,3023.13,03,Anna Brown,Y
+0381,2025-10-02,Northeast,780.63,7,JOSÉ GARCÍA,Y
+0085,2025-01-28, Central ,207.49,,unknown,No
+0151,2025-02-11,-,"$1,429.56",3,Sofía Lefèvre,
+0037,2025-04-02,southeast,1301.39,,unknown,N
+0033,2025-08-26,Southwest,1790.14,7,Iñaki Smith,Yes
+0155,"Mar 24, 2025",Northwest,"$6,280.18",3,SOFÍA LEFÈVRE,
+0353,09/05/2025,Southwest,"$2,313.95",?,Chloé Dubois  ,No
+0336,2025-01-11,Southwest,4435.72,3,,No
+0339,2025-11-18,Souhtwest,n.a.,3,ANNA DUBOIS,Yes
+0288,2025-02-16,Souhtwest,"$8,647.87",5,Emma Tanaka,
+0145,2025-06-12,Central,8211.13,4,Jürgen Brown,0
+0203,"Jun 1, 2025",Northwest,3322.25,5 ,Priya Dubois,Yes
+0181,pending,Northest,$807.26,1,,N
+0293,,Southeats,$333.76,1,NOAH NUÑEZ,Yes
+0303,"Oct 1, 2025",TBD,"$3,450.46",03,,N
+0086,02/24/2025,NW,7538.82,6,Priya O'Brien,
+0267,2025-05-24,Northwest,N/A,1,CHLOÉ SCHRÖDER,Yes
+0356,05/21/2025,Northwest,4789.74,5,Liam Khan,0
+0040,2025-11-24,Southeast,893.22,1,zoë khan,Yes
+0015,08/05/2025,Northwest,5826.40,1,unknown,Yes
+0094,11/07/2025,SOUTHWEST,8316.67 ,9,,0
+0042,2025-02-19,,"$2,712.14",2,Müller Silva,N/A
+0150,,Central,1802.90,8,Søren Smith,N/A
+0181,2025-01-29,Northeast,7522.27,5,Jürgen Lefèvre  ,Yes
+0170,2025-05-12,Souhtwest,3101.28,9,unknown,0
+0269,2025-11-23, Northeast ,"$3,083.62",07,Liam Dubois,Yes
+0386,01/09/2025,Southwest,,7,Omar García,No
+0307,08/27/2025,NE,,2,Iñaki Åberg,No
+0018,2025-03-13,NE,N/A,1,ANNA SCHRÖDER,No
+0056,2025-02-24,Cent.,1439.66,1 ,Mia Tanaka,TRUE
+0117,,Central,3971.41,3,Sofía Rossi,N
+0178,2025-06-25,Northwest,"$3,358.34",6,José Smith  ,No
+0081,2025-03-09,Northwest,7651.59,,Anna Rossi,N
+0132,N/A,N.E.,3832.22,7,Emma Novak,No
+0182,2025-03-20,Southeast,5795.75,6 ,Liam Brown,No
+0083,2025-10-19,Northeast,2602.99,5,MIA O'BRIEN,Yes
+0288,2025-07-12,Central,"$6,823.25",7,Ethan Nuñez,No
+0257,2025-03-16,Southeast,free,8,Iñaki Rossi,N
+0360,04/23/2025,Central,8088.88,,Priya Peña  ,No
+0297,2025-03-22,Southwest,8277.10,6,Ava Peña,N
+0190,2025-02-24,Central,8674.92,03,unknown,Yes
+0170,2025-03-02,CENTRAL,"$5,564.87",8 ,Sofía Peña,No
+0341,03/19/2025,Northwest,n.a.,5 ,Sofía Smith,No
+0339,2025-11-18,Souhtwest,n.a.,3,ANNA DUBOIS,Yes
+0235,2025-11-11,Central,3893.91,?,Anna Peña,Yes
+0214,"Oct 30, 2025",Central,1019.93,6,Ethan Schröder,N/A
+0261,2025-07-04,NE,(1800.12),?,Iñaki Silva,Yes
+0368,2025-01-24,NORTHWEST,4225.59,8,Renée O'Brien,No
+0268,2025-10-24,Cent.,$418.64,07,ava novak,N/A
+0125,"Jun 6, 2025",Northwest,1380.47,6,unknown,Yes
+0311,2025-09-08,Southeast,262.86,2,unknown,
+,,,,,,
+0024,2025-02-27,Southwest,,9,Søren Lefèvre,0
+0237,2025-01-15,SE,7904.84,7,zoë o'brien,N/A
+0026,2025-10-28,NE,n.a.,8 ,Ethan Nuñez,No
+0110,,Northwest,(3748.52),5,Ava Tanaka,No
+0353,2025-03-27,Northwest,3219.24,6,,No
+0198,2025-10-08,Southeast,5132.13,8,Zoë Dubois,Yes
+0120,05/27/2025,Northwest,8269.33,4,MÜLLER SILVA,Yes
+0006,pending,Northeast,(4922.98),2,Emma Nuñez,Yes
+0282,2025-09-10,Souhtwest,872.37,7,Ava Lefèvre,Yes
+0115,"Jun 25, 2025",NE,"$4,992.38",3,Liam Tanaka,TRUE
+0300,2025-05-17,Southeast,N/A,,Søren Schröder,Yes
+0357,"Mar 7, 2025",Northwest,2653.29,1,Noah Smith,Yes
+0358,10/01/2025,TBD,3708.95,7,Priya O'Brien,Y
+0207,2025-05-15,TBD,5367.30,06,Müller Nuñez  ,No
+0375,, Southwest ,3222.77,5,Søren Rossi,N
+0118,pending,Southwest,1078.26,8,Ethan O'Brien,N
+0024,"Sep 12, 2025",SOUTHWEST,n.a.,6,Priya Smith,
+0258,07/10/2025,Central,880000.00,5,,N/A
+0108,,NE,free,,Noah Khan,Y
+0004,2025-10-16,Southwest,"$3,280.07",,jürgen garcía,
+0304,2025-07-22,Central,7200.19,2,Liam Peña,No
+0076,2025-01-26,Southwest,6919.09,1 ,Ethan Nuñez,Yes
+0389,2025-04-10,Central,5657.64,4 ,Wei Peña,No
+0321,2025-01-12,-,3157.64,7 ,Jürgen Dubois,0
+0389,01/29/2025,Southeast,"$1,932.17",3,Søren Smith,Y
+0144,2025-11-21,,"$4,444.26",3 ,Priya Peña,Yes
+0139,2025-05-18,,"$5,748.83",7,,Y
+0176,pending,Southeast,"$3,227.37",6,Priya Tanaka  ,
+0070,2025-07-27, Southwest ,2325.17,,Noah Silva,Yes
+0057,2025-10-20,Northwest,8477.16,7,Sofía Schröder,Yes
+0242,02/04/2025,Northwest,"$2,886.40",1 ,Priya Smith,Y
+0396,2025-11-22,Southeast,,06,Mia Smith,Yes
+0012,2025-01-05, Northeast ,5523.32,7,Priya Rossi,TRUE
+0230,2025-03-29,Southwest,467.69 ,3,unknown,Yes
+0148,"Nov 12, 2025",NE,8382.16,07,Lucas Brown,N/A
+0080,2025-03-08,Northwest,1665.38,5,Zoë Smith,No
+0150,2025-08-30,-,N/A,1 ,Renée Brown,Yes
+0068,2025-07-20,Southeast,N/A,6,emma o'brien,Yes
+0203,"Aug 7, 2025",Northwest,"$5,548.97",7,Jürgen Smith,Yes
+0309,,Northeast,2131.29,,,N/A
+0158,2025-09-10,N.E.,5347.37,,Anna Peña,Y
+0265,"May 17, 2025",-,2382.94,9,,No
+0056,2025-07-05,SW,"$1,846.64",2,Ava Nuñez,N
+0106,03/04/2025,Southeats,"$2,480.93",4,Sofía Novak,No
+0051,2025-10-07,NORTHWEST,n.a.,,unknown,No
+0297,2025-10-07,Southwest,$246.59,5,Renée Silva,No
+0008,2025-07-08,Cent.,4154.86,06,unknown,No
+0057,2025-03-13,Central,2024.46,7,Noah Åberg,No
+0382,2025-02-21,Northest,(6852.94),4,,Yes
+0028,2025-02-26,,4160.27,08,Müller Dubois,Yes
+0332,10/03/2025,,4763.87,,Emma Åberg,Y
+0140,08/22/2025,Northwest,2322.99,2,Zoë Silva,Yes
+0306,10/07/2025,NE,4864.23,7,Priya Nuñez,Yes
+0272,2025-09-28,Northeast,(1373.00),8,Anna Nuñez,0
+0370,"Sep 10, 2025",Southwest,3098.45,9,Ava Peña,TRUE
+0300,2025-09-21,southeast,8248.35,4 ,Omar Peña,Y
+0090,2025-11-26,southwest,4078.94,?,Emma Åberg  ,N/A
+0059,10/18/2025,Southwest,n.a.,6,Ava Silva,
+0037,N/A,SW,3411.55,2,Mia Tanaka,No
+0330,2025-10-28,NW,1253.57,,PRIYA ÅBERG,Y
+0079,2025-10-27,Northwest,"$3,029.36",4,Müller Åberg,Y
+0020,"Jun 10, 2025",Northwest,294.91,5 ,Wei García,Yes
+0361,,NORTHEAST,2244.94 ,8,Omar Khan,Y
+0189,2025-03-10,TBD,1985.52,8,Omar Brown,Yes
+0236,"Mar 7, 2025",SE,,5,unknown,No
+0148,"Oct 18, 2025",Central,4367.67,3,José Rossi,0
+0071,07/10/2025,Southwest,755.02,?,unknown,No
+0078,"Jul 1, 2025",Northwest,"$3,945.57",1,Sofía Lefèvre,
+0227,2025-09-12,SOUTHEAST,1322.01,2,Emma Rossi,Y
+0060,,Southeast,n.a.,5,,No
+0160,03/14/2025,Southeast,2914.64,?,Jürgen Silva,0
+0040,"Jun 6, 2025",southwest,3341.20,8,Søren Silva,Y
+0360,2025-10-17,Southeast,8636.11,8,Müller Nuñez,Yes
+0328,2025-05-11,Central,4362.36,5,,No
+0034,"Mar 7, 2025",Southwest,8486.28,6,Ethan García,
+0170,2025-07-27,Southeast,6268.67,1 ,Sofía Brown,No
+0021,04/28/2025,TBD,3399.30,7,Iñaki Dubois,
+0009,2025-09-24,Nothwest,"$5,759.50",?,Anna Lefèvre,Yes
+0323,2025-08-03,N.E.,"$3,073.18",5,Sofía Khan,Yes
+0042,2025-01-19,Northwest,"$3,072.11",8,SOFÍA SMITH,Yes
+0003,2025-01-13,Northwest,N/A,7,Sofía Tanaka,No
+0005,,Southeast,2357.69 ,9,RENÉE ÅBERG,No
+0211,2025-08-15,NE,free,3,,TRUE
+0024,2025-06-19,N.E.,6018.00,1,Ava Schröder,Yes
+0382,09/25/2025,Souhtwest,,7,Emma Åberg  ,Yes
+0037,2025-08-14,Northeast,7025.21,6,,TRUE
+0096,,Central,1106.92,6,Chloé García,Yes
+0185,2025-07-28,Central,5356.97,3,Jürgen Smith,Yes
+0271,2025-02-12,Central,N/A,8,,Yes
+0269,2025-11-23, Northeast ,"$3,083.62",07,Liam Dubois,Yes
+0193,2025-11-07,Southeats,7584.07,2,Liam Nuñez,N/A
+0016,2025-05-07,Cent.,,6,Søren Dubois  ,Yes
+0063,2025-01-26,Central,8914.97,5,Wei Åberg,Yes
+0282,"Apr 14, 2025",Southeast,1996.82 ,6,Chloé Dubois,Yes
+0358,05/13/2025,-,,3 ,,0
+0120,11/19/2025,Central,5512.61,?,Renée Tanaka,Yes
+0332,2025-06-08, Southwest ,"$6,740.09",08,Müller Peña,
+0369,07/02/2025,Northest,,04,Noah Smith,No
+0303,2025-08-15,,6809.74,4,Chloé Lefèvre,Yes
+0214,2025-03-13,Southeast,4048.31,6,Lucas Åberg,No
+0030,2025-09-22,N.E.,285.68,7,,N
+,,,,,,
+0387,2025-04-09,SE,8127.70,7,,
+0064,04/10/2025,Central,,07,Renée Nuñez,No
+0274,2025-02-04,Central,5940.88,8,EMMA PEÑA,No
+0328,2025-01-02,NW,5172.63,1,unknown,N/A
+0292,2025-10-03,Southwest,3009.79,6,Søren Silva,No
+0102,"Apr 4, 2025",Southeast,1207.35,5,Wei Brown,No
+0306,2025-09-06,Southeast,6969.48,9,CHLOÉ NOVAK,Yes
+0204,2025-05-10,northwest,N/A,3,Wei O'Brien,N/A
+0023,,Northwest,265.93,06,Emma Nuñez,N/A
+0090,"May 21, 2025",SW,(5268.89),6,Mia Brown,
+0200,N/A,Northwest,5552.21,3,,No
+0133,2025-03-28,Central,"$8,881.26",2 ,José Silva,No
+0301,"Jun 22, 2025",-,2116.98,7,Chloé Lefèvre,No
+,,,,,,
+0096,"Jun 20, 2025",Cent.,2538.41,02,Zoë Lefèvre,0
+0170,2025-09-15,Northeast,1690.28,8,Sofía Åberg,No
+0070,2025-09-03,Northwest,5599.65,7,Chloé Lefèvre,Yes
+0336,2025-08-11,Northeast,3439.36,4,Priya Tanaka  ,Y
+0189,2025-09-07,SW,6159.59,7,Anna Rossi,
+0301,2025-03-08,Souhtwest,,9,Liam Lefèvre,No
+0091,2025-09-22,Central,3823.82,?,Mia García,Yes
+0293,,-,6671.78,6,,Yes
+0303,2025-08-14,Central,7697.06,3 ,Zoë Rossi,No
+0290,2025-08-16,Southeast,,,josé o'brien,Yes
+0162,04/07/2025,Northwest,2653.05 ,2,Iñaki Schröder,N/A
+0216,"Aug 24, 2025",N.E.,6488.57,08,OMAR SCHRÖDER,Yes
+0230,05/29/2025,NORTHEAST,3279.16 ,6,Liam Lefèvre,0
+0162,04/07/2025,Northwest,2653.05 ,2,Iñaki Schröder,N/A
+0232,2025-05-20,Ctr,6644.57,?,Jürgen Tanaka,Y
+0389,2025-02-15,Northeast,793.01,3,LUCAS SMITH,Yes
+0332,2025-02-17,Northeast,"$8,367.63",8,Liam Novak,No
+0314,2025-07-19,-,7653.79,7,Chloé Peña,Yes
+0107,2025-02-08,Northwest,,1,Ava Brown,
+0352,2025-10-10,Northwest,548.66,9,,No
+0336,2025-04-24,TBD,8460.91,5,ANNA GARCÍA,Yes
+0128,2025-05-28,Northeast,"$7,690.91",,Zoë Lefèvre,
+0318,2025-10-05,Northest,,6,Wei García,Yes
+0148,"Nov 12, 2025",NE,8382.16,07,Lucas Brown,N/A
+0035,2025-07-11,Central,,8,Ava Tanaka,Yes
+0009,pending,NE,7724.78,5,Ava Brown,No
+0080,2025-04-20,Northeast,7541.15,9,Iñaki Dubois,N
+0191,pending,Southwest,2260.98,2,Iñaki Silva,Y
+0044,,southwest,$164.49,8,zoë tanaka,Yes
+0397,2025-07-05,,5695.05 ,3,José Brown,
+0322,2025-02-21,Southwest,6634.52,8 ,José Khan,N
+0250,2025-01-30,Southwest,3532.53,3,Noah Åberg,TRUE
+0034,,Southeast,(3530.28),9,,No
+0167,N/A,N.E.,1966.85,7,Noah Silva,No
+0283,2025-05-26,Southeast,,8,Sofía Novak,No
+0033,2025-10-16,NW,3628.39,1,Anna Rossi  ,Yes
+0317,10/09/2025,SOUTHWEST,3708.77,4 ,NOAH LEFÈVRE,No
+0069,2025-02-15,Southwest,N/A,9,Emma García,No
+0200,2025-06-18,Northeast,,,Iñaki Novak,N
+0014,2025-10-13,Southeast,4441.24,8,Müller Novak,No
+0166,02/04/2025,SW,5541.17,8,Sofía Schröder,
+0301,, Southeast ,2465.13 ,7,Liam Silva,No
+0160,2025-02-14,Central,6709.72,9,LIAM NUÑEZ,Y
+0228,2025-04-30,Northeast,8838.39,09,SØREN GARCÍA,Yes
+0153,06/09/2025,Northwest,1534.43,7 ,Müller Brown,Yes
+0318,10/23/2025,Southwest,8438.70,1,ANNA KHAN,
+0165,"Jul 3, 2025", Southeast ,4739.75,9,Noah Dubois,TRUE
+0034,pending,Northeast,,01,Renée García,Yes
+0119,11/11/2025,Northeast,(3551.83),6,ZOË TANAKA,0
+0097,2025-09-01,Southeast,,1,Ava Nuñez,No
+0236,2025-10-01,Southeats,(181.33),?,emma tanaka,Yes
+0300,2025-10-28,Southeast,6495.36,7,Sofía Smith,Yes
+0057,2025-06-27,SE,n.a.,1,José Dubois  ,Yes
+0090,2025-09-26,Central,N/A,3,,No
+0272,07/15/2025, Northwest ,7406.08,4,PRIYA KHAN,Yes
+0028,2025-01-09,Southwest,,5,Emma Schröder,No
+0259,05/09/2025,Northwest,1942.51,2,José Åberg,0
+0086,pending,NORTHWEST,4994.88,08,Ava Schröder,Yes
+0285,2025-11-19,Southeast,8400.73,7,Wei Tanaka,0
+0015,2025-10-31,Central,1675.67,5,,No
+0325,05/21/2025,SOUTHEAST,5218.09 ,8,,Yes
+0137,2025-08-18,Central,5468.47,9,Wei Novak,
+0311,2025-09-08,Southeast,262.86,2,unknown,
+0292,"Aug 17, 2025",Northeast,4852.68,7,Ethan Smith,N
+0068,2025-01-07,Cent.,6793.25,6 ,Wei Tanaka,0
+0007,"Jul 23, 2025",Southwest,4442.63,9,unknown,Y
+0128,01/13/2025,Northwest,,8,Ethan Åberg,Yes
+0147,10/11/2025,Northeast,"$6,362.17",8,ANNA O'BRIEN,Yes
+0385,"Jun 3, 2025",Ctr,5539.34,2,omar schröder,Yes
+0356,2025-06-04,SOUTHEAST,1854.18,6,Jürgen O'Brien,No
+0177,,Southeats,6421.36,9,Zoë Schröder,Yes
+0279,2025-10-08,Nothwest,4326.77,3 ,Anna Silva,Yes
+0387,"Oct 6, 2025",Northeast,995.81,,Sofía O'Brien  ,N/A
+0111,2025-08-27,Northwest,,?,Mia Smith,0
+0303,03/09/2025,Northeast,4150.22,7,Zoë Åberg,Yes
+0357,2025-01-20,Northeast,"$6,409.26",8,unknown,Y
+0395,N/A,SE,1728.41,4,lucas lefèvre,
+0315,2025-09-23,Southeast,742.53,08,ETHAN DUBOIS,No
+0337,2025-02-04,,179.42 ,7,Chloé Dubois,No
+0111,2025-08-27,Northwest,,?,Mia Smith,0
+0363,"Jun 17, 2025", Southeast ,,1,Omar Lefèvre,Yes
+0020,"Feb 24, 2025",Northwest,209.49,5,Ava Åberg,Yes
+0263,N/A,Northeast,1753.13 ,2,NOAH SILVA,No
+0195,2025-08-24,Northwest,7022.14,9,Emma O'Brien,Yes
+0086,2025-08-24,Northwest,970.22,4,Emma Brown,Yes
+0345,07/29/2025,SW,"$3,064.25",3,OMAR ROSSI,Yes
+0117,"Mar 27, 2025",Central,N/A,3,Emma Dubois,Yes
+0329,2025-03-30,SW,6890.97,2,Müller Brown,Yes
+0353,2025-11-22,Southeast,8489.76,4,Ethan Silva,Yes
+0275,2025-08-03,Southeast,7535.27,1,José Rossi  ,No
+0057,2025-11-09,Northeast,,8,Mia Peña,Yes
+0131,03/02/2025, Southeast ,2972.64,6,Priya Khan,Yes
+0355,"May 22, 2025",Central,4972.44,4,Iñaki Rossi,Yes
+0003,2025-02-24, Central ,3325.25,3,Renée Lefèvre,No
+0160,03/14/2025,Southeast,2914.64,?,Jürgen Silva,0
+0051,10/17/2025,Centrl,556.23,5,SOFÍA ROSSI,Y
+0232,05/10/2025,Northwest,,8,Priya Novak,No
+0265,"May 17, 2025",-,2382.94,9,,No
+0078,"Jul 1, 2025",Northwest,"$3,945.57",1,Sofía Lefèvre,
+0211,07/07/2025,Northeast,8999.10,5,Müller Dubois,Yes
+0238,2025-07-25,Northwest,4622.39,3 ,Anna O'Brien,Y
+0132,2025-08-18, Southwest ,6809.10,7,Mia Peña,No
+0134,04/30/2025,SOUTHEAST,911.95,9,Zoë Dubois,Y
+0040,2025-11-24,Southeast,893.22,1,zoë khan,Yes
+0017,05/10/2025,Northwest,722.25,3,Ava Schröder  ,No
+0247,2025-09-22,Northwest,3333.87,01,Müller Åberg,
+0041,2025-08-31,NW,477.34,8,Ava Khan,No
+0009,10/16/2025,Southeats,7737.18,?,Priya Khan,Yes
+0249,2025-04-18,Northwest,"$7,093.38",,Iñaki Khan,0
+0133,2025-06-05,Southwest,"$4,838.13",4,,No
+0328,"Feb 22, 2025", Southeast ,4286.48 ,9,LUCAS O'BRIEN,No
+0305,"Aug 15, 2025",NW,1131.04,,MÜLLER NUÑEZ,Yes
+0132,09/06/2025,CENTRAL,free,5,Mia Åberg,
+0232,2025-05-20,Ctr,6644.57,?,Jürgen Tanaka,Y
+0158,09/09/2025,Northeast,7194.40,4 ,wei schröder,Yes
+0150,2025-10-01,Southeast,"$3,582.91",2,Liam Rossi,0
+0164,2025-11-21,N.E.,N/A,8,Iñaki Smith  ,
+0089,2025-07-13, Southeast ,2264.83,4,Søren Peña,N
+0122,2025-03-14,NW,"$1,387.69",8,Renée Novak,No
+0056,2025-02-11,Central,8233.47,6,zoë schröder,N
+0130,2025-09-01,NW,5663.55 ,5 ,,No
+0003,06/03/2025,Southwest,"$4,878.36",2,lucas tanaka,TRUE
+0337,2025-01-10,CENTRAL,2682.14,?,José O'Brien,No
+0201,"Aug 3, 2025",Central,,1,Sofía Åberg,Yes
+0016,2025-04-01,Northwest,"$8,166.73",01,Renée O'Brien,N
+0096,2025-05-25,Northeast,4981.38,9,MÜLLER O'BRIEN,No
+0226,06/16/2025,Northwest,7110.65,09,unknown,Yes
+0275,,CENTRAL,"$7,409.98",7,Mia Brown,
+0114,2025-06-11,central,670.92,6,Emma Rossi,
+0212,2025-04-02,Nothwest,6422.86,09,Jürgen Tanaka,Yes
+0238,,southwest,8426.52,5,SOFÍA TANAKA,
+,,,,,,
+0031,2025-06-24,Northeast,3854.13,02,Anna Silva,No
+0048,2025-11-13,Southwest,1758.40,02,,No
+0202,2025-06-27,TBD,,3,PRIYA SMITH,N/A

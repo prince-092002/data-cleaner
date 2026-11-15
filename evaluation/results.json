@@ -1,4 +1,121 @@
 {
+  "all_errors": {
+    "injected": 2718,
+    "noop_injections": 339,
+    "fixed": 1818,
+    "fix_recall": 66.9,
+    "detected_cell_level": 2210,
+    "detected": 2645,
+    "detection_recall": 97.3,
+    "detection_recall_cell_level": 81.3,
+    "by_error_type": {
+      "ambiguous_date": {
+        "cell": 300,
+        "fixed": 6
+      },
+      "blank_row_above_header": {
+        "fixed": 1
+      },
+      "boolean_variant": {
+        "fixed": 193
+      },
+      "case_variant": {
+        "fixed": 178,
+        "none": 32
+      },
+      "category_synonym": {
+        "cell": 23
+      },
+      "currency_symbol": {
+        "fixed": 136
+      },
+      "duplicate_header": {
+        "fixed": 1
+      },
+      "duplicate_key": {
+        "column": 1
+      },
+      "duplicate_row": {
+        "fixed": 36
+      },
+      "empty_column": {
+        "fixed": 1
+      },
+      "empty_header": {
+        "fixed": 1
+      },
+      "empty_row": {
+        "fixed": 10
+      },
+      "extra_whitespace": {
+        "fixed": 294
+      },
+      "header_whitespace": {
+        "fixed": 1
+      },
+      "invalid_value": {
+        "cell": 43,
+        "fixed": 4
+      },
+      "missing_value": {
+        "column": 434,
+        "fixed": 22
+      },
+      "mixed_date_format": {
+        "fixed": 155
+      },
+      "mojibake": {
+        "fixed": 85
+      },
+      "non_breaking_space": {
+        "fixed": 18
+      },
+      "non_default_delimiter": {
+        "fixed": 1
+      },
+      "non_default_encoding": {
+        "fixed": 1
+      },
+      "null_token": {
+        "fixed": 413
+      },
+      "number_with_thousands_sep": {
+        "fixed": 129
+      },
+      "outlier": {
+        "fixed": 2,
+        "cell": 1
+      },
+      "parentheses_negative": {
+        "fixed": 5
+      },
+      "percent_symbol": {
+        "fixed": 58
+      },
+      "placeholder_token": {
+        "cell": 25,
+        "fixed": 3
+      },
+      "stray_marker": {
+        "none": 41
+      },
+      "title_row": {
+        "fixed": 1
+      },
+      "typo_category": {
+        "fixed": 52
+      },
+      "utf8_bom": {
+        "fixed": 1
+      },
+      "zero_width_space": {
+        "fixed": 10
+      }
+    },
+    "ambiguous_dates_right_by_default_order": 300,
+    "fix_recall_if_date_order_is_right": 77.9,
+    "fix_recall_counting_noops_as_errors": 59.5
+  },
   "headline": {
     "scored": 1742,
     "fixed": 1741,
@@ -13,6 +130,12 @@
   "false_positive_changes": 0,
   "files": {
     "sales_orders_messy.csv": {
+      "all_errors": {
+        "injected": 1637,
+        "fixed": 1217,
+        "fix_recall": 74.3,
+        "detection_recall": 100.0
+      },
       "headline": {
         "scored": 1151,
         "fixed": 1151,
@@ -84,6 +207,12 @@
       }
     },
     "customers_messy.xlsx": {
+      "all_errors": {
+        "injected": 387,
+        "fixed": 301,
+        "fix_recall": 77.8,
+        "detection_recall": 91.7
+      },
       "headline": {
         "scored": 298,
         "fixed": 298,
@@ -153,6 +282,12 @@
       }
     },
     "hr_survey_messy.csv": {
+      "all_errors": {
+        "injected": 694,
+        "fixed": 300,
+        "fix_recall": 43.2,
+        "detection_recall": 94.1
+      },
       "headline": {
         "scored": 293,
         "fixed": 292,
@@ -508,5 +643,811 @@
       "method": "not flagged: value inside the IQR fence"
     }
   ],
-  "false_positive_examples": []
+  "false_positive_examples": [],
+  "heldout": {
+    "all_errors": {
+      "injected": 3474,
+      "noop_injections": 363,
+      "fixed": 2401,
+      "fix_recall": 69.1,
+      "detected_cell_level": 2810,
+      "detected": 3360,
+      "detection_recall": 96.7,
+      "detection_recall_cell_level": 80.9,
+      "by_error_type": {
+        "ambiguous_date": {
+          "cell": 300,
+          "fixed": 6
+        },
+        "blank_row_above_header": {
+          "fixed": 1
+        },
+        "boolean_variant": {
+          "fixed": 286
+        },
+        "case_variant": {
+          "fixed": 205,
+          "none": 66
+        },
+        "category_abbreviation": {
+          "fixed": 47,
+          "cell": 2
+        },
+        "category_synonym": {
+          "cell": 17
+        },
+        "currency_symbol": {
+          "fixed": 180
+        },
+        "duplicate_header": {
+          "fixed": 1
+        },
+        "duplicate_key": {
+          "column": 1
+        },
+        "duplicate_row": {
+          "fixed": 48
+        },
+        "empty_column": {
+          "fixed": 1
+        },
+        "empty_header": {
+          "fixed": 1
+        },
+        "empty_row": {
+          "fixed": 14
+        },
+        "extra_whitespace": {
+          "fixed": 360
+        },
+        "header_whitespace": {
+          "fixed": 1
+        },
+        "invalid_value": {
+          "cell": 57,
+          "fixed": 3
+        },
+        "leading_zero": {
+          "fixed": 29
+        },
+        "missing_value": {
+          "column": 549,
+          "fixed": 28
+        },
+        "mixed_date_format": {
+          "fixed": 246
+        },
+        "mojibake": {
+          "fixed": 96,
+          "none": 1
+        },
+        "non_breaking_space": {
+          "fixed": 22
+        },
+        "non_default_delimiter": {
+          "fixed": 1
+        },
+        "non_default_encoding": {
+          "fixed": 1
+        },
+        "null_token": {
+          "fixed": 465
+        },
+        "number_with_thousands_sep": {
+          "fixed": 168
+        },
+        "outlier": {
+          "fixed": 3,
+          "cell": 1
+        },
+        "parentheses_negative": {
+          "fixed": 19
+        },
+        "percent_symbol": {
+          "fixed": 65
+        },
+        "placeholder_token": {
+          "cell": 28,
+          "none": 16,
+          "fixed": 2
+        },
+        "stray_marker": {
+          "none": 31
+        },
+        "title_row": {
+          "fixed": 1
+        },
+        "typo_category": {
+          "fixed": 85,
+          "cell": 4
+        },
+        "utf8_bom": {
+          "fixed": 1
+        },
+        "zero_width_space": {
+          "fixed": 15
+        }
+      },
+      "ambiguous_dates_right_by_default_order": 300,
+      "fix_recall_if_date_order_is_right": 77.7,
+      "fix_recall_counting_noops_as_errors": 62.6
+    },
+    "headline": {
+      "scored": 2316,
+      "fixed": 2308,
+      "missed": 8,
+      "recall": 99.7,
+      "not_fixable": 1516,
+      "out_of_scope": 5,
+      "unmatched": 0
+    },
+    "precision": 100.0,
+    "neutral_changes": 1157,
+    "false_positive_changes": 0,
+    "files": {
+      "sales_orders_messy.csv": {
+        "all_errors": {
+          "injected": 1672,
+          "fixed": 1234,
+          "fix_recall": 73.8,
+          "detection_recall": 99.9
+        },
+        "headline": {
+          "scored": 1158,
+          "fixed": 1157,
+          "missed": 1,
+          "recall": 99.9
+        },
+        "precision": 100.0,
+        "rows_before": 433,
+        "rows_after": 400,
+        "quality_before": {
+          "overall": 77.8,
+          "completeness": 63.0,
+          "validity": 98.0,
+          "consistency": 78.2,
+          "uniqueness": 93.3,
+          "conformity": 52.6
+        },
+        "quality_after": {
+          "overall": 91.9,
+          "completeness": 71.1,
+          "validity": 98.5,
+          "consistency": 98.5,
+          "uniqueness": 100.0,
+          "conformity": 98.8
+        },
+        "lift": {
+          "overall": 14.1,
+          "completeness": 8.1,
+          "validity": 0.5,
+          "consistency": 20.3,
+          "uniqueness": 6.7,
+          "conformity": 46.2
+        },
+        "alignment": {
+          "checked": 1962,
+          "matched": 1962
+        },
+        "damaged_cells": 0,
+        "cells_compared": 1834,
+        "rule_stats": {
+          "drop_empty_rows_and_columns": {
+            "row_correct": 9
+          },
+          "trim_and_normalize_text": {
+            "on_injected": 272
+          },
+          "standardize_null_tokens": {
+            "on_injected": 362
+          },
+          "coerce_numeric": {
+            "on_injected": 151
+          },
+          "parse_dates": {
+            "on_injected": 96
+          },
+          "standardize_booleans": {
+            "neutral": 225,
+            "on_injected": 114
+          },
+          "remove_exact_duplicate_rows": {
+            "row_correct": 25
+          },
+          "standardize_categories": {
+            "on_injected": 98
+          },
+          "flag_outliers": {
+            "on_injected": 6
+          }
+        }
+      },
+      "customers_messy.xlsx": {
+        "all_errors": {
+          "injected": 375,
+          "fixed": 304,
+          "fix_recall": 81.1,
+          "detection_recall": 95.2
+        },
+        "headline": {
+          "scored": 301,
+          "fixed": 301,
+          "missed": 0,
+          "recall": 100.0
+        },
+        "precision": 100.0,
+        "rows_before": 257,
+        "rows_after": 250,
+        "quality_before": {
+          "overall": 91.5,
+          "completeness": 97.1,
+          "validity": 98.8,
+          "consistency": 89.9,
+          "uniqueness": 97.7,
+          "conformity": 65.6
+        },
+        "quality_after": {
+          "overall": 99.2,
+          "completeness": 97.9,
+          "validity": 99.5,
+          "consistency": 99.5,
+          "uniqueness": 100.0,
+          "conformity": 99.6
+        },
+        "lift": {
+          "overall": 7.7,
+          "completeness": 0.8,
+          "validity": 0.7,
+          "consistency": 9.6,
+          "uniqueness": 2.3,
+          "conformity": 34.0
+        },
+        "alignment": {
+          "checked": 370,
+          "matched": 370
+        },
+        "damaged_cells": 0,
+        "cells_compared": 1919,
+        "rule_stats": {
+          "drop_empty_rows_and_columns": {
+            "row_correct": 2
+          },
+          "trim_and_normalize_text": {
+            "on_injected": 66
+          },
+          "coerce_numeric": {
+            "on_injected": 24,
+            "neutral": 22
+          },
+          "parse_dates": {
+            "on_injected": 56
+          },
+          "standardize_booleans": {
+            "neutral": 194,
+            "on_injected": 57
+          },
+          "remove_exact_duplicate_rows": {
+            "row_correct": 5
+          },
+          "standardize_categories": {
+            "on_injected": 59
+          },
+          "flag_outliers": {
+            "on_injected": 1
+          }
+        }
+      },
+      "hr_survey_messy.csv": {
+        "all_errors": {
+          "injected": 673,
+          "fixed": 303,
+          "fix_recall": 45.0,
+          "detection_recall": 95.4
+        },
+        "headline": {
+          "scored": 297,
+          "fixed": 296,
+          "missed": 1,
+          "recall": 99.7
+        },
+        "precision": 100.0,
+        "rows_before": 306,
+        "rows_after": 300,
+        "quality_before": {
+          "overall": 86.2,
+          "completeness": 75.8,
+          "validity": 96.2,
+          "consistency": 95.2,
+          "uniqueness": 98.2,
+          "conformity": 63.0
+        },
+        "quality_after": {
+          "overall": 96.0,
+          "completeness": 84.1,
+          "validity": 100.0,
+          "consistency": 100.0,
+          "uniqueness": 100.0,
+          "conformity": 100.0
+        },
+        "lift": {
+          "overall": 9.8,
+          "completeness": 8.3,
+          "validity": 3.8,
+          "consistency": 4.8,
+          "uniqueness": 1.8,
+          "conformity": 37.0
+        },
+        "alignment": {
+          "checked": 633,
+          "matched": 633
+        },
+        "damaged_cells": 0,
+        "cells_compared": 2122,
+        "rule_stats": {
+          "drop_empty_rows_and_columns": {
+            "row_wrong": 1
+          },
+          "trim_and_normalize_text": {
+            "on_injected": 118
+          },
+          "standardize_null_tokens": {
+            "on_injected": 23
+          },
+          "coerce_numeric": {
+            "neutral": 246,
+            "on_injected": 46
+          },
+          "parse_dates": {
+            "on_injected": 306
+          },
+          "standardize_booleans": {
+            "neutral": 284,
+            "on_injected": 22
+          },
+          "remove_exact_duplicate_rows": {
+            "row_correct": 6
+          },
+          "standardize_categories": {
+            "on_injected": 48
+          },
+          "flag_outliers": {
+            "on_injected": 1
+          }
+        }
+      },
+      "store_visits_messy.csv": {
+        "all_errors": {
+          "injected": 754,
+          "fixed": 560,
+          "fix_recall": 74.3,
+          "detection_recall": 91.5
+        },
+        "headline": {
+          "scored": 560,
+          "fixed": 554,
+          "missed": 6,
+          "recall": 98.9
+        },
+        "precision": 100.0,
+        "rows_before": 316,
+        "rows_after": 300,
+        "quality_before": {
+          "overall": 85.9,
+          "completeness": 89.3,
+          "validity": 98.9,
+          "consistency": 80.9,
+          "uniqueness": 95.3,
+          "conformity": 55.6
+        },
+        "quality_after": {
+          "overall": 97.0,
+          "completeness": 90.6,
+          "validity": 98.9,
+          "consistency": 98.9,
+          "uniqueness": 100.0,
+          "conformity": 99.1
+        },
+        "lift": {
+          "overall": 11.1,
+          "completeness": 1.3,
+          "validity": 0.0,
+          "consistency": 18.0,
+          "uniqueness": 4.7,
+          "conformity": 43.5
+        },
+        "alignment": {
+          "checked": 770,
+          "matched": 770
+        },
+        "damaged_cells": 0,
+        "cells_compared": 1406,
+        "rule_stats": {
+          "drop_empty_rows_and_columns": {
+            "row_correct": 4
+          },
+          "trim_and_normalize_text": {
+            "on_injected": 76
+          },
+          "standardize_null_tokens": {
+            "on_injected": 70
+          },
+          "coerce_numeric": {
+            "on_injected": 88
+          },
+          "parse_dates": {
+            "on_injected": 94
+          },
+          "standardize_booleans": {
+            "neutral": 186,
+            "on_injected": 75
+          },
+          "remove_exact_duplicate_rows": {
+            "row_correct": 12
+          },
+          "standardize_categories": {
+            "on_injected": 87
+          },
+          "flag_outliers": {
+            "on_injected": 4
+          }
+        }
+      }
+    },
+    "by_error_type": {
+      "ambiguous_date": {
+        "not_fixable": 306
+      },
+      "blank_row_above_header": {
+        "out_of_scope": 1
+      },
+      "boolean_variant": {
+        "fixed": 286
+      },
+      "case_variant": {
+        "fixed": 172,
+        "not_fixable": 99
+      },
+      "category_abbreviation": {
+        "fixed": 47,
+        "missed": 2
+      },
+      "category_synonym": {
+        "not_fixable": 17
+      },
+      "currency_symbol": {
+        "fixed": 180
+      },
+      "duplicate_header": {
+        "fixed": 1
+      },
+      "duplicate_key": {
+        "not_fixable": 1
+      },
+      "duplicate_row": {
+        "fixed": 48
+      },
+      "empty_column": {
+        "fixed": 1
+      },
+      "empty_header": {
+        "fixed": 1
+      },
+      "empty_row": {
+        "fixed": 14
+      },
+      "extra_whitespace": {
+        "fixed": 360
+      },
+      "header_whitespace": {
+        "fixed": 1
+      },
+      "invalid_value": {
+        "not_fixable": 60
+      },
+      "leading_zero": {
+        "fixed": 29
+      },
+      "missing_value": {
+        "not_fixable": 940
+      },
+      "mixed_date_format": {
+        "fixed": 246
+      },
+      "mojibake": {
+        "fixed": 96,
+        "missed": 1
+      },
+      "non_breaking_space": {
+        "fixed": 22
+      },
+      "non_default_delimiter": {
+        "out_of_scope": 1
+      },
+      "non_default_encoding": {
+        "out_of_scope": 1
+      },
+      "null_token": {
+        "fixed": 465
+      },
+      "number_with_thousands_sep": {
+        "fixed": 168
+      },
+      "outlier": {
+        "fixed": 3,
+        "missed": 1
+      },
+      "parentheses_negative": {
+        "fixed": 19
+      },
+      "percent_symbol": {
+        "fixed": 65
+      },
+      "placeholder_token": {
+        "not_fixable": 46
+      },
+      "stray_marker": {
+        "not_fixable": 31
+      },
+      "title_row": {
+        "out_of_scope": 1
+      },
+      "typo_category": {
+        "not_fixable": 16,
+        "fixed": 69,
+        "missed": 4
+      },
+      "utf8_bom": {
+        "out_of_scope": 1
+      },
+      "zero_width_space": {
+        "fixed": 15
+      }
+    },
+    "rules": {
+      "normalize_headers": {
+        "injected": 3,
+        "fixed": 3,
+        "recall": 100.0,
+        "cell_changes_on_injected": 0,
+        "neutral": 0,
+        "false_positives": 0,
+        "precision": null,
+        "row_or_column_correct": 0,
+        "row_or_column_wrong": 0
+      },
+      "drop_empty_rows_and_columns": {
+        "injected": 15,
+        "fixed": 15,
+        "recall": 100.0,
+        "cell_changes_on_injected": 0,
+        "neutral": 0,
+        "false_positives": 0,
+        "precision": null,
+        "row_or_column_correct": 15,
+        "row_or_column_wrong": 1
+      },
+      "trim_and_normalize_text": {
+        "injected": 494,
+        "fixed": 493,
+        "recall": 99.8,
+        "cell_changes_on_injected": 532,
+        "neutral": 0,
+        "false_positives": 0,
+        "precision": 100.0,
+        "row_or_column_correct": 0,
+        "row_or_column_wrong": 0
+      },
+      "standardize_null_tokens": {
+        "injected": 465,
+        "fixed": 465,
+        "recall": 100.0,
+        "cell_changes_on_injected": 455,
+        "neutral": 0,
+        "false_positives": 0,
+        "precision": 100.0,
+        "row_or_column_correct": 0,
+        "row_or_column_wrong": 0
+      },
+      "coerce_numeric": {
+        "injected": 461,
+        "fixed": 461,
+        "recall": 100.0,
+        "cell_changes_on_injected": 309,
+        "neutral": 268,
+        "false_positives": 0,
+        "precision": 100.0,
+        "row_or_column_correct": 0,
+        "row_or_column_wrong": 0
+      },
+      "parse_dates": {
+        "injected": 246,
+        "fixed": 246,
+        "recall": 100.0,
+        "cell_changes_on_injected": 552,
+        "neutral": 0,
+        "false_positives": 0,
+        "precision": 100.0,
+        "row_or_column_correct": 0,
+        "row_or_column_wrong": 0
+      },
+      "standardize_booleans": {
+        "injected": 286,
+        "fixed": 286,
+        "recall": 100.0,
+        "cell_changes_on_injected": 268,
+        "neutral": 889,
+        "false_positives": 0,
+        "precision": 100.0,
+        "row_or_column_correct": 0,
+        "row_or_column_wrong": 0
+      },
+      "remove_exact_duplicate_rows": {
+        "injected": 48,
+        "fixed": 48,
+        "recall": 100.0,
+        "cell_changes_on_injected": 0,
+        "neutral": 0,
+        "false_positives": 0,
+        "precision": null,
+        "row_or_column_correct": 48,
+        "row_or_column_wrong": 0
+      },
+      "standardize_categories": {
+        "injected": 294,
+        "fixed": 288,
+        "recall": 98.0,
+        "cell_changes_on_injected": 292,
+        "neutral": 0,
+        "false_positives": 0,
+        "precision": 100.0,
+        "row_or_column_correct": 0,
+        "row_or_column_wrong": 0
+      },
+      "flag_outliers": {
+        "injected": 4,
+        "fixed": 3,
+        "recall": 75.0,
+        "cell_changes_on_injected": 12,
+        "neutral": 0,
+        "false_positives": 0,
+        "precision": 100.0,
+        "row_or_column_correct": 0,
+        "row_or_column_wrong": 0
+      }
+    },
+    "not_fixable": {
+      "ambiguous_date": {
+        "count": 306,
+        "no_op": 0,
+        "reason": "day/month choice needed; the rule applies one order column-wide"
+      },
+      "case_variant": {
+        "count": 99,
+        "no_op": 0,
+        "reason": "standardize_categories clusters category columns only"
+      },
+      "category_synonym": {
+        "count": 17,
+        "no_op": 0,
+        "reason": "no rule maps synonyms; clustering is by spelling only"
+      },
+      "duplicate_key": {
+        "count": 1,
+        "no_op": 0,
+        "reason": "no rule detects an id copied from the previous row"
+      },
+      "invalid_value": {
+        "count": 60,
+        "no_op": 0,
+        "reason": "unparseable text stays as it was (by design: 'never guessed')"
+      },
+      "missing_value": {
+        "count": 940,
+        "no_op": 363,
+        "reason": "a deleted value cannot be restored; no rule imputes"
+      },
+      "placeholder_token": {
+        "count": 46,
+        "no_op": 0,
+        "reason": "filler such as 'unknown' is not in the null-token list"
+      },
+      "stray_marker": {
+        "count": 31,
+        "no_op": 0,
+        "reason": "no rule removes a marker inside a non-empty column"
+      },
+      "typo_category": {
+        "count": 16,
+        "no_op": 0,
+        "reason": "short-value guard: under 5 characters, no safe merge"
+      }
+    },
+    "out_of_scope": {
+      "blank_row_above_header": 1,
+      "non_default_delimiter": 1,
+      "non_default_encoding": 1,
+      "title_row": 1,
+      "utf8_bom": 1
+    },
+    "damaged_cells": {
+      "total": 0,
+      "cells_compared": 7281,
+      "examples": []
+    },
+    "missed": [
+      {
+        "file": "sales_orders_messy.csv",
+        "row": 247,
+        "column": " Customer Name ",
+        "error_type": "mojibake",
+        "original": "Ava Åberg",
+        "injected": "Ava Ã…berg",
+        "method": "output 'Ava Ã…berg', expected 'Ava Åberg'"
+      },
+      {
+        "file": "hr_survey_messy.csv",
+        "row": 209,
+        "column": "Salary",
+        "error_type": "outlier",
+        "original": "124000",
+        "injected": "1",
+        "method": "not flagged: value inside the IQR fence"
+      },
+      {
+        "file": "store_visits_messy.csv",
+        "row": 26,
+        "column": "Region",
+        "error_type": "typo_category",
+        "original": "Northeast",
+        "injected": "Northest",
+        "method": "output 'Northest', expected 'Northeast'"
+      },
+      {
+        "file": "store_visits_messy.csv",
+        "row": 114,
+        "column": "Region",
+        "error_type": "typo_category",
+        "original": "Northeast",
+        "injected": "Northest",
+        "method": "output 'Northest', expected 'Northeast'"
+      },
+      {
+        "file": "store_visits_messy.csv",
+        "row": 163,
+        "column": "Region",
+        "error_type": "typo_category",
+        "original": "Northeast",
+        "injected": "Northest",
+        "method": "output 'Northest', expected 'Northeast'"
+      },
+      {
+        "file": "store_visits_messy.csv",
+        "row": 196,
+        "column": "Region",
+        "error_type": "category_abbreviation",
+        "original": "Central",
+        "injected": "Ctr",
+        "method": "output 'Ctr', expected 'Central'"
+      },
+      {
+        "file": "store_visits_messy.csv",
+        "row": 204,
+        "column": "Region",
+        "error_type": "typo_category",
+        "original": "Northeast",
+        "injected": "Northest",
+        "method": "output 'Northest', expected 'Northeast'"
+      },
+      {
+        "file": "store_visits_messy.csv",
+        "row": 250,
+        "column": "Region",
+        "error_type": "category_abbreviation",
+        "original": "Central",
+        "injected": "Ctr",
+        "method": "output 'Ctr', expected 'Central'"
+      }
+    ],
+    "false_positive_examples": []
+  }
 }

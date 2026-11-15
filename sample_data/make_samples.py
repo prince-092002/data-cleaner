@@ -486,12 +486,115 @@ def make_hr(rng: random.Random, out_dir: Path) -> list[tuple]:
     return [(name_file, *s) for s in structural] + _records(name_file, rows)
 
 
-def generate(out_dir: Path = HERE) -> Path:
-    """Write the three sample files and ground_truth.csv into out_dir. Returns the ground truth path."""
+# --------------------------------------------------------------------------- 4. stores (held-out only)
+
+def make_stores(rng: random.Random, out_dir: Path) -> list[tuple]:
+    """Held-out file (M6 step 8). Region uses abbreviations the first batch never had
+    (NE, NW, SE, SW, N.E., Ctr, Cent.). The engine was never tuned against this file."""
+    name_file = "store_visits_messy.csv"
+    header = ["Store ID", "Visit Date", "Region", "Revenue ($)", "Units", "Manager", "Open?"]
+    regions = ["Northeast", "Northwest", "Southeast", "Southwest", "Central"]
+    short = {"Northeast": "NE", "Northwest": "NW", "Southeast": "SE", "Southwest": "SW", "Central": "Ctr"}
+    typo = {"Northeast": "Northest", "Northwest": "Nothwest", "Southeast": "Southeats",
+            "Southwest": "Souhtwest", "Central": "Centrl"}
+    rows: list[Row] = []
+    start = dt.date(2025, 1, 1)
+    for i in range(300):
+        errs: list[tuple] = []
+        store = f"{rng.randrange(1, 400):04d}"
+        d = start + dt.timedelta(days=rng.randrange(0, 330))
+        date, found = _pick(rng, [
+            (d.isoformat(), 60),
+            (d.strftime("%m/%d/%Y"), 20, "mixed_date_format", None),
+            (d.strftime("%b %d, %Y").replace(" 0", " "), 8, "mixed_date_format", None),
+            ("", 6, "missing_value", None),
+            ("pending", 3, "invalid_value", None),
+            ("N/A", 3, "null_token", None),
+        ], d.isoformat())
+        _add(errs, header[1], found)
+        clean_region = rng.choice(regions)
+        region, found = _pick(rng, [
+            (clean_region, 52),
+            (short[clean_region], 12, "category_abbreviation", None),
+            ("N.E.", 2, "category_abbreviation", "Northeast"),
+            ("Cent.", 2, "category_abbreviation", "Central"),
+            (clean_region.lower(), 5, "case_variant", None),
+            (clean_region.upper(), 5, "case_variant", None),
+            (typo[clean_region], 6, "typo_category", None),
+            (f" {clean_region} ", 5, "extra_whitespace", None),
+            ("", 5, "missing_value", None),
+            ("TBD", 3, "null_token", None),
+            ("-", 3, "null_token", None),
+        ], clean_region)
+        _add(errs, header[2], found)
+        revenue = round(rng.uniform(150, 9000), 2)
+        revenue_txt, found = _pick(rng, [
+            (f"{revenue:.2f}", 55),
+            (f"${revenue:,.2f}", 18, _currency_tags(revenue), None),
+            (f"({revenue:.2f})", 3, "parentheses_negative", f"-{revenue:.2f}"),
+            (f"{revenue:.2f} ", 5, "extra_whitespace", None),
+            ("", 8, "missing_value", None),
+            ("N/A", 6, "null_token", None),
+            ("n.a.", 3, "placeholder_token", None),
+            ("free", 2, "invalid_value", None),
+        ], f"{revenue:.2f}")
+        _add(errs, header[3], found)
+        units = rng.randrange(1, 10)
+        units_txt, found = _pick(rng, [
+            (str(units), 70),
+            (f"0{units}", 10, "leading_zero", None),
+            (f"{units} ", 8, "extra_whitespace", None),
+            ("", 7, "missing_value", None),
+            ("?", 5, "null_token", None),
+        ], str(units))
+        _add(errs, header[4], found)
+        manager = _name(rng)
+        manager, found = _pick(rng, [
+            (manager, 62),
+            (manager.upper(), 10, "case_variant", None),
+            (manager.lower(), 6, "case_variant", None),
+            (f"{manager}  ", 6, "extra_whitespace", None),
+            ("", 10, "missing_value", None),
+            ("unknown", 6, "placeholder_token", None),
+        ], manager)
+        _add(errs, header[5], found)
+        is_open, found = _pick(rng, [
+            ("Yes", 35), ("No", 25),
+            ("Y", 8, "boolean_variant", "Yes"),
+            ("N", 8, "boolean_variant", "No"),
+            ("TRUE", 6, "boolean_variant", "Yes"),
+            ("0", 4, "boolean_variant", "No"),
+            ("", 8, "missing_value", None),
+            ("N/A", 6, "null_token", None),
+        ], None)
+        _add(errs, header[6], found)
+        rows.append(Row([store, date, region, revenue_txt, units_txt, manager, is_open], errs))
+    _overwrite(rows[77], 3, header[3], "880000.00", "outlier")
+    for _ in range(12):
+        rows.insert(rng.randrange(len(rows)), _duplicate(rng.choice(rows)))
+    for _ in range(4):
+        rows.insert(rng.randrange(len(rows)), Row([""] * len(header), [("", "empty_row", "", "")]))
+
+    with open(out_dir / name_file, "w", encoding="utf-8", newline="") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(header)
+        writer.writerows(rows)
+    return _records(name_file, rows)
+
+
+HELDOUT_SEED = 20261115      # never tune the engine against files made with this seed
+
+
+def generate(out_dir: Path = HERE, seed: int = SEED, heldout: bool = False) -> Path:
+    """Write the three sample files and ground_truth.csv into out_dir. Returns the ground truth path.
+    heldout=True also writes store_visits_messy.csv (a file type the first batch does not have)."""
     out_dir = Path(out_dir)
-    records = make_sales(random.Random(SEED), out_dir)
-    records += make_customers(random.Random(SEED + 1), out_dir)
-    records += make_hr(random.Random(SEED + 2), out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    records = make_sales(random.Random(seed), out_dir)
+    records += make_customers(random.Random(seed + 1), out_dir)
+    records += make_hr(random.Random(seed + 2), out_dir)
+    if heldout:
+        records += make_stores(random.Random(seed + 3), out_dir)
     path = out_dir / "ground_truth.csv"
     with open(path, "w", encoding="utf-8", newline="") as fh:
         writer = csv.writer(fh)
@@ -500,6 +603,12 @@ def generate(out_dir: Path = HERE) -> Path:
     return path
 
 
+def generate_heldout(out_dir: Path = HERE / "heldout") -> Path:
+    """The held-out batch (M6 step 8): same generators, a different seed, plus the stores file."""
+    return generate(out_dir, seed=HELDOUT_SEED, heldout=True)
+
+
 if __name__ == "__main__":
     generate()
-    print("wrote 3 sample files and ground_truth.csv to", HERE)
+    generate_heldout()
+    print("wrote 3 sample files and ground_truth.csv to", HERE, "and the held-out batch to", HERE / "heldout")

@@ -1,3 +1,5 @@
 sample_data/*.csv -text
 sample_data/*.xlsx binary
 frontend/public/samples/* -text
+sample_data/heldout/*.csv -text
+sample_data/heldout/*.xlsx binary

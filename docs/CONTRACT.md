@@ -566,11 +566,25 @@ The profile and results are stored in the `Dataset` row (section 8.8), not as fi
 
 ## 11. Success criteria (Phase 1)
 
-There is no single "average points lift" target. Phase 1 is judged on three measures, computed by `evaluation/run_evaluation.py` on the three ground-truth samples (`sample_data/ground_truth.csv`) with every proposal approved:
+There is no single "average points lift" target. Phase 1 is judged on the measures below, computed by `evaluation/run_evaluation.py` with every proposal approved. Since M6 there are two batches: the **tuning batch** (`sample_data/`, three files) and the **held-out batch** (`sample_data/heldout/`: the same generators with seed `HELDOUT_SEED`, plus `store_visits_messy.csv`). The engine must never be tuned against the held-out batch; it is the batch to quote.
 
-1. **Per-dimension lift.** For each of the five quality dimensions (section 4): the after-score is not lower than the before-score, and every dimension that has injected errors rises. Reported per file and per dimension, never only as an overall number. The Results screen shows the same table (before, after, change) for the overall score and each dimension.
-2. **Recall on injected errors.** Fixed injected errors divided by scored injected errors. An error is *fixed* when the cleaned cell equals the expected clean form, the row or column was removed on purpose, or the cell was flagged (outliers). Errors that no rule is designed to fix (missing values, ambiguous dates, invalid values, synonyms and similar) are reported separately as "not fixable by design" and are not in the recall denominator. Precision (changes on injected cells divided by all non-neutral changes) is reported next to it.
-3. **Zero damaged cells.** A cell with no injected error must keep its meaning after cleaning. Count must be 0 (`tests/engine/test_evaluation.py` asserts it).
+Both recalls are over **all** injected errors. An injection that changed nothing (original equals injected) is not an error and is left out.
 
-Measured at the end of M5: recall 98.8%, precision 100%, damaged cells 0, no dimension lower after cleaning on the three samples. The fourth sample (a real public dataset, `sample_data/chicago_food_inspections.csv`) has no ground truth and is excluded from these measures; it is reported only as before and after scores. Its uniqueness score can fall by up to 0.1 point (long free text counts as a key candidate and trimming merges values that differed only by spaces); `tests/engine/test_real_dataset.py` tolerates at most 0.5.
+1. **Detection recall.** Share of injected errors that were fixed, or changed, flagged or listed in a proposal's `left_alone` (cell level), or for which the column's profile carries the matching issue (column level: `missing_values`, `mixed_types`, `ambiguous_dates`, `duplicate_keys`, `inconsistent_categories`). Reported with the cell-level share next to it.
+2. **Fix recall.** Share of injected errors that end up correct **and** in the standard form: a real empty cell for null tokens and placeholders, a plain number, an ISO date, `true`/`false`, tidy text. Also fixed: a row or column removed on purpose, a flagged outlier, and reading problems handled at ingest. Ambiguous dates count as detected, not fixed, because the engine cannot know the order; the figure "if the user picks the right order" is reported separately.
+3. **Precision.** Changes on injected cells divided by all non-neutral changes.
+4. **Zero damaged cells.** A cell with no injected error must keep its meaning after cleaning. Count must be 0 on both batches (`tests/engine/test_evaluation.py` asserts it).
+5. **Per-dimension lift.** For each of the five quality dimensions (section 4) the after-score is not lower than the before-score, on every file of both batches. The Results screen shows the same table (before, after, change).
 
+Measured at M6 step 8:
+
+| Batch | Injected errors | Detection recall | of which cell level | Fix recall | Precision | Damaged cells |
+|---|---|---|---|---|---|---|
+| Held-out | 3,474 | 96.7% | 80.9% | 69.1% (77.7% with the right date order) | 100% | 0 |
+| Tuning | 2,718 | 97.3% | 81.3% | 66.9% (77.9% with the right date order) | 100% | 0 |
+
+The older measure, recall on the error types a rule is meant to fix, is 99.7% (held-out) and 99.9% (tuning); it is kept in `evaluation/RESULTS.md` for continuity with M5 (98.8% then, before the answer key was corrected in M6 step 1).
+
+Timing and memory (M6 step 7, development machine, `evaluation/TIMING.md`): 100,000 rows (5.4 MB) profile about 12 s, clean about 12 s, peak about 0.46 GB; 872,050 rows (47.5 MB) profile about 60 to 80 s, clean about 90 s without Excel, peak about 1.8 GB. clean.xlsx is built on first download. Supported size: 50 MB locally, 4 MB on the live site.
+
+The real public dataset (`sample_data/chicago_food_inspections.csv`) has no ground truth and is excluded from these measures; it is reported as before and after scores plus a hand check of 100 random changes (`evaluation/CHICAGO_HANDCHECK.md`: 0 wrong). Its uniqueness score can fall by up to 0.1 point (long free text counts as a key candidate and trimming merges values that differed only by spaces); `tests/engine/test_real_dataset.py` tolerates at most 0.5.

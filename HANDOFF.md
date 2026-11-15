@@ -7,16 +7,18 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`. Part B: Step 7 (measure, then optimize) done and committed.
-- **Waiting for:** the owner's "go" for Step 8, and a decision on clean.xlsx (see Open questions).
+- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`. Part B: Steps 7, 7b (Excel on download) and 8 done and committed.
+- **Waiting for:** the owner's "go" for Step 9 (code review, tag phase1-m6b), and answers to the two Chicago findings below.
 
-## Last milestone summary (M6 Step 7, 2026-11-15)
-- Measured first with new `evaluation/stage_timing.py` (per-stage time, exact OS peak). Before, 47.5 MB: profile 54 s, clean 151 s, peak about 1.9 GB; clean.xlsx (openpyxl) was 48% of clean, quality scoring 17%, trim 11%, changelog 10%.
-- Changes: read-once cache (`engine/cache.py`, Parquet + before-scores, keyed by file hash; backend passes the dataset folder); `map_values` on distinct values; change records streamed to changelog.csv (byte-identical, counts and 50-record sample kept).
-- Back-to-back pairs (machine speed varied up to 4x, so only pairs compare): clean 13 to 20% faster; peak 1,948 -> 1,787 MiB on 47.5 MB, but about 50 MiB higher on 100k rows. Records were not the main peak driver; the final scoring and the read are.
-- Supported size documented: 50 MB locally, 4 MB on the live site (README, TIMING.md, CONTRACT 7 and 9).
+## Last milestone summary (M6 Steps 7b and 8, 2026-11-15)
+- **7b:** clean.xlsx is built on first download (`pipeline.build_xlsx`, `POST .../downloads/clean.xlsx/prepare`), kept per run, atomic; failure is `500 excel_failed` and touches nothing else; UI shows "Preparing your Excel file". Content proven identical to the old code (fingerprints for 4 files). 100k rows: clean about 25 s to 12 s.
+- **8a:** held-out batch in `sample_data/heldout/` (seed 20261115) plus `store_visits_messy.csv` (NE, SW, Ctr, N.E., Cent.). Engine not tuned against it.
+- **8b:** honest metrics over all injected errors. Held-out: detection 96.7% (80.9% at the cell), fix recall 69.1% (77.7% if the user picks the right date order), precision 100%, 0 damaged cells. Tuning: 97.3% / 66.9%. Fixable-only recall: 99.7% held-out, 99.9% tuning.
+- Fix recall is above the 55 to 60% the owner expected because 339 no-op injections (an "empty" Notes cell that was already empty) are not counted as errors; counting them gives 59.5% on the tuning batch.
+- **8c:** 100 random Chicago changes read one by one (`evaluation/CHICAGO_HANDCHECK.md`): 65 correct, 31 debatable, 1 useful flag, 3 useless flags, 0 wrong.
+- **8d:** RESULTS.md, README and CONTRACT 11 rewritten around these metrics, with timing and memory.
 
-Tests: **298 Python passed** (frontend unchanged, 56), evaluation unchanged.
+Tests: **312 Python passed, 58 frontend passed**, build OK.
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -78,15 +80,16 @@ Tests: **298 Python passed** (frontend unchanged, 56), evaluation unchanged.
 - 2026-11-15 (M6.7) Change log stays on Python's csv module: Polars quotes empty strings differently and the gain was 1.6 s on 2.8 million rows.
 - 2026-11-15 (M6.7) Timing compared only in back-to-back pairs because this machine's speed varies up to 4x between runs.
 - 2026-11-15 (M6.7b) Owner decision: clean.xlsx is built on download, no new dependency. `pipeline.build_xlsx(out_dir)` builds from clean.csv + xlsx_spec.json, cached per clean run, atomic rename. Old-code fingerprints in tests/engine/fixtures/xlsx_old_code.json prove identical content.
+- 2026-11-15 (M6.8) "Fixed" is strict: right value AND standard form; null tokens and placeholders must become real empty cells; no partial credit. Ambiguous dates count as detected, not fixed (right only by default order).
+- 2026-11-15 (M6.8) Detection has two levels: cell (fixed, changed, flagged, listed as left alone) and column (profile issue). Both are reported; missing values are column level.
+- 2026-11-15 (M6.8) No engine change in Step 8. Held-out misses are reported, not fixed.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Ambiguous dates default to month-first if approved without editing; the UI forces a Day first / Month first click before Approve.
-- The evaluation still treats short category typos (9) and name case variants as "not fixable by design" although Tier 2 and name casing now fix them; fix in Step 8 with the new metrics.
 - The 500-distinct cap for Tier 2 is never reached in practice: the category test (<= 50 distinct) runs first.
 - Outlier recall 66.7%: a salary of 1 sits inside the IQR fence (by design). Duplicate and "(123)" misses were answer-key errors, fixed in M6.1.
-- README evaluation table and the "(123)" / duplicates explanation are stale until M6 Step 8.
 - Uniqueness can fall about 0.1 point on free-text columns that count as key candidates (Chicago sample). Candidate fix: exclude long free text from key candidates.
 - Large files: 47.5 MB takes about 4 to 5 minutes and about 1.8 GB (M6.7). Writing clean.xlsx with openpyxl is about half of clean.
 - Jobs run in the API process; two big files at once slow each other.
@@ -94,12 +97,15 @@ Tests: **298 Python passed** (frontend unchanged, 56), evaluation unchanged.
 - Samples shown after a Day first / Month first toggle still show the original suggestion.
 - Review (M6.6), not fixed: an id column with leading zeros at mixed widths and no id-like name (cust_no: 00123, 045) is coerced to numbers automatically. Follows the owner's Step 2 rule; revisit if it bites.
 - Review (M6.6), efficiency: Tier 2 category analysis runs up to 3 times per column (Step 7); every route loads profile/results JSON from the Dataset row (Step 12).
+- **Owner question 1 (Chicago):** Title Case beats a 99% majority: 4,953 "CHICAGO" are rewritten to "Chicago" (20 rows) automatically. Option: prefer Title Case only when no spelling has a clear majority.
+- **Owner question 2 (Chicago):** `license` is read as a number and gets 573 outlier flags. Option: add license-style names to the id list, or skip outlier flags on nearly all-distinct columns.
+- Held-out misses: "Northest" (tie between Northeast and Northwest), "Ctr" (not recognised as Central), one mojibake name ("Ã…berg"), emails in capitals, "unknown"/"n.a." placeholders, stray markers, synonyms.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Owner decision on clean.xlsx (xlsxwriter, build on download, or leave).
-2. M6 Step 8: held-out synthetic batch (new seed, new region abbreviations), detection recall and fix recall over all injected errors, 100 hand-checked Chicago changes; update RESULTS.md, README, CONTRACT 11.
-3. Step 9 (code review, tag phase1-m6b), then Part C (GitHub + Vercel).
+1. Owner answers on the two Chicago findings (change, or leave for Phase 2).
+2. M6 Step 9: code review over everything since phase1-m5, fix high-severity items, tag phase1-m6b.
+3. Part C (Steps 10-15): GitHub, Vercel feasibility spike, adapters, deploy. The owner must run `gh auth login` and `vercel login` when asked.
 
 ## How to run
 ```bash
@@ -128,3 +134,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-12 | M6 Step 5 Name casing | Done. Suggest-only name capitals with Mc/Mac/O'/particles/numerals, business-name guard, excluded from approve-all-safe. 286 Python + 56 frontend tests passing.
 - 2026-11-12 | M6 Step 6 Part A checkpoint | Done. Demo file 4 regions / 1 quantity format / 2 decimals, quality 80.5 -> 98.0; review: 5 fixes. 291 Python + 56 frontend tests passing. Tagged phase1-m6a.
 - 2026-11-15 | M6 Step 7 Measure, then optimize | Done. Stage profiler, read-once Parquet cache, distinct-value map_values, streamed change log. Clean 13-20% faster, 47.5 MB peak -8%. 298 Python tests passing.
+- 2026-11-15 | M6 Steps 7b + 8 | Done. Excel on download; held-out batch; detection 96.7%, fix recall 69.1%, precision 100%, 0 damaged; Chicago hand check 0 wrong. 312 Python + 58 frontend tests passing.

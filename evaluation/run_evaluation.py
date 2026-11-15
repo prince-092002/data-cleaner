@@ -1,4 +1,9 @@
-"""Precision and recall of the cleaning engine on the three ground-truth sample files.
+"""Precision and recall of the cleaning engine on the ground-truth sample files.
+
+Two batches: the tuning batch (sample_data/, three files, the one the engine was developed on)
+and the held-out batch (sample_data/heldout/, a different seed plus store_visits_messy.csv; never
+tune against it). The headline numbers are detection recall and fix recall over ALL injected
+errors (M6 step 8); the older "recall on fixable errors" view is kept below them.
 
     .venv/Scripts/python evaluation/run_evaluation.py
 
@@ -38,6 +43,8 @@ SAMPLES = ROOT / "sample_data"
 GROUND_TRUTH = SAMPLES / "ground_truth.csv"
 HERE = Path(__file__).resolve().parent
 FILES = ["sales_orders_messy.csv", "customers_messy.xlsx", "hr_survey_messy.csv"]
+HELDOUT = SAMPLES / "heldout"
+HELDOUT_FILES = FILES + ["store_visits_messy.csv"]
 ROW_ID = "_row_id"
 FLAG_SUFFIX = "_outlier_flag"
 DIMENSIONS = ["overall", "completeness", "validity", "consistency", "uniqueness", "conformity"]
@@ -65,7 +72,19 @@ FIXABLE: dict[str, tuple[str, str]] = {
     "typo_category": ("standardize_categories", "text"),
     "case_variant": ("standardize_categories", "text"),
     "outlier": ("flag_outliers", "flag"),
+    "category_abbreviation": ("standardize_categories", "text"),   # held-out stores file
+    "leading_zero": ("coerce_numeric", "num"),                     # held-out stores file
 }
+# Column-level detection: the profile issue that names this kind of problem for the column.
+ISSUE_FOR: dict[str, str] = {
+    "missing_value": "missing_values",
+    "invalid_value": "mixed_types",
+    "ambiguous_date": "ambiguous_dates",
+    "duplicate_key": "duplicate_keys",
+    "category_synonym": "inconsistent_categories",
+}
+# Error types whose correct clean form is an empty cell (the original value cannot be known).
+EXPECT_NULL = {"null_token", "placeholder_token"}
 # Structural errors scored by a file-level or column-level check.
 STRUCTURAL: dict[str, tuple[str, str]] = {
     "header_whitespace": ("normalize_headers", "header"),
@@ -203,6 +222,27 @@ def clean_matches(kind: str, out: str | None, expected: str | None) -> bool:
     return canon_text(out) == canon_text(expected)
 
 
+_ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?$")
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}")
+
+
+def strict_fixed(out: str | None, expected: str | None) -> bool:
+    """Fixed correctly: the cell holds the expected value AND is written in the standard form
+    (real empty cell, plain number, ISO date, true/false, tidy text). No partial credit."""
+    if expected is None or expected == "":
+        return out is None or out == ""
+    if out is None or out == "":
+        return False
+    if _ISO_DATE_RE.match(expected):
+        return bool(_ISO_RE.match(out)) and out[:10] == expected[:10]
+    if num_value(expected) is not None:
+        return bool(_NUM_RE.match(out)) and float(out) == num_value(expected)
+    if bool_value(expected) is not None:
+        return out in ("true", "false") and out == bool_value(expected)
+    # Same text (curly or straight quotes both accepted) and written tidily.
+    return canon_text(out) == canon_text(expected) and out == " ".join(out.split())
+
+
 def _looks_snake(name: str) -> bool:
     return bool(re.match(r"^[a-z][a-z0-9_]*$", name))
 
@@ -213,11 +253,16 @@ def _gt_for(fname: str, rows: list[dict]) -> list[dict]:
     return [r for r in rows if r["file"] == fname]
 
 
-def _evaluate_file(fname: str, gt: list[dict]) -> dict:
-    path = SAMPLES / fname
+def _evaluate_file(fname: str, gt: list[dict], samples: Path = SAMPLES) -> dict:
+    path = samples / fname
     profile = pipeline.profile(path)
     plan = pipeline.build_plan(profile, Decisions(approved=[p.id for p in profile.proposals]))
     ptype = {c.name: c.inferred_type for c in profile.columns}
+    issues = {c.name: {i.code for i in c.issues} for c in profile.columns}
+    listed: dict[str, set[str]] = defaultdict(set)          # column -> values shown as "left alone"
+    for prop in profile.proposals:
+        if prop.column:
+            listed[prop.column].update(x.value for x in prop.left_alone)
 
     loaded = _ingest.ingest(path)
     df = loaded.df
@@ -245,6 +290,8 @@ def _evaluate_file(fname: str, gt: list[dict]) -> dict:
             out_rows = list(reader)
 
     removed = {int(r["row_id"]) for r in log if r["change_type"] == "row_removed"}
+    changed_cells = {(int(r["row_id"]), r["column"]) for r in log
+                     if r["change_type"] == "cell" and r["row_id"]}
     removed_cols = {r["column"] for r in log if r["change_type"] == "column_removed"}
     out_ids = [rid for rid in input_ids if rid not in removed]
     if len(out_ids) != len(out_rows):
@@ -298,6 +345,7 @@ def _evaluate_file(fname: str, gt: list[dict]) -> dict:
                 cell_keys[(row, t)] = item
                 item["input_ok"] = _input_matches(inputs.get(row, {}).get(df_col), e)
                 _judge_cell(item, et, row, t, removed, out_by_id, out_cols, ptype)
+        _judge_all(item, et, row, removed, out_by_id, out_cols, changed_cells, listed, issues, inputs, src2df)
         entries.append(item)
 
     # --- damaged cells: kept rows and columns, no injected error on the cell
@@ -375,6 +423,52 @@ def _evaluate_file(fname: str, gt: list[dict]) -> dict:
 
 
 fp_examples: list[dict] = []
+
+
+def _judge_all(item, et, row, removed, out_by_id, out_cols, changed_cells, listed, issues, inputs, src2df) -> None:
+    """The M6 view over ALL injected errors: was it fixed correctly, and if not, was it at least
+    detected (the engine changed, flagged or listed the cell, or named the problem for the column)?
+
+    item["noop"]: the injection changed nothing (original == injected), so it is not an error.
+    item["fixed_all"]: fixed correctly (strict_fixed, row/column removed, outlier flagged, or a
+    reading problem handled at ingest).
+    item["detect"]: "fixed" | "cell" | "column" | "none".
+    """
+    t = item["tidy"]
+    item["noop"] = row > 0 and item["column"] != "" and item["original"] == item["injected"]
+    if row == 0 or item["column"] == "":                     # structural and row-level
+        fixed = item["status"] in ("fixed", "out_of_scope")
+        item.update(fixed_all=fixed, detect="fixed" if fixed else "none")
+        return
+    if t is None:
+        item.update(fixed_all=False, detect="none")
+        return
+    if row in removed:
+        item.update(fixed_all=True, detect="fixed")
+        return
+    out = out_by_id[row].get(t)
+    if et == "outlier":
+        fixed = (t + FLAG_SUFFIX) in out_cols and out_by_id[row].get(t + FLAG_SUFFIX) == "true"
+    else:
+        expected = None if et in EXPECT_NULL else item["original"]
+        fixed = strict_fixed(out, expected)
+    if fixed and et == "ambiguous_date":
+        # Right only because "approve everything" keeps the default day/month order and the
+        # generator happens to use the same one. The engine cannot know; the user must choose.
+        item.update(fixed_all=False, detect="cell", lucky=True)
+        return
+    if fixed:
+        item.update(fixed_all=True, detect="fixed")
+        return
+    raw = inputs.get(row, {}).get(src2df.get(item["column"]))
+    shown = raw is not None and (raw in listed[t] or canon_text(raw) in listed[t])
+    if (row, t) in changed_cells or shown:
+        detect = "cell"
+    elif ISSUE_FOR.get(et) in issues.get(t, ()):
+        detect = "column"
+    else:
+        detect = "none"
+    item.update(fixed_all=False, detect=detect)
 
 
 def _input_matches(raw: str | None, e: dict) -> bool:
@@ -460,7 +554,31 @@ def _aggregate(per_file: list[dict]) -> dict:
             slot["no_op"] += int(e["original"] == e["injected"])
             slot["reason"] = e["method"]
 
+    real = [e for e in entries if not e["noop"]]
+    by_type_all: dict[str, Counter] = defaultdict(Counter)
+    for e in real:
+        by_type_all[e["error_type"]][e["detect"]] += 1
+    n_fixed = sum(1 for e in real if e["fixed_all"])
+    n_cell = sum(1 for e in real if e["detect"] == "cell")
+    n_col = sum(1 for e in real if e["detect"] == "column")
+    all_errors = {
+        "injected": len(real),
+        "noop_injections": len(entries) - len(real),
+        "fixed": n_fixed,
+        "fix_recall": _pct(n_fixed, len(real)),
+        "detected_cell_level": n_fixed + n_cell,
+        "detected": n_fixed + n_cell + n_col,
+        "detection_recall": _pct(n_fixed + n_cell + n_col, len(real)),
+        "detection_recall_cell_level": _pct(n_fixed + n_cell, len(real)),
+        "by_error_type": {k: dict(v) for k, v in sorted(by_type_all.items())},
+    }
+    lucky = sum(1 for e in real if e.get("lucky"))
+    all_errors["ambiguous_dates_right_by_default_order"] = lucky
+    all_errors["fix_recall_if_date_order_is_right"] = _pct(n_fixed + lucky, len(real))
+    all_errors["fix_recall_counting_noops_as_errors"] = _pct(n_fixed, len(entries))
+
     return {
+        "all_errors": all_errors,
         "headline": {"scored": scored, "fixed": fixed, "missed": missed,
                      "recall": _pct(fixed, scored),
                      "not_fixable": sum(v["count"] for v in not_fixable.values()),
@@ -494,8 +612,12 @@ def _render(results: dict) -> str:
     h = results["headline"]
     files = results["files"]
     parts = ["# Evaluation results", "",
-             "Generated by `evaluation/run_evaluation.py` on the three ground-truth samples. "
-             "The chicago file has no ground truth and is excluded.", ""]
+             "Generated by `evaluation/run_evaluation.py`. Every proposal is approved. "
+             "The chicago file has no ground truth; see `evaluation/CHICAGO_HANDCHECK.md`.", ""]
+    parts += _render_all_errors(results)
+    parts += ["# Tuning batch in detail (older view: recall on fixable errors only)", "",
+              "The sections below are for the tuning batch and count only the error types a rule is "
+              "meant to fix. They are kept for continuity with M5; the numbers above are the honest ones.", ""]
 
     parts += ["## Headline per file", ""]
     rows = []
@@ -579,6 +701,72 @@ def _render(results: dict) -> str:
     return "\n".join(parts)
 
 
+TIMING_NOTE = [
+    "## Timing and memory (M6 step 7, see TIMING.md)", "",
+    _md(["File", "Profile", "Clean", "Peak memory", "Excel on first download"],
+        [["100,000 rows, 5.4 MB", "about 12 s", "about 12 s", "about 0.46 GB", "about 8 s"],
+         ["872,050 rows, 47.5 MB", "about 60 to 80 s", "about 90 s", "about 1.8 GB", "about 70 to 120 s"]]), "",
+    "Measured on the development machine, whose speed varies between runs. Clean no longer writes "
+    "clean.xlsx; it is built on the first Excel download. Supported size: 50 MB locally, 4 MB on the live site.", "",
+]
+
+
+def _render_all_errors(results: dict) -> list[str]:
+    parts = ["## Honest metrics: all injected errors", "",
+             "- **Detection recall:** share of injected errors the engine fixed, changed, flagged, listed as "
+             "\"left alone\", or named as a problem for that column in the profile.",
+             "- **Fix recall:** share of injected errors that end up correct AND in the standard form "
+             "(real empty cell, plain number, ISO date, true/false, tidy text). A deleted value cannot be "
+             "restored, so missing values can be detected but never fixed.",
+             "- Injections that changed nothing (original equals injected) are not errors and are left out.",
+             "- **Ambiguous dates** (03/04/2024) are counted as detected, not fixed: the engine cannot know "
+             "the order and asks the user. If the user picks the right order they are all fixed; that figure "
+             "is in the last column.",
+             "- The held-out batch uses a different seed and a file with region abbreviations the engine "
+             "was never tuned on. It is the figure to quote.", ""]
+    rows = []
+    for label, r in (("**Held-out batch**", results["heldout"]), ("Tuning batch", results)):
+        a = r["all_errors"]
+        rows.append([label, a["injected"], a["detection_recall"], a["detection_recall_cell_level"],
+                     a["fix_recall"], r["precision"], r["damaged_cells"]["total"],
+                     a["fix_recall_if_date_order_is_right"]])
+    parts += [_md(["Batch", "Injected errors", "Detection recall %", "of which cell-level %",
+                   "Fix recall %", "Precision %", "Damaged cells",
+                   "Fix recall % if the user picks the right date order"], rows), ""]
+    a = results["all_errors"]
+    parts += [f"For comparison with the M5 count of 3,057 entries: counting the {a['noop_injections']} "
+              f"no-op injections of the tuning batch as unfixed errors would give "
+              f"{a['fix_recall_counting_noops_as_errors']}%.", ""]
+    for label, r in (("Held-out batch", results["heldout"]), ("Tuning batch", results)):
+        parts += [f"### {label} per file", ""]
+        rows = [[name, f["all_errors"]["injected"], f["all_errors"]["detection_recall"],
+                 f["all_errors"]["fix_recall"], f["precision"], f["damaged_cells"],
+                 f"{f['quality_before']['overall']} -> {f['quality_after']['overall']}"]
+                for name, f in r["files"].items()]
+        parts += [_md(["File", "Injected errors", "Detection recall %", "Fix recall %", "Precision %",
+                       "Damaged cells", "Quality before -> after"], rows), ""]
+    parts += ["### Held-out batch by error type", ""]
+    rows = []
+    for et, c in results["heldout"]["all_errors"]["by_error_type"].items():
+        n = sum(c.values())
+        rows.append([et, n, c.get("fixed", 0), c.get("cell", 0), c.get("column", 0), c.get("none", 0),
+                     _pct(c.get("fixed", 0), n)])
+    parts += [_md(["Error type", "Injected", "Fixed", "Detected at the cell, not fixed",
+                   "Detected for the column only", "Not detected", "Fix recall %"], rows), ""]
+    h = results["heldout"]
+    if h["missed"]:
+        parts += ["### Held-out batch: fixable errors that were missed", ""]
+        rows = [[m["file"], m["row"], m["column"], m["error_type"], m["original"], m["injected"], m["method"]]
+                for m in h["missed"][:40]]
+        parts += [_md(["File", "Row", "Column", "Error type", "Original", "Injected", "Why missed"], rows), ""]
+    if h["damaged_cells"]["examples"]:
+        parts += ["### Held-out batch: damaged cells", ""]
+        rows = [[x["file"], x["row"], x["column"], x["input"], x["output"], ", ".join(x["changed_by"])]
+                for x in h["damaged_cells"]["examples"]]
+        parts += [_md(["File", "Row", "Column", "Input", "Output", "Changed by"], rows), ""]
+    return parts + TIMING_NOTE
+
+
 def _claim(et: str) -> str:
     if et in FIXABLE:
         return FIXABLE[et][0]
@@ -591,14 +779,13 @@ def _claim(et: str) -> str:
 
 # ---------------------------------------------------------------- entry point
 
-def run(out_dir: Path | None = None) -> dict:
-    """Run the evaluation. Writes RESULTS.md and results.json into out_dir (default: evaluation/)."""
-    out_dir = Path(out_dir) if out_dir else HERE
-    with open(GROUND_TRUTH, encoding="utf-8", newline="") as fh:
+def evaluate(samples: Path = SAMPLES, file_names: list[str] = FILES) -> dict:
+    """Evaluate one batch of sample files against the ground_truth.csv in the same folder."""
+    with open(samples / "ground_truth.csv", encoding="utf-8", newline="") as fh:
         gt = list(csv.DictReader(fh))
 
     fp_examples.clear()
-    per_file = [_evaluate_file(f, _gt_for(f, gt)) for f in FILES]
+    per_file = [_evaluate_file(f, _gt_for(f, gt), samples) for f in file_names]
     agg = _aggregate(per_file)
 
     files = {}
@@ -608,7 +795,14 @@ def run(out_dir: Path | None = None) -> dict:
         neutral = f["rule_stats"]
         on_inj = sum(v.get("on_injected", 0) for v in neutral.values())
         fp = sum(v.get("false_positive", 0) for v in neutral.values())
+        real = [e for e in f["entries"] if not e["noop"]]
         files[f["file"]] = {
+            "all_errors": {
+                "injected": len(real),
+                "fixed": sum(1 for e in real if e["fixed_all"]),
+                "fix_recall": _pct(sum(1 for e in real if e["fixed_all"]), len(real)),
+                "detection_recall": _pct(sum(1 for e in real if e["detect"] != "none"), len(real)),
+            },
             "headline": {"scored": len(scored), "fixed": fixed, "missed": len(scored) - fixed,
                          "recall": _pct(fixed, len(scored))},
             "precision": _pct(on_inj, on_inj + fp),
@@ -624,6 +818,7 @@ def run(out_dir: Path | None = None) -> dict:
     all_fp = sum(s.get("false_positive", 0) for f in per_file for s in f["rule_stats"].values())
     damaged = [d for f in per_file for d in f["damaged"]]
     results = {
+        "all_errors": agg["all_errors"],
         "headline": agg["headline"],
         "precision": _pct(all_on, all_on + all_fp),
         "neutral_changes": sum(s.get("neutral", 0) for f in per_file for s in f["rule_stats"].values()),
@@ -637,9 +832,17 @@ def run(out_dir: Path | None = None) -> dict:
                           "examples": damaged[:25]},
         "missed": [{k: e[k] for k in ("file", "row", "column", "error_type", "original", "injected", "method")}
                    for f in per_file for e in f["missed"]],
-        "false_positive_examples": fp_examples[:25],
+        "false_positive_examples": list(fp_examples[:25]),
     }
+    return results
 
+
+def run(out_dir: Path | None = None) -> dict:
+    """Evaluate both batches. Writes RESULTS.md and results.json into out_dir (default: evaluation/).
+    Returns the tuning-batch results, with the held-out batch under "heldout"."""
+    out_dir = Path(out_dir) if out_dir else HERE
+    results = evaluate(SAMPLES, FILES)
+    results["heldout"] = evaluate(HELDOUT, HELDOUT_FILES)
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "results.json").write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
     (out_dir / "RESULTS.md").write_text(_render(results), encoding="utf-8")
@@ -648,6 +851,11 @@ def run(out_dir: Path | None = None) -> dict:
 
 def main() -> int:
     results = run()
+    for label, r in (("Held-out", results["heldout"]), ("Tuning", results)):
+        a = r["all_errors"]
+        print(f"{label}: detection recall {a['detection_recall']}%, fix recall {a['fix_recall']}% "
+              f"({a['fixed']}/{a['injected']} injected errors), precision {r['precision']}%, "
+              f"damaged cells {r['damaged_cells']['total']}")
     h = results["headline"]
     print(f"Recall {h['recall']}% ({h['fixed']}/{h['scored']} fixable injected errors)")
     print(f"Precision {results['precision']}% (neutral changes excluded)")

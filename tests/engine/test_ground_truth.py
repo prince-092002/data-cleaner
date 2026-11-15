@@ -129,3 +129,43 @@ def test_duplicate_row_labels_the_later_copy(out_dir, ground_truth, file_name):
         seen.add(row)
     assert labelled == expected, (f"labelled but first copy: {sorted(labelled - expected)}; "
                                   f"later copy not labelled: {sorted(expected - labelled)}")
+
+
+# ---- held-out batch (M6 step 8): different seed, plus a file with other region abbreviations
+
+@pytest.fixture(scope="module")
+def heldout(tmp_path_factory):
+    spec = importlib.util.spec_from_file_location("make_samples", SAMPLE_SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    target = tmp_path_factory.mktemp("heldout")
+    module.generate_heldout(target)
+    with open(target / "ground_truth.csv", encoding="utf-8", newline="") as fh:
+        return target, list(csv.DictReader(fh)), module
+
+
+def test_heldout_batch_has_four_files_and_differs_from_the_tuning_batch(heldout, out_dir):
+    target, gt, module = heldout
+    assert {r["file"] for r in gt} == set(FILES) | {"store_visits_messy.csv"}
+    assert (target / "sales_orders_messy.csv").read_bytes() != (out_dir / "sales_orders_messy.csv").read_bytes()
+    assert module.HELDOUT_SEED != module.SEED
+
+
+def test_heldout_store_file_uses_other_region_abbreviations(heldout):
+    target, gt, _ = heldout
+    with open(target / "store_visits_messy.csv", encoding="utf-8", newline="") as fh:
+        rows = list(csv.DictReader(fh))
+    regions = {r["Region"] for r in rows}
+    assert {"NE", "SW", "Ctr"} <= regions and not {"Nrth", "Wset", "Sout"} & regions
+    stores = [r for r in gt if r["file"] == "store_visits_messy.csv"]
+    assert {"category_abbreviation", "leading_zero"} <= {r["error_type"] for r in stores}
+    for r in stores:                                           # every entry points at the injected value
+        if int(r["row"]) > 0 and r["column"]:
+            assert rows[int(r["row"]) - 1][r["column"]] == r["injected_value"], r
+
+
+def test_committed_heldout_files_match_the_generator(heldout):
+    target, _, _ = heldout
+    committed = ROOT / "sample_data" / "heldout"
+    for name in ["sales_orders_messy.csv", "hr_survey_messy.csv", "store_visits_messy.csv", "ground_truth.csv"]:
+        assert (committed / name).read_bytes() == (target / name).read_bytes(), name
