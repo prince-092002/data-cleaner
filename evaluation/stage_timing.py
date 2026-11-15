@@ -112,7 +112,6 @@ def instrument(st: Stages, phase: list[str]) -> None:
     p = lambda name: (lambda *a, **k: f"{phase[0]}: {name}")  # noqa: E731
     _ingest.ingest = st.wrap(p("read file (ingest)"), _ingest.ingest)
     _profile.profile_dataframe = st.wrap(p("profile_dataframe (scores)"), _profile.profile_dataframe)
-    pipeline._write_xlsx = st.wrap(p("write clean.xlsx"), pipeline._write_xlsx)
     changelog.write_csv = st.wrap(p("write changelog.csv"), changelog.write_csv)
     report.render = st.wrap(p("render report.html"), report.render)
     recipe.save = st.wrap(p("write recipe.yaml"), recipe.save)

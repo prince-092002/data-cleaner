@@ -46,7 +46,7 @@ def test_amount_has_two_decimals_everywhere(cleaned):
 
 
 def test_amount_shows_two_decimals_in_excel(cleaned):
-    ws = openpyxl.load_workbook(cleaned[0] / "clean.xlsx")["clean"]
+    ws = openpyxl.load_workbook(pipeline.build_xlsx(cleaned[0]))["clean"]
     header = [c.value for c in ws[1]]
     col = header.index("amount") + 1
     formats = {ws.cell(row=r, column=col).number_format for r in range(2, ws.max_row + 1)

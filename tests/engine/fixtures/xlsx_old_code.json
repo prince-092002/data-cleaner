@@ -1,0 +1,22 @@
+{
+  "sales_orders_messy.csv": {
+    "rows": 401,
+    "columns": 10,
+    "sha256": "cf75b96a696b33a65bbd0c63997ba9f4fd7b3cdc07d6bdcdf4f801826009dec6"
+  },
+  "customers_messy.xlsx": {
+    "rows": 251,
+    "columns": 10,
+    "sha256": "1b956e5302bb1a13d8c352e0bbfb2b69abb0a649f0ed79b99cb74d470f581d09"
+  },
+  "hr_survey_messy.csv": {
+    "rows": 301,
+    "columns": 10,
+    "sha256": "659198e13bca51440497a0c581fb09a11012d5d2d75fb0fc0253a2defbdd5aba"
+  },
+  "messy_orders_demo.csv": {
+    "rows": 121,
+    "columns": 9,
+    "sha256": "ef505986d424b5d7bf576ecfdb0419043f8163c1df7a099d39fe0de7b2067537"
+  }
+}

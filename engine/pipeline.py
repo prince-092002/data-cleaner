@@ -6,6 +6,9 @@ The backend calls only this module. See docs/CONTRACT.md section 7.
 from __future__ import annotations
 
 import datetime as _dt
+import json as _json
+import os as _os
+import uuid as _uuid
 from pathlib import Path
 from typing import Callable
 
@@ -36,6 +39,7 @@ from engine.rules.registry import ORDER, RULES, RULES_BY_ID
 ProgressFn = Callable[[int, str], None]
 
 OUTPUT_FILES = ("clean.csv", "clean.xlsx", "report.html", "recipe.yaml", "changelog.csv")
+XLSX_SPEC = "xlsx_spec.json"      # column types and money columns, for build_xlsx
 _SAMPLE_COUNT = 5
 _SAMPLE_MAX_CHARS = 200
 
@@ -263,6 +267,28 @@ def _write_xlsx(df: pl.DataFrame, types: dict[str, str], path: Path, money: set[
     wb.save(path)
 
 
+def build_xlsx(out_dir: Path) -> Path:
+    """Build clean.xlsx in a clean job's output folder from clean.csv, on demand (M6).
+
+    Writing Excel was about half of a clean job's time, so the job no longer does it. The first
+    call builds the file; later calls return it at once. It is written to a temporary name and
+    renamed, so a failed or interrupted build never leaves a half-written clean.xlsx.
+    """
+    out_dir = Path(out_dir)
+    target = out_dir / "clean.xlsx"
+    if target.exists():
+        return target
+    spec = _json.loads((out_dir / XLSX_SPEC).read_text(encoding="utf-8"))
+    df = pl.read_csv(out_dir / "clean.csv", infer_schema=False)
+    tmp = out_dir / f"clean.xlsx.{_uuid.uuid4().hex}.tmp"
+    try:
+        _write_xlsx(df, spec["types"], tmp, set(spec["money"]))
+        _os.replace(tmp, target)
+    finally:
+        tmp.unlink(missing_ok=True)
+    return target
+
+
 def clean(
     path: Path,
     approved_plan: ApprovedPlan,
@@ -273,9 +299,10 @@ def clean(
     display_name: str | None = None,
     cache_dir: Path | None = None,
 ) -> CleanResult:
-    """Run the approved steps on a fresh read of the file and write the five output files.
+    """Run the approved steps on a fresh read of the file and write the output files.
 
-    The original file is only read. Outputs go to out_dir.
+    The original file is only read. Outputs go to out_dir: clean.csv, changelog.csv, recipe.yaml,
+    report.html and xlsx_spec.json. clean.xlsx is built later by build_xlsx(out_dir).
     """
     from engine import report as _report
 
@@ -368,7 +395,8 @@ def _finish(df, loaded, before, current, warnings, log, approved_plan, out_dir, 
     output.write_csv(out_dir / "clean.csv")
     money = {current.get(s.column, s.column) for s in steps
              if s.rule_id == "coerce_numeric" and s.params.get("decimals")}
-    _write_xlsx(output, {c.name: c.inferred_type for c in after.columns}, out_dir / "clean.xlsx", money)
+    (out_dir / XLSX_SPEC).write_text(_json.dumps(
+        {"types": {c.name: c.inferred_type for c in after.columns}, "money": sorted(money)}), encoding="utf-8")
     saved = _recipe.from_plan(approved_plan, loaded.source, name=recipe_name)
     _recipe.save(saved, out_dir / "recipe.yaml")
     (out_dir / "report.html").write_text(

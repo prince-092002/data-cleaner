@@ -142,7 +142,8 @@ def test_clean_writes_all_files_and_leaves_the_original_alone(tmp_path):
     profile = pipeline.profile(SALES)
     pipeline.clean(SALES, pipeline.build_plan(profile, Decisions()), tmp_path, "run-1")
     assert hashlib.sha256(SALES.read_bytes()).hexdigest() == before
-    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(FILES)
+    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(
+        [f for f in FILES if f != "clean.xlsx"] + ["xlsx_spec.json"])      # Excel is built on download
 
 
 def test_clean_improves_the_score(sales_run):
@@ -177,7 +178,7 @@ def test_clean_csv_content(sales_run):
 
 def test_clean_xlsx_has_real_types(sales_run):
     *_, out, _, _ = sales_run
-    ws = openpyxl.load_workbook(out / "clean.xlsx", read_only=True)["clean"]
+    ws = openpyxl.load_workbook(pipeline.build_xlsx(out), read_only=True)["clean"]
     rows = list(ws.iter_rows(values_only=True))
     header = list(rows[0])
     def col(name):   # read-only xlsx rows can be shorter than the header when trailing cells are empty

@@ -77,6 +77,7 @@ Tests: **298 Python passed** (frontend unchanged, 56), evaluation unchanged.
 - 2026-11-15 (M6.7) Read-once cache keyed by file SHA-256 + sheet + header row + engine version, so a re-downloaded copy (Vercel later) still hits. Cache files live in the dataset folder.
 - 2026-11-15 (M6.7) Change log stays on Python's csv module: Polars quotes empty strings differently and the gain was 1.6 s on 2.8 million rows.
 - 2026-11-15 (M6.7) Timing compared only in back-to-back pairs because this machine's speed varies up to 4x between runs.
+- 2026-11-15 (M6.7b) Owner decision: clean.xlsx is built on download, no new dependency. `pipeline.build_xlsx(out_dir)` builds from clean.csv + xlsx_spec.json, cached per clean run, atomic rename. Old-code fingerprints in tests/engine/fixtures/xlsx_old_code.json prove identical content.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
@@ -93,7 +94,6 @@ Tests: **298 Python passed** (frontend unchanged, 56), evaluation unchanged.
 - Samples shown after a Day first / Month first toggle still show the original suggestion.
 - Review (M6.6), not fixed: an id column with leading zeros at mixed widths and no id-like name (cust_no: 00123, 045) is coerced to numbers automatically. Follows the owner's Step 2 rule; revisit if it bites.
 - Review (M6.6), efficiency: Tier 2 category analysis runs up to 3 times per column (Step 7); every route loads profile/results JSON from the Dataset row (Step 12).
-- **Open question (owner):** clean.xlsx costs about half of the clean time (openpyxl itself is 90% of it). Options: add xlsxwriter (new dependency, usually several times faster), or build clean.xlsx only when it is downloaded.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps

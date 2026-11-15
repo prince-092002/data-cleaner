@@ -355,7 +355,12 @@ def build_plan(profile: DatasetProfile, decisions: Decisions) -> ApprovedPlan
 def clean(path: Path, approved_plan: ApprovedPlan, out_dir: Path, run_id: str,
           progress: ProgressFn | None = None, recipe_name: str | None = None,
           display_name: str | None = None, cache_dir: Path | None = None) -> CleanResult
-    """Writes clean.csv, clean.xlsx, report.html, recipe.yaml, changelog.csv into out_dir."""
+    """Writes clean.csv, report.html, recipe.yaml, changelog.csv and xlsx_spec.json into out_dir."""
+
+def build_xlsx(out_dir: Path) -> Path
+    """Builds clean.xlsx in a clean job's out_dir from clean.csv and xlsx_spec.json (column
+    types, money columns). First call builds, later calls return the same file. Written to a
+    temporary name and renamed, so a failed build leaves no clean.xlsx."""
 ```
 
 Models:
@@ -441,6 +446,7 @@ Error body for every non-2xx response:
 | 415 | `unsupported_file_type` | not `.csv` or `.xlsx` (checked by extension **and** content sniffing) |
 | 422 | `unreadable_file` | file passes type checks but cannot be parsed, or is empty |
 | 500 | `internal_error` | unexpected server error (no internal details in the message) |
+| 500 | `excel_failed` | clean.xlsx could not be built; the clean job and the other downloads are not affected |
 
 A failed job's `error.code` is one of `unreadable_file`, `invalid_request`, `internal_error`, `interrupted` (the server restarted while the job was queued or running), or `superseded` (a newer profile or clean job was started for the same dataset, so this job's result was discarded).
 
@@ -516,7 +522,9 @@ Query params for the change log table: `limit` (default 100, max 500), `offset`,
 
 ### 8.7 `GET /api/datasets/{id}/downloads/{name}`
 
-`name` is one of `clean.csv`, `clean.xlsx`, `report.html`, `recipe.yaml`, `changelog.csv`; anything else is `404`; a valid name before cleaning has finished is `409 not_ready`. Sent with `Content-Disposition: attachment` and the original file stem as a prefix (e.g. `sales_clean.csv`).
+`name` is one of `clean.csv`, `clean.xlsx`, `report.html`, `recipe.yaml`, `changelog.csv`; anything else is `404`; a valid name before cleaning has finished is `409 not_ready`.
+
+**clean.xlsx is built on download (M6).** The clean job does not write it (it was about half of the job's time). `POST /api/datasets/{id}/downloads/clean.xlsx/prepare` builds it if needed and answers `200 {"ready": true}`; the website calls this, shows "Preparing your Excel file", then starts the normal download. `GET .../downloads/clean.xlsx` also builds it if it is missing. The built file is kept in the run folder, so repeat downloads are immediate. A build failure answers `500 excel_failed` and never changes the job status or the other downloads. Sent with `Content-Disposition: attachment` and the original file stem as a prefix (e.g. `sales_clean.csv`).
 
 ### 8.8 Jobs table (SQLModel)
 
@@ -536,7 +544,8 @@ storage/
     ingest-<key>.parquet / .json   # read-once cache (section 7), written by the profile job
     runs/{run_id}/                 # one folder per clean job (M6)
       plan.json
-      clean.csv  clean.xlsx  report.html  recipe.yaml  changelog.csv
+      clean.csv  report.html  recipe.yaml  changelog.csv  xlsx_spec.json
+      clean.xlsx                   # only after the first Excel download or prepare call
 ```
 
 The profile and results are stored in the `Dataset` row (section 8.8), not as files. Downloads come from `runs/{results_run_id}/`. When a clean job's result is saved, the other run folders of that dataset are deleted, except those of clean jobs still queued or running; a superseded or failed clean job deletes its own folder. A download whose file is missing answers `409 not_ready`.

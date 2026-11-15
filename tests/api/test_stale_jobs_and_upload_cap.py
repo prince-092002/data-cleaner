@@ -180,3 +180,55 @@ def test_upload_limit_accepts_decimal_megabytes_and_rejects_nonsense(monkeypatch
     monkeypatch.setenv("DC_MAX_UPLOAD_MB", "4MB")
     with pytest.raises(ValueError, match="DC_MAX_UPLOAD_MB"):
         Settings(storage_dir=tmp_path / "s")
+
+
+# --------------------------------------------------------------------------- Excel on download
+
+def _cleaned(client) -> tuple[str, str]:
+    dataset_id = _upload(client)
+    client.post(f"/api/datasets/{dataset_id}/profile")
+    run_id = client.post(f"/api/datasets/{dataset_id}/clean", json={}).json()["job_id"]
+    assert client.get(f"/api/jobs/{run_id}").json()["status"] == "done"
+    return dataset_id, run_id
+
+
+def test_excel_is_built_on_first_request_and_kept_for_the_run(client, app):
+    dataset_id, run_id = _cleaned(client)
+    xlsx = app.state.ctx.storage.run_dir(dataset_id, run_id) / "clean.xlsx"
+    assert not xlsx.exists()                                  # the clean job does not build it
+
+    r = client.post(f"/api/datasets/{dataset_id}/downloads/clean.xlsx/prepare")
+    assert r.status_code == 200 and r.json() == {"ready": True}
+    built = xlsx.stat().st_mtime_ns
+    assert client.post(f"/api/datasets/{dataset_id}/downloads/clean.xlsx/prepare").json() == {"ready": True}
+    r = client.get(f"/api/datasets/{dataset_id}/downloads/clean.xlsx")
+    assert r.status_code == 200 and r.content.startswith(b"PK")
+    assert xlsx.stat().st_mtime_ns == built                   # repeat downloads reuse the file
+
+
+def test_direct_excel_download_builds_it_too(client):
+    dataset_id, _ = _cleaned(client)
+    r = client.get(f"/api/datasets/{dataset_id}/downloads/clean.xlsx")
+    assert r.status_code == 200 and r.content.startswith(b"PK")
+
+
+def test_excel_failure_does_not_touch_the_job_or_the_other_downloads(client, monkeypatch):
+    dataset_id, run_id = _cleaned(client)
+
+    def boom(out_dir):
+        raise RuntimeError("secret internal detail")
+
+    monkeypatch.setattr(routes.pipeline, "build_xlsx", boom)
+    for r in (client.post(f"/api/datasets/{dataset_id}/downloads/clean.xlsx/prepare"),
+              client.get(f"/api/datasets/{dataset_id}/downloads/clean.xlsx")):
+        assert r.status_code == 500 and r.json()["error"]["code"] == "excel_failed"
+        assert "secret" not in r.json()["error"]["message"] and "CSV" in r.json()["error"]["message"]
+    assert client.get(f"/api/jobs/{run_id}").json()["status"] == "done"
+    for name in ("clean.csv", "report.html", "recipe.yaml", "changelog.csv"):
+        assert client.get(f"/api/datasets/{dataset_id}/downloads/{name}").status_code == 200
+    assert client.get(f"/api/datasets/{dataset_id}/results").status_code == 200
+
+
+def test_prepare_before_cleaning_is_409(client):
+    dataset_id = _upload(client)
+    assert client.post(f"/api/datasets/{dataset_id}/downloads/clean.xlsx/prepare").status_code == 409

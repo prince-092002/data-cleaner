@@ -1,4 +1,5 @@
-import { downloadUrl } from '@/api/client'
+import { useState } from 'react'
+import { ApiError, downloadUrl, prepareExcel, startDownload } from '@/api/client'
 import type { DownloadName } from '@/api/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,7 +7,11 @@ import { useAppState } from '@/state/AppState'
 
 const FILES: { name: DownloadName; description: string }[] = [
   { name: 'clean.csv', description: 'Your cleaned data as a CSV file. Opens in any spreadsheet or database tool.' },
-  { name: 'clean.xlsx', description: 'Your cleaned data as an Excel workbook, ready to open in Excel.' },
+  {
+    name: 'clean.xlsx',
+    description:
+      'Your cleaned data as an Excel workbook. It is made when you first ask for it, which can take a moment for big files.',
+  },
   { name: 'report.html', description: 'A readable cleaning report with quality scores and a summary of what changed.' },
   { name: 'recipe.yaml', description: 'A reusable recipe of the cleaning steps, so the same fixes can be repeated on similar files.' },
   { name: 'changelog.csv', description: 'Every changed cell, with its old and new value, the rule used and whether it was automatic or approved.' },
@@ -18,6 +23,26 @@ const linkClass =
 export function DownloadsScreen() {
   const { state, dispatch } = useAppState()
   const { datasetId, upload } = state
+  const [excel, setExcel] = useState<'idle' | 'preparing'>('idle')
+  const [excelError, setExcelError] = useState<string | null>(null)
+
+  async function downloadExcel() {
+    if (!datasetId) return
+    setExcel('preparing')
+    setExcelError(null)
+    try {
+      await prepareExcel(datasetId)
+      startDownload(downloadUrl(datasetId, 'clean.xlsx'))
+    } catch (e) {
+      setExcelError(
+        e instanceof ApiError
+          ? e.message
+          : 'The Excel file could not be built. The other files are still available.',
+      )
+    } finally {
+      setExcel('idle')
+    }
+  }
 
   if (!datasetId) {
     return (
@@ -48,14 +73,26 @@ export function DownloadsScreen() {
             <CardContent className="space-y-3">
               <p className="text-sm text-slate-700">{f.description}</p>
               <div className="flex flex-wrap gap-2">
-                <a
-                  href={downloadUrl(datasetId, f.name)}
-                  download
-                  className={`${linkClass} bg-blue-600 text-white hover:bg-blue-700`}
-                  aria-label={`Download ${f.name}`}
-                >
-                  Download
-                </a>
+                {f.name === 'clean.xlsx' ? (
+                  <button
+                    type="button"
+                    onClick={downloadExcel}
+                    disabled={excel === 'preparing'}
+                    className={`${linkClass} bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60`}
+                    aria-label={`Download ${f.name}`}
+                  >
+                    {excel === 'preparing' ? 'Preparing…' : 'Download'}
+                  </button>
+                ) : (
+                  <a
+                    href={downloadUrl(datasetId, f.name)}
+                    download
+                    className={`${linkClass} bg-blue-600 text-white hover:bg-blue-700`}
+                    aria-label={`Download ${f.name}`}
+                  >
+                    Download
+                  </a>
+                )}
                 {f.name === 'report.html' && (
                   <a
                     href={downloadUrl(datasetId, f.name)}
@@ -67,6 +104,16 @@ export function DownloadsScreen() {
                   </a>
                 )}
               </div>
+              {f.name === 'clean.xlsx' && excel === 'preparing' && (
+                <p role="status" className="text-sm text-slate-700">
+                  Preparing your Excel file… The download starts by itself when it is ready.
+                </p>
+              )}
+              {f.name === 'clean.xlsx' && excelError && (
+                <p role="alert" className="rounded-md border border-red-300 bg-red-50 p-2 text-sm text-red-900">
+                  {excelError}
+                </p>
+              )}
             </CardContent>
           </Card>
         ))}

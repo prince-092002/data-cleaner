@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import datetime as dt
 import json
+import logging
 import uuid
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
@@ -23,6 +24,7 @@ from engine.errors import IngestError, PlanError
 from engine.models import DatasetProfile, Decisions
 
 router = APIRouter(prefix="/api")
+log = logging.getLogger("data_cleaner.routes")
 
 ALLOWED = {".csv": "csv", ".xlsx": "xlsx"}
 CHANGE_FILTERS = ("rule_id", "column", "action", "change_type")
@@ -263,17 +265,42 @@ def get_results(
 
 # --------------------------------------------------------------------------- downloads
 
+def _download_path(ctx: Context, dataset: Dataset, name: str) -> Path:
+    """The output file of the current clean run. clean.xlsx is built on first request and then
+    kept for that run; a build failure is its own error and touches nothing else."""
+    if dataset.results_json is None:
+        raise errors.not_ready("This file is not ready yet. Clean the file first.")
+    run_dir = ctx.storage.run_dir(dataset.id, dataset.results_run_id)
+    if name == "clean.xlsx" and (run_dir / "clean.csv").exists():
+        try:
+            return pipeline.build_xlsx(run_dir)
+        except Exception:
+            log.exception("building clean.xlsx failed for dataset %s", dataset.id)
+            raise errors.ApiError(
+                500, "excel_failed",
+                "The Excel file could not be built. The CSV file and the report are still available.",
+            )
+    path = run_dir / name
+    if not path.exists():
+        raise errors.not_ready("This file is not ready yet. Clean the file first.")
+    return path
+
+
+@router.post("/datasets/{dataset_id}/downloads/clean.xlsx/prepare")
+def prepare_excel(request: Request, dataset_id: str):
+    """Build clean.xlsx now, so the website can show "Preparing your Excel file" and then download."""
+    ctx = _ctx(request)
+    _download_path(ctx, _dataset(ctx, dataset_id), "clean.xlsx")
+    return {"ready": True}
+
+
 @router.get("/datasets/{dataset_id}/downloads/{name}")
 def download(request: Request, dataset_id: str, name: str):
     ctx = _ctx(request)
     dataset = _dataset(ctx, dataset_id)
     if name not in DOWNLOADS:
         raise errors.not_found("This download")
-    if dataset.results_json is None:
-        raise errors.not_ready("This file is not ready yet. Clean the file first.")
-    path = ctx.storage.run_dir(dataset_id, dataset.results_run_id) / name
-    if not path.exists():
-        raise errors.not_ready("This file is not ready yet. Clean the file first.")
+    path = _download_path(ctx, dataset, name)
     suffix, media_type = DOWNLOADS[name]
     stem = Path(dataset.filename).stem or "data"
     return FileResponse(path, media_type=media_type, filename=stem + suffix)

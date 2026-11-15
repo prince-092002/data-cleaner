@@ -101,6 +101,21 @@ export function getResults(datasetId: string, query: ResultsQuery = {}): Promise
   return request<ResultsResponse>(`/datasets/${enc(datasetId)}/results${resultsQueryString(query)}`)
 }
 
+/** Builds clean.xlsx on the server if it is not there yet (it is made on first download). */
+export function prepareExcel(datasetId: string): Promise<{ ready: boolean }> {
+  return request(`/datasets/${enc(datasetId)}/downloads/clean.xlsx/prepare`, { method: 'POST' })
+}
+
+/** Starts a normal browser download (streamed by the browser, not held in page memory). */
+export function startDownload(url: string): void {
+  const a = document.createElement('a')
+  a.href = url
+  a.download = ''
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
+
 export function downloadUrl(datasetId: string, name: string): string {
   return `${BASE}/datasets/${enc(datasetId)}/downloads/${enc(name)}`
 }
