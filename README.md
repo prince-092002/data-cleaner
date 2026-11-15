@@ -50,6 +50,7 @@ npm run dev                            # http://localhost:5173 (proxies /api to 
 npm run test -- --run                  # frontend tests
 ```
 Uploads are kept for 24 hours under `./storage` (change with `DC_STORAGE_DIR`). Use "Try a sample file" on the first screen, or upload your own `.csv` / `.xlsx` (up to 50 MB).
+For the demo with the sales sample, approve the Region suggestion on the fixes screen: west, WEST and West have no 80% majority spelling, so they become "West" only after you approve it.
 
 ## Screenshots
 | Upload (header-row check) | Profile |

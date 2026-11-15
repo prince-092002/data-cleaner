@@ -36,6 +36,16 @@ def test_id_like_names_do_not_match_inside_words(name):
     assert not P.is_id_like_name(name)
 
 
+@pytest.mark.parametrize("name", ["Number of items", "Item Count", "Total Amount", "num_total", "Qty No"])
+def test_count_like_token_overrides_id_token(name):
+    assert not P.is_id_like_name(name)
+
+
+@pytest.mark.parametrize("name", ["cust_no", "License #", "Permit Number", "Account Number"])
+def test_id_names_without_count_token_still_match(name):
+    assert P.is_id_like_name(name)
+
+
 # --------------------------------------------------------------------------- profile and pipeline
 
 N = 30
@@ -69,6 +79,7 @@ def run(tmp_path_factory):
         "Monkey": _with_outlier(20),
         "Amount": _with_outlier(100),
         "Quantity": ["1", "2", "3", "03", "4", "5"] * 5,
+        "Number of items": _with_outlier(30),
     }
     path = _write(tmp, columns)
     profile = pipeline.profile(path)
@@ -130,6 +141,13 @@ def test_genuine_numeric_column_still_flagged(run):
     profile, rows = run
     assert "flag_outliers" in _rules_for(profile, "amount")
     assert rows[-1]["amount_outlier_flag"] == "true"
+
+
+def test_count_column_named_number_of_items_is_numeric_and_flagged(run):
+    profile, rows = run
+    assert _types(profile)["number_of_items"] == "integer"
+    assert "flag_outliers" in _rules_for(profile, "number_of_items")
+    assert rows[-1]["number_of_items_outlier_flag"] == "true"
 
 
 def test_quantity_leading_zero_still_coerced(run):

@@ -127,6 +127,26 @@ describe('ResultsScreen', () => {
     await waitFor(() => expect(screen.getByText('Showing 51-51 of 120')).toBeTruthy())
   })
 
+  it('shows 11-column change records (with reason) from the server', async () => {
+    const withReason: ChangesPage = {
+      total: 2,
+      limit: 50,
+      offset: 0,
+      items: [
+        { run_id: 'r', rule_id: 'standardize_categories', rule_version: '1.2.0', row_id: 7, column: 'city', change_type: 'cell', old_value: 'Chicago', new_value: 'CHICAGO', action: 'auto', timestamp: 't', reason: 'majority spelling' },
+        { run_id: 'r', rule_id: 'parse_dates', rule_version: '1', row_id: 8, column: 'day', change_type: 'cell', old_value: '1/2/24', new_value: '2024-01-02', action: 'approved', timestamp: 't', reason: null },
+      ],
+    }
+    getResults.mockResolvedValue(results({ changes: withReason }))
+    setup()
+    fireEvent.change(screen.getByLabelText('Rule'), { target: { value: 'coerce_numeric' } })
+    await waitFor(() => expect(screen.getByText('Showing 1-2 of 2')).toBeTruthy())
+    const rows = screen.getAllByTestId('change-row')
+    expect(rows).toHaveLength(2)
+    expect(rows[0].textContent).toMatch(/city.*standardize_categories.*Chicago.*CHICAGO.*auto/)
+    expect(rows[1].textContent).toMatch(/day.*parse_dates.*1\/2\/24.*2024-01-02.*approved/)
+  })
+
   it('shows an error state', async () => {
     hoisted.fail = true
     setup()

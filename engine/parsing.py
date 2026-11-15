@@ -91,8 +91,13 @@ def unique_column_names(headers: list[str], reserved: set[str] | None = None) ->
     return out
 
 
+# A count-like word wins over an id word: "Number of items" is a count, not an id.
+COUNT_NAME_TOKENS = frozenset({"count", "qty", "quantity", "total", "sum", "amount", "items", "of"})
+
+
 def is_id_like_name(name: str) -> bool:
-    return any(tok in ID_NAME_TOKENS for tok in _snake(name).split("_"))
+    tokens = set(_snake(name).split("_"))
+    return bool(tokens & ID_NAME_TOKENS) and not tokens & COUNT_NAME_TOKENS
 
 
 # --------------------------------------------------------------------------- person names
