@@ -195,7 +195,7 @@ def test_changelog_schema_and_stamping(sales_run):
     rows = _changelog(out)
     assert list(rows[0].keys()) == COLUMNS == [
         "run_id", "rule_id", "rule_version", "row_id", "column", "change_type",
-        "old_value", "new_value", "action", "timestamp",
+        "old_value", "new_value", "action", "timestamp", "reason",   # M6b: reason added last
     ]
     assert len(rows) == result.summary.total_changes
     assert {r["run_id"] for r in rows} == {run_id}

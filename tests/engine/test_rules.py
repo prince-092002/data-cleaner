@@ -286,16 +286,72 @@ REGION = ["North"] * 20 + ["north", "NORTH", "Nrth"] + ["South"] * 20 + ["East"]
 def test_standardize_categories_tier1_case_variants_are_automatic():
     rule = RULES_BY_ID["standardize_categories"]
     cands = triggers("standardize_categories", {"region": REGION})
-    assert [c.params["tier"] for c in cands] == [1, 2]
+    # M6b: changed for the clear-majority rule. A third candidate (the no-majority Title Case
+    # suggestion, marked case_suggestion) now sits between Tier 1 and Tier 2.
+    assert [c.params.get("tier") for c in cands] == [1, None, 2]
+    assert cands[1].params.get("case_suggestion") is True
     tier1 = cands[0]
     params, confidence = rule.prepare(frame({"region": REGION}), "region", tier1.params)
     assert params == {"tier": 1, "mapping": {"NORTH": "North", "north": "North"}}
     assert resolve_mode(rule, confidence, auto_safe=tier1.auto_safe) == "auto"
 
 
+def _category_candidate(data, column, **match):
+    cands = triggers("standardize_categories", data)
+    return next(c for c in cands if c.column == column
+                and all(c.params.get(k) == v for k, v in match.items()))
+
+
+def test_standardize_categories_majority_spelling_wins_with_reason():
+    rule = RULES_BY_ID["standardize_categories"]
+    data = {"city": ["CHICAGO"] * 4953 + ["Chicago"] * 20}
+    df = frame(data)
+    tier1 = _category_candidate(data, "city", tier=1)
+    params, confidence = rule.prepare(df, "city", tier1.params)
+    assert params["mapping"] == {"Chicago": "CHICAGO"}
+    assert resolve_mode(rule, confidence, auto_safe=tier1.auto_safe) == "auto"
+    out, records = run("standardize_categories", df, "city", params)
+    assert len(records) == 20
+    assert {(r.old_value, r.new_value, r.reason) for r in records} == {("Chicago", "CHICAGO", "majority spelling")}
+    assert out["city"].to_list() == ["CHICAGO"] * 4973
+    case = _category_candidate(data, "city", case_suggestion=True)
+    assert rule.prepare(df, "city", case.params)[0]["mapping"] == {}
+
+
+def test_standardize_categories_no_majority_is_a_title_case_suggestion():
+    rule = RULES_BY_ID["standardize_categories"]
+    data = {"region": ["WEST"] * 30 + ["West"] * 20 + ["North"] * 50}
+    df = frame(data)
+    tier1 = _category_candidate(data, "region", tier=1)
+    assert rule.prepare(df, "region", tier1.params)[0]["mapping"] == {}
+    case = _category_candidate(data, "region", case_suggestion=True)
+    assert case.params.get("tier") is None and not case.auto_safe
+    params, confidence = rule.prepare(df, "region", case.params)
+    assert params["mapping"] == {"WEST": "West"}
+    assert "Title Case" in params["reasons"]["WEST"]
+    assert resolve_mode(rule, confidence, auto_safe=case.auto_safe) == "suggest"
+    _, records = run("standardize_categories", df, "region", params)
+    assert len(records) == 30 and {r.reason for r in records} == {"Title Case spelling, no clear majority"}
+
+
+def test_standardize_categories_yes_no_column_is_left_as_is():
+    rule = RULES_BY_ID["standardize_categories"]
+    df = frame({"answer": ["Yes"] * 90 + ["No"] * 10})
+    for params in ({"tier": 1, "mapping": {}}, {"case_suggestion": True, "mapping": {}, "reasons": {}},
+                   {"tier": 2, "mapping": {}, "reasons": {}}):
+        assert rule.prepare(df, "answer", params)[0]["mapping"] == {}
+
+
+def test_standardize_categories_tier2_records_carry_the_reason():
+    df = frame({"region": REGION})
+    params = {"tier": 2, "mapping": {"Nrth": "North"}, "reasons": {"Nrth": "typo reason"}}
+    _, records = run("standardize_categories", df, "region", params)
+    assert [r.reason for r in records] == ["typo reason"]
+
+
 def test_standardize_categories_tier2_typos_are_suggestions_with_reasons():
     rule = RULES_BY_ID["standardize_categories"]
-    tier2 = triggers("standardize_categories", {"region": REGION})[1]
+    tier2 = triggers("standardize_categories", {"region": REGION})[2]   # M6b: index 1 -> 2 (case suggestion added)
     df = frame({"region": REGION})
     params, confidence = rule.prepare(df, "region", tier2.params)
     assert params["mapping"] == {"Nrth": "North"}

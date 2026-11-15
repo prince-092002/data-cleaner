@@ -64,6 +64,19 @@ const proposals = [
     editable_params: ['mapping'],
   }),
   prop({
+    id: 'k',
+    title: 'Case suggestion',
+    rule_id: 'standardize_categories',
+    column: 'region',
+    is_destructive: true,
+    params: {
+      case_suggestion: true,
+      mapping: { NORTH: 'North' },
+      reasons: { NORTH: 'No spelling is used in 80% of rows, so the Title Case spelling "North" is suggested' },
+    },
+    editable_params: ['mapping'],
+  }),
+  prop({
     id: 'f',
     title: 'Ambiguous dates',
     rule_id: 'parse_dates',
@@ -141,6 +154,23 @@ describe('FixesScreen', () => {
     setup()
     const c = within(card('Categories'))
     expect(c.getByText('"Wst" is one letter away from "West"')).toBeInTheDocument()
+  })
+
+  it('a no-majority case suggestion is a normal card with its reason, not an automatic merge', async () => {
+    const u = userEvent.setup()
+    setup()
+    const auto = within(screen.getByRole('region', { name: 'Automatic merges' }))
+    expect(auto.queryByRole('button', { name: 'Undo merge of NORTH into North' })).not.toBeInTheDocument()
+    const region = within(screen.getByRole('region', { name: /^Column region/ }))
+    expect(region.getByRole('heading', { name: 'Case suggestion' })).toBeInTheDocument()
+    expect(
+      within(card('Case suggestion')).getByText(
+        'No spelling is used in 80% of rows, so the Title Case spelling "North" is suggested',
+      ),
+    ).toBeInTheDocument()
+    expect(status('Case suggestion')).toBe('Undecided (will not run)')
+    await u.click(screen.getByRole('button', { name: 'Approve all safe fixes' }))
+    expect(status('Case suggestion')).toBe('Undecided (will not run)')
   })
 
   it('lists values left alone with a count and reason', () => {

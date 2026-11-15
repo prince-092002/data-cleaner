@@ -417,8 +417,14 @@ def _is_title_case(value: str) -> bool:
     return value == value.title() and value != value.upper()
 
 
-def _variant_groups(counts: dict[str, int]) -> dict[str, tuple[str, int, list[str]]]:
-    """key -> (most frequent tidy spelling, total count, raw values in the group)."""
+CATEGORY_MAJORITY_SHARE = 0.80
+
+
+def _variant_groups(counts: dict[str, int]) -> dict[str, tuple[str, int, list[str], bool]]:
+    """key -> (canonical tidy spelling, total count, raw values in the group, has a majority).
+
+    A spelling holding at least 80% of the group's rows is the canonical one (majority). Otherwise
+    the canonical spelling is an existing Title Case spelling, else the most frequent."""
     groups: dict[str, dict[str, int]] = {}
     for value, count in counts.items():
         groups.setdefault(category_key(value), {})[value] = count
@@ -427,22 +433,37 @@ def _variant_groups(counts: dict[str, int]) -> dict[str, tuple[str, int, list[st
         tidy_counts: dict[str, int] = {}
         for value, count in members.items():
             tidy_counts[tidy_text(value)] = tidy_counts.get(tidy_text(value), 0) + count
+        total = sum(members.values())
+        top = min(tidy_counts, key=lambda v: (-tidy_counts[v], v))
+        majority = tidy_counts[top] >= CATEGORY_MAJORITY_SHARE * total
         title = [v for v in tidy_counts if _is_title_case(v)]
-        pool = title or list(tidy_counts)        # prefer an existing Title Case spelling
+        pool = [top] if majority else (title or list(tidy_counts))
         canonical = min(pool, key=lambda v: (-tidy_counts[v], v))
-        out[key] = (canonical, sum(members.values()), sorted(members))
+        out[key] = (canonical, total, sorted(members), majority)
     return out
 
 
-def merge_case_variants(counts: dict[str, int]) -> dict[str, str]:
-    """Tier 1 (automatic): values that differ only by case, accents or whitespace are mapped to
-    the most frequent spelling. Returns only the values that change."""
+def _case_mapping(counts: dict[str, int], majority: bool) -> dict[str, str]:
     return {
         value: canonical
-        for canonical, _, members in _variant_groups(counts).values()
+        for canonical, _, members, has_majority in _variant_groups(counts).values()
+        if has_majority == majority
         for value in members
         if value != canonical
     }
+
+
+def merge_case_variants(counts: dict[str, int]) -> dict[str, str]:
+    """Tier 1 (automatic): within a group of values that differ only by case, accents or
+    whitespace, a spelling with 80% or more of the group's rows absorbs the others; its own
+    cells are left as they are. Returns only the values that change."""
+    return _case_mapping(counts, majority=True)
+
+
+def suggest_case_variants(counts: dict[str, int]) -> dict[str, str]:
+    """Suggestion: groups where no spelling has 80% of the rows are mapped to an existing Title
+    Case spelling, else the most frequent. Never invents a spelling. Returns only the changes."""
+    return _case_mapping(counts, majority=False)
 
 
 CATEGORY_TIER2_MAX_DISTINCT = 500
@@ -484,13 +505,13 @@ def _tier2(counts: dict[str, int]) -> tuple[dict[str, tuple[str, str]], dict[str
     groups = _variant_groups(counts)
     if len(groups) > CATEGORY_TIER2_MAX_DISTINCT:
         return {}, {}
-    total = sum(n for _, n, _ in groups.values())
+    total = sum(g[1] for g in groups.values())
     order = sorted(groups, key=lambda k: (-groups[k][1], k))
     targets: list[str] = []
     out: dict[str, tuple[str, str]] = {}
     left: dict[str, str] = {}
     for key in order:
-        canonical, n, members = groups[key]
+        canonical, n, members, _ = groups[key]
         found = [
             (ev, t) for t in targets
             if groups[t][1] > n and (ev := _evidence(key, t, canonical, groups[t][0]))
@@ -528,7 +549,7 @@ def suggest_category_merges(counts: dict[str, int]) -> dict[str, tuple[str, str]
 
 def category_group_counts(counts: dict[str, int]) -> dict[str, int]:
     """Tier 1 spelling -> rows of every spelling in its group (the keys category_left_alone uses)."""
-    return {canonical: n for canonical, n, _ in _variant_groups(counts).values()}
+    return {canonical: n for canonical, n, _, _ in _variant_groups(counts).values()}
 
 
 def category_left_alone(counts: dict[str, int]) -> dict[str, str]:
@@ -537,10 +558,11 @@ def category_left_alone(counts: dict[str, int]) -> dict[str, str]:
 
 
 def cluster_categories(counts: dict[str, int]) -> dict[str, str]:
-    """Both tiers together: raw value -> the value it would end up as (itself if unchanged).
+    """Tier 1, the case suggestion and Tier 2 together: raw value -> the value it would end up as (itself if unchanged).
     Used by the profiler to score consistency."""
     mapping = {v: v for v in counts}
     mapping.update(merge_case_variants(counts))
+    mapping.update(suggest_case_variants(counts))
     mapping.update({v: t for v, (t, _) in suggest_category_merges(counts).items()})
     return mapping
 

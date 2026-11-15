@@ -256,7 +256,7 @@ def test_clean_job_and_results(client):
     assert (changes["limit"], changes["offset"], len(changes["items"])) == (100, 0, 100)
     first = changes["items"][0]
     assert list(first) == ["run_id", "rule_id", "rule_version", "row_id", "column", "change_type",
-                           "old_value", "new_value", "action", "timestamp"]
+                           "old_value", "new_value", "action", "timestamp", "reason"]   # M6b: reason added
     assert first["run_id"] == job_id and first["row_id"] is None and first["change_type"] == "header_renamed"
 
 

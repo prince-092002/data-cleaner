@@ -28,6 +28,7 @@ class ChangeRecord:
     new_value: str | None
     action: str | None
     timestamp: str | None
+    reason: str | None = None        # short plain reason (category merges); empty for the rest
 
     def to_dict(self) -> dict:
         return {f.name: getattr(self, f.name) for f in fields(self)}

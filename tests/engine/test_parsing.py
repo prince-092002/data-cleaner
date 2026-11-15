@@ -111,20 +111,69 @@ def test_date_order_ambiguous():
 # ---- Tier 1: case, accents, whitespace (automatic)
 
 def test_tier1_merges_case_accent_and_space_variants_into_most_frequent_spelling():
+    # M6b: changed for the clear-majority rule. Café (6 of 9 rows, 67%) has no 80% majority, so
+    # its group is no longer merged automatically; it moved to the Title Case suggestion below.
     counts = {"North": 50, "north": 4, "NORTH": 3, "South": 40, "South ": 3, "Café": 6, "cafe": 2, "CAFÉ": 1}
     assert P.merge_case_variants(counts) == {
-        "north": "North", "NORTH": "North", "South ": "South", "cafe": "Café", "CAFÉ": "Café",
+        "north": "North", "NORTH": "North", "South ": "South",
     }
+    assert P.suggest_case_variants(counts) == {"cafe": "Café", "CAFÉ": "Café"}
 
 
 def test_tier1_prefers_an_existing_title_case_spelling():
-    assert P.merge_case_variants({"west": 17, "WEST": 7, "West": 5}) == {"west": "West", "WEST": "West"}
-    assert P.merge_case_variants({"New York": 2, "new york": 9}) == {"new york": "New York"}
+    # M6b: changed for the clear-majority rule. Title Case now wins only when no spelling has
+    # 80% of the group, and then only as a suggestion (suggest_case_variants), never automatically.
+    assert P.merge_case_variants({"west": 17, "WEST": 7, "West": 5}) == {}
+    assert P.suggest_case_variants({"west": 17, "WEST": 7, "West": 5}) == {"west": "West", "WEST": "West"}
+    # "new york" holds 9 of 11 rows (82%): the majority spelling wins over Title Case.
+    assert P.merge_case_variants({"New York": 2, "new york": 9}) == {"New York": "new york"}
 
 
 def test_tier1_keeps_the_most_frequent_spelling_when_no_title_case_exists():
+    # M6b: changed for the clear-majority rule. west/WEST is 9 of 12 (75%), under 80%, so it
+    # becomes a suggestion of the most frequent spelling instead of an automatic merge.
     assert P.merge_case_variants({"USA": 50, "usa": 5}) == {"usa": "USA"}
-    assert P.merge_case_variants({"west": 9, "WEST": 3}) == {"WEST": "west"}
+    assert P.merge_case_variants({"west": 9, "WEST": 3}) == {}
+    assert P.suggest_case_variants({"west": 9, "WEST": 3}) == {"WEST": "west"}
+
+
+# ---- M6b: a clear-majority spelling wins
+
+def test_majority_spelling_wins_and_majority_cells_are_untouched():
+    assert P.merge_case_variants({"CHICAGO": 4953, "Chicago": 20}) == {"Chicago": "CHICAGO"}
+    assert P.suggest_case_variants({"CHICAGO": 4953, "Chicago": 20}) == {}
+
+
+def test_majority_needs_80_percent_of_the_group():
+    assert P.merge_case_variants({"WEST": 8, "West": 2}) == {"West": "WEST"}       # exactly 80%
+    assert P.merge_case_variants({"WEST": 79, "West": 21}) == {}                     # 79%
+    assert P.suggest_case_variants({"WEST": 79, "West": 21}) == {"WEST": "West"}
+
+
+def test_majority_counts_spellings_on_tidy_text():
+    # "WEST" and "WEST " are one spelling after trimming: 7 + 2 of 10 rows is 90%.
+    assert P.merge_case_variants({"WEST": 7, "WEST ": 2, "West": 1}) == {"WEST ": "WEST", "West": "WEST"}
+
+
+def test_no_majority_suggests_title_case_or_else_the_most_frequent_spelling():
+    assert P.merge_case_variants({"WEST": 60, "west": 40}) == {}
+    assert P.suggest_case_variants({"WEST": 60, "west": 40}) == {"west": "WEST"}       # no Title Case exists
+    assert P.suggest_case_variants({"WEST": 50, "west": 30, "West": 20}) == {"WEST": "West", "west": "West"}
+
+
+def test_majority_never_merges_different_values():
+    counts = {"Yes": 90, "No": 10}
+    assert P.merge_case_variants(counts) == {}
+    assert P.suggest_case_variants(counts) == {}
+    assert P.suggest_category_merges(counts) == {}
+
+
+def test_region_west_majority_and_tier2_still_work_together():
+    counts = {"West": 35, "WEST": 3, "west": 2, "North": 30, "South": 30, "Wst": 2}
+    assert P.merge_case_variants(counts) == {"WEST": "West", "west": "West"}
+    assert P.suggest_case_variants(counts) == {}
+    assert _targets(counts) == {"Wst": "West"}
+    assert P.cluster_categories(counts)["WEST"] == "West"
 
 
 def test_tier1_leaves_typos_and_distinct_values_alone():
@@ -186,6 +235,11 @@ def test_tier2_reports_values_it_left_alone_and_why():
 def test_cluster_categories_combines_both_tiers():
     mapping = P.cluster_categories({"North": 20, "north": 3, "Nrth": 2, "South": 20})
     assert mapping == {"North": "North", "north": "North", "Nrth": "North", "South": "South"}
+
+
+def test_cluster_categories_counts_no_majority_groups_as_inconsistent():
+    mapping = P.cluster_categories({"WEST": 60, "west": 40})
+    assert mapping == {"WEST": "WEST", "west": "WEST"}
 
 
 def test_format_pattern():
