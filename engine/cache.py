@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
+import uuid
 from pathlib import Path
 
 import polars as pl
@@ -19,6 +21,7 @@ from engine import ENGINE_VERSION
 from engine.ingest import IngestResult
 from engine.models import DatasetProfile, SourceInfo
 
+log = logging.getLogger("data_cleaner.cache")
 CACHE_VERSION = "1"
 
 
@@ -68,22 +71,34 @@ def load(cache_dir: Path | None, path: Path, sheet: str | None, header_row: int 
 
 
 def store(cache_dir: Path | None, path: Path, loaded: IngestResult, before: DatasetProfile) -> None:
-    """Save the parsed table (all text) and its before-profile, keyed by the resolved sheet/header."""
+    """Save the parsed table (all text) and its before-profile, keyed by the resolved sheet/header.
+
+    Safe when another job stores the same entry at the same time: every writer uses its own
+    temporary names and renames atomically, and the content for one key is identical. A cache
+    write error is logged and ignored, because the cache is only a speed-up.
+    """
     if cache_dir is None:
         return
-    cache_dir = Path(cache_dir)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    key = _key(path, loaded.source.sheet, loaded.source.header_row)
-    parquet, meta_file = _files(cache_dir, key)
-    tmp = parquet.with_suffix(".parquet.tmp")
-    loaded.df.write_parquet(tmp)
-    os.replace(tmp, parquet)
-    meta = {
-        "key": key,
-        "source": loaded.source.model_dump(mode="json"),
-        "source_names": loaded.source_names,
-        "before": before.model_copy(update={"proposals": []}).model_dump(mode="json"),
-    }
-    tmp = meta_file.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(meta), encoding="utf-8")
-    os.replace(tmp, meta_file)
+    tmps: list[Path] = []
+    try:
+        cache_dir = Path(cache_dir)
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        key = _key(path, loaded.source.sheet, loaded.source.header_row)
+        parquet, meta_file = _files(cache_dir, key)
+        unique = uuid.uuid4().hex
+        tmps = [parquet.with_name(f"{parquet.name}.{unique}.tmp"), meta_file.with_name(f"{meta_file.name}.{unique}.tmp")]
+        loaded.df.write_parquet(tmps[0])
+        os.replace(tmps[0], parquet)
+        meta = {
+            "key": key,
+            "source": loaded.source.model_dump(mode="json"),
+            "source_names": loaded.source_names,
+            "before": before.model_copy(update={"proposals": []}).model_dump(mode="json"),
+        }
+        tmps[1].write_text(json.dumps(meta), encoding="utf-8")
+        os.replace(tmps[1], meta_file)
+    except Exception:
+        log.warning("could not write the read-once cache", exc_info=True)
+    finally:
+        for tmp in tmps:
+            tmp.unlink(missing_ok=True)

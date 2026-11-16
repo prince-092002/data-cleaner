@@ -6,11 +6,11 @@ import asyncio
 import datetime as dt
 import logging
 
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select
 
-from backend.db import Dataset, Job, utcnow
+from backend.db import Dataset, Job, Lease, utcnow
 from backend.jobs import Context
-from backend.storage import is_uuid
+from backend.storage import dataset_prefix, is_uuid
 
 log = logging.getLogger("data_cleaner.cleanup")
 
@@ -19,7 +19,8 @@ def delete_dataset(ctx: Context, session: Session, dataset: Dataset) -> None:
     for job in session.exec(select(Job).where(Job.dataset_id == dataset.id)).all():
         session.delete(job)
     session.delete(dataset)
-    ctx.storage.delete(dataset.id)
+    session.execute(delete(Lease).where(Lease.dataset_id == dataset.id))
+    ctx.storage.delete_prefix(dataset_prefix(dataset.id))
 
 
 def cleanup_expired(ctx: Context, now: dt.datetime | None = None) -> int:
@@ -33,15 +34,15 @@ def cleanup_expired(ctx: Context, now: dt.datetime | None = None) -> int:
         session.commit()
         known = set(session.exec(select(Dataset.id)).all())
     # Orphan folders (no database row). Young ones may be an upload still in progress.
-    cutoff = (now - dt.timedelta(hours=1)).timestamp()
-    for folder in ctx.storage.root.iterdir():
-        if (
-            folder.is_dir()
-            and is_uuid(folder.name)
-            and folder.name not in known
-            and folder.stat().st_mtime < cutoff
-        ):
-            ctx.storage.delete(folder.name)
+    cutoff = now - dt.timedelta(hours=1)
+    newest: dict[str, dt.datetime] = {}
+    for key, modified in ctx.storage.list_keys(""):
+        folder = key.split("/")[0]
+        if is_uuid(folder) and folder not in known:
+            newest[folder] = max(modified, newest.get(folder, modified))
+    for folder, modified in newest.items():
+        if modified < cutoff:
+            ctx.storage.delete_prefix(dataset_prefix(folder))
             removed += 1
     return removed
 

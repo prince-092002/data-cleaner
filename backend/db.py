@@ -1,14 +1,17 @@
-"""SQLite tables (SQLModel): datasets and jobs. See CONTRACT.md section 8.8."""
+"""Tables (SQLModel) on SQLite (default) or Postgres (DATABASE_URL): datasets, jobs, leases.
+See CONTRACT.md section 8.8."""
 
 from __future__ import annotations
 
 import datetime as dt
+import uuid
 from pathlib import Path
 
 import logging
 
-from sqlalchemy import Engine, inspect, update
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlalchemy import DateTime, Engine, TypeDecorator, inspect, update
+from sqlalchemy.exc import IntegrityError
+from sqlmodel import Column, Field, Session, SQLModel, create_engine, delete, select
 
 log = logging.getLogger("data_cleaner.db")
 
@@ -24,6 +27,23 @@ def iso(value: dt.datetime) -> str:
     return value.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+class UTCDateTime(TypeDecorator):
+    """Stored as UTC without a zone and always read back timezone-aware, the same on SQLite and Postgres."""
+
+    impl = DateTime
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        return value.astimezone(dt.timezone.utc).replace(tzinfo=None) if value is not None else None
+
+    def process_result_value(self, value, dialect):
+        return value.replace(tzinfo=dt.timezone.utc) if value is not None else None
+
+
+def _time(nullable: bool = False):
+    return Column(UTCDateTime(), nullable=nullable)
+
+
 class Dataset(SQLModel, table=True):
     id: str = Field(primary_key=True)
     filename: str                      # as uploaded; for display and download names only, never a path
@@ -31,8 +51,8 @@ class Dataset(SQLModel, table=True):
     size_bytes: int
     sheet: str | None = None
     header_row: int | None = None
-    created_at: dt.datetime
-    expires_at: dt.datetime
+    created_at: dt.datetime = Field(sa_column=_time())
+    expires_at: dt.datetime = Field(sa_column=_time())
     # Bumped by every new profile or clean job. A job saves its result only if the generation it
     # started with is still current, so an old job can never overwrite a newer one.
     generation: int = 0
@@ -45,21 +65,50 @@ class Job(SQLModel, table=True):
     id: str = Field(primary_key=True)
     dataset_id: str = Field(index=True)
     type: str                          # profile | clean
-    status: str = "queued"             # queued | running | done | failed
+    # queued | running | done | failed | superseded | expired (the API shows the last two as "failed")
+    status: str = "queued"
     progress_pct: int = 0
     current_step: str = "Queued"
     error_code: str | None = None
     error_message: str | None = None
     generation: int = 0                # the dataset generation this job belongs to
-    created_at: dt.datetime
-    updated_at: dt.datetime
+    attempts: int = 0                  # claims so far (a queue may deliver a message more than once)
+    started_at: dt.datetime | None = Field(default=None, sa_column=_time(True))
+    deadline_at: dt.datetime | None = Field(default=None, sa_column=_time(True))   # running past this may be claimed again
+    created_at: dt.datetime = Field(sa_column=_time())
+    updated_at: dt.datetime = Field(sa_column=_time())
 
 
-def make_engine(db_path: Path) -> Engine:
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    engine = create_engine(f"sqlite:///{db_path.as_posix()}", connect_args={"check_same_thread": False})
+class Lease(SQLModel, table=True):
+    """A short-lived lock shared by every server instance, for example one Excel build per run."""
+
+    key: str = Field(primary_key=True)
+    dataset_id: str = Field(index=True)
+    holder: str
+    expires_at: dt.datetime = Field(sa_column=_time())
+
+
+ACTIVE = ("queued", "running")
+
+
+def normalize_url(url: str) -> str:
+    """Neon and Vercel give postgres:// or postgresql://; SQLAlchemy needs the psycopg 3 driver name."""
+    for scheme in ("postgres://", "postgresql://"):
+        if url.startswith(scheme):
+            return "postgresql+psycopg://" + url[len(scheme):]
+    return url
+
+
+def make_engine(target: Path | str) -> Engine:
+    """A file path gives SQLite; a postgres URL gives Postgres (DATABASE_URL)."""
+    if isinstance(target, Path):
+        target.parent.mkdir(parents=True, exist_ok=True)
+        engine = create_engine(f"sqlite:///{target.as_posix()}", connect_args={"check_same_thread": False})
+    else:
+        # prepare_threshold=None: Neon's pooled URL goes through PgBouncer, which cannot keep prepared statements.
+        engine = create_engine(normalize_url(target), connect_args={"prepare_threshold": None}, pool_pre_ping=True)
     tables = inspect(engine)
-    if tables.has_table("dataset") and "generation" not in {c["name"] for c in tables.get_columns("dataset")}:
+    if tables.has_table("job") and "attempts" not in {c["name"] for c in tables.get_columns("job")}:
         # Pre-M6 database. Its data lives at most 24 hours, so it is rebuilt rather than migrated.
         log.warning("old database layout found; recreating tables")
         SQLModel.metadata.drop_all(engine)
@@ -86,6 +135,68 @@ def save_if_current(engine: Engine, dataset_id: str, generation: int, **values) 
         )
         session.commit()
         return result.rowcount == 1
+
+
+def mark_superseded(session: Session, dataset_id: str, keep_job_id: str) -> None:
+    """A new profile or clean replaces older jobs of the dataset that have not finished."""
+    session.execute(
+        update(Job)
+        .where(Job.dataset_id == dataset_id, Job.id != keep_job_id, Job.status.in_(ACTIVE))
+        .values(status="superseded", error_code="superseded", updated_at=utcnow(),
+                error_message="A newer run was started for this file, so this result was not kept.")
+    )
+
+
+def claim_job(engine: Engine, job_id: str, *, lease_seconds: int = 900, max_attempts: int = 3) -> bool:
+    """Idempotent and safe across processes: ONE conditional UPDATE decides who runs the job.
+
+    Claimable: queued, or running with its deadline passed (the earlier worker died). A job that is
+    running within its deadline, finished, superseded or expired is left alone (returns False). A job
+    past its deadline with no attempts left becomes expired.
+    """
+    now = utcnow()
+    with Session(engine) as session:
+        claimed = session.execute(
+            update(Job)
+            .where(Job.id == job_id, Job.attempts < max_attempts,
+                   (Job.status == "queued") | ((Job.status == "running") & (Job.deadline_at <= now)))
+            .values(status="running", attempts=Job.attempts + 1, started_at=now, updated_at=now,
+                    deadline_at=now + dt.timedelta(seconds=lease_seconds), current_step="Starting")
+        ).rowcount == 1
+        if not claimed:
+            session.execute(
+                update(Job)
+                .where(Job.id == job_id, Job.status == "running", Job.deadline_at <= now, Job.attempts >= max_attempts)
+                .values(status="expired", error_code="expired", updated_at=now,
+                        error_message="This job ran out of time. Please try again.")
+            )
+        session.commit()
+        return claimed
+
+
+def acquire_lease(engine: Engine, key: str, dataset_id: str, seconds: int = 120) -> str | None:
+    """Take the lock `key` (returns a holder token), or None if another caller holds it unexpired."""
+    holder, now = uuid.uuid4().hex, utcnow()
+    expires = now + dt.timedelta(seconds=seconds)
+    with Session(engine) as session:
+        try:
+            session.add(Lease(key=key, dataset_id=dataset_id, holder=holder, expires_at=expires))
+            session.commit()
+            return holder
+        except IntegrityError:
+            session.rollback()
+        taken = session.execute(
+            update(Lease).where(Lease.key == key, Lease.expires_at <= now)
+            .values(holder=holder, expires_at=expires)
+        ).rowcount == 1
+        session.commit()
+        return holder if taken else None
+
+
+def release_lease(engine: Engine, key: str, holder: str) -> None:
+    with Session(engine) as session:
+        session.execute(delete(Lease).where(Lease.key == key, Lease.holder == holder))
+        session.commit()
 
 
 def fail_interrupted_jobs(engine: Engine) -> int:

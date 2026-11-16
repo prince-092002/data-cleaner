@@ -6,19 +6,22 @@ import csv
 import datetime as dt
 import json
 import logging
+import tempfile
+import urllib.parse
 import uuid
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Body, Query, Request, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlmodel import Session
 
 from backend import errors
-from backend.db import Dataset, Job, iso, start_generation, utcnow
-from backend.jobs import Context, run_clean_job, run_profile_job
-from backend.storage import DOWNLOADS, TooLarge, is_uuid, looks_like
+from backend.db import Dataset, Job, iso, mark_superseded, start_generation, utcnow
+from backend.jobs import Context, ensure_xlsx, run_clean_job, run_profile_job
+from backend.storage import (DOWNLOADS, StorageNotFound, TooLarge, file_key, is_uuid, looks_like, original_key,
+                             run_key, write_limited)
 from engine import pipeline
 from engine.errors import IngestError, PlanError
 from engine.models import DatasetProfile, Decisions
@@ -27,6 +30,8 @@ router = APIRouter(prefix="/api")
 log = logging.getLogger("data_cleaner.routes")
 
 ALLOWED = {".csv": "csv", ".xlsx": "xlsx"}
+# Job states the website does not know (CONTRACT 8.8) are shown as failed, with their own error code.
+API_STATUS = {"superseded": "failed", "expired": "failed"}
 CHANGE_FILTERS = ("rule_id", "column", "action", "change_type")
 
 
@@ -61,14 +66,11 @@ def _new_job(ctx: Context, dataset_id: str, job_type: str) -> str:
     job_id = str(uuid.uuid4())
     with Session(ctx.engine) as session:
         generation = start_generation(session, dataset_id, clear_profile=job_type == "profile")
+        mark_superseded(session, dataset_id, keep_job_id=job_id)
         session.add(Job(id=job_id, dataset_id=dataset_id, type=job_type, generation=generation,
                         created_at=now, updated_at=now))
         session.commit()
     return job_id
-
-
-def _read_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
 
 
 # --------------------------------------------------------------------------- upload
@@ -83,13 +85,13 @@ def upload_dataset(request: Request, file: UploadFile):
 
     dataset_id = str(uuid.uuid4())
     limit = ctx.settings.max_upload_bytes
-    try:
-        size = ctx.storage.save_upload(dataset_id, file_type, file.file, limit)
-    except TooLarge:
-        raise errors.ApiError(413, "file_too_large", f"Files must be {limit / (1024 * 1024):g} MB or smaller.")
-
-    original = ctx.storage.original(dataset_id, file_type)
-    try:
+    # The upload is checked on a local temp file first; storage only ever receives a file that passed.
+    with tempfile.TemporaryDirectory() as tmp:
+        original = Path(tmp) / f"original.{file_type}"
+        try:
+            size = write_limited(file.file, original, limit)
+        except TooLarge:
+            raise errors.ApiError(413, "file_too_large", f"Files must be {limit / (1024 * 1024):g} MB or smaller.")
         if size == 0:
             raise errors.ApiError(422, "unreadable_file", "The file is empty.")
         if not looks_like(original, file_type):
@@ -101,11 +103,8 @@ def upload_dataset(request: Request, file: UploadFile):
             inspection = pipeline.inspect(original)
         except IngestError as exc:
             raise errors.ApiError(422, "unreadable_file", exc.message)
-    except errors.ApiError:
-        ctx.storage.delete(dataset_id)
-        raise
-
-    ctx.storage.file(dataset_id, "inspection.json").write_text(inspection.model_dump_json(), encoding="utf-8")
+        ctx.storage.put_file(original_key(dataset_id, file_type), original)
+    ctx.storage.put_bytes(file_key(dataset_id, "inspection.json"), inspection.model_dump_json().encode("utf-8"))
     now = utcnow()
     dataset = Dataset(
         id=dataset_id, filename=filename, file_type=file_type, size_bytes=size,
@@ -137,7 +136,10 @@ def start_profile(
     ctx = _ctx(request)
     dataset = _dataset(ctx, dataset_id)
     body = body or ProfileRequest()
-    sheets = _read_json(ctx.storage.file(dataset_id, "inspection.json"))["sheets"]
+    try:
+        sheets = json.loads(ctx.storage.read_bytes(file_key(dataset_id, "inspection.json")))["sheets"]
+    except StorageNotFound:
+        raise errors.not_found("This dataset")
     by_name = {s["name"]: s for s in sheets}
     if dataset.file_type == "csv":
         if body.sheet is not None:
@@ -175,10 +177,11 @@ def get_job(request: Request, job_id: str):
             "job_id": job.id,
             "dataset_id": job.dataset_id,
             "type": job.type,
-            "status": job.status,
+            "status": API_STATUS.get(job.status, job.status),
             "progress_pct": job.progress_pct,
             "current_step": job.current_step,
-            "error": {"code": job.error_code, "message": job.error_message} if job.status == "failed" else None,
+            "error": {"code": job.error_code, "message": job.error_message}
+            if API_STATUS.get(job.status, job.status) == "failed" else None,
             "created_at": iso(job.created_at),
             "updated_at": iso(job.updated_at),
         }
@@ -208,26 +211,30 @@ def start_clean(request: Request, dataset_id: str, decisions: Decisions, backgro
         raise errors.invalid_request(exc.message)
 
     job_id = _new_job(ctx, dataset_id, "clean")
-    run_dir = ctx.storage.run_dir(dataset_id, job_id)
-    run_dir.mkdir(parents=True, exist_ok=True)
-    (run_dir / "plan.json").write_text(plan.model_dump_json(), encoding="utf-8")
+    ctx.storage.put_bytes(run_key(dataset_id, job_id, "plan.json"), plan.model_dump_json().encode("utf-8"))
     background.add_task(run_clean_job, ctx, job_id, dataset, plan)
     return {"job_id": job_id}
 
 
-def _changes(path: Path, filters: dict[str, str], limit: int, offset: int) -> dict[str, Any]:
-    """Read one page of the change log, filtering as it streams."""
+def _changes(ctx: Context, dataset: Dataset, filters: dict[str, str], limit: int, offset: int) -> dict[str, Any]:
+    """Read one page of the change log (downloaded to a temp file), filtering as it streams."""
     total = 0
     items: list[dict[str, Any]] = []
-    with open(path, encoding="utf-8", newline="") as fh:
-        for row in csv.DictReader(fh):
-            if any(row[key] != value for key, value in filters.items()):
-                continue
-            if offset <= total < offset + limit:
-                item: dict[str, Any] = {k: (v if v != "" else None) for k, v in row.items()}
-                item["row_id"] = int(item["row_id"]) if item["row_id"] is not None else None
-                items.append(item)
-            total += 1
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "changelog.csv"
+        try:
+            ctx.storage.get_file(run_key(dataset.id, dataset.results_run_id, "changelog.csv"), path)
+        except StorageNotFound:
+            raise errors.not_ready("The results are not ready yet. Start a clean job and wait for it to finish.")
+        with open(path, encoding="utf-8", newline="") as fh:
+            for row in csv.DictReader(fh):
+                if any(row[key] != value for key, value in filters.items()):
+                    continue
+                if offset <= total < offset + limit:
+                    item: dict[str, Any] = {k: (v if v != "" else None) for k, v in row.items()}
+                    item["row_id"] = int(item["row_id"]) if item["row_id"] is not None else None
+                    items.append(item)
+                total += 1
     return {"total": total, "limit": limit, "offset": offset, "items": items}
 
 
@@ -247,7 +254,6 @@ def get_results(
     if dataset.results_json is None:
         raise errors.not_ready("The results are not ready yet. Start a clean job and wait for it to finish.")
     result = json.loads(dataset.results_json)
-    run_dir = ctx.storage.run_dir(dataset_id, dataset.results_run_id)
     given = {"rule_id": rule_id, "column": column, "action": action, "change_type": change_type}
     filters = {k: v for k, v in given.items() if v}
     return {
@@ -257,7 +263,7 @@ def get_results(
         "after": result["after"],
         "columns": result["columns"],
         "summary": result["summary"],
-        "changes": _changes(run_dir / "changelog.csv", filters, limit, offset),
+        "changes": _changes(ctx, dataset, filters, limit, offset),
         "downloads": list(DOWNLOADS),
         "warnings": result["warnings"],
     }
@@ -265,32 +271,37 @@ def get_results(
 
 # --------------------------------------------------------------------------- downloads
 
-def _download_path(ctx: Context, dataset: Dataset, name: str) -> Path:
-    """The output file of the current clean run. clean.xlsx is built on first request and then
-    kept for that run; a build failure is its own error and touches nothing else."""
+def _prepare_download(ctx: Context, dataset: Dataset, name: str) -> str:
+    """The storage key of the current clean run's output file. clean.xlsx is built on first request
+    (once, even for simultaneous requests) and then kept for that run; a build failure is its own
+    error and touches nothing else. A dataset or run that vanished meanwhile is a 404, never a 500."""
     if dataset.results_json is None:
         raise errors.not_ready("This file is not ready yet. Clean the file first.")
-    run_dir = ctx.storage.run_dir(dataset.id, dataset.results_run_id)
-    if name == "clean.xlsx" and (run_dir / "clean.csv").exists():
-        try:
-            return pipeline.build_xlsx(run_dir)
-        except Exception:
-            log.exception("building clean.xlsx failed for dataset %s", dataset.id)
-            raise errors.ApiError(
-                500, "excel_failed",
-                "The Excel file could not be built. The CSV file and the report are still available.",
-            )
-    path = run_dir / name
-    if not path.exists():
-        raise errors.not_ready("This file is not ready yet. Clean the file first.")
-    return path
+    key = run_key(dataset.id, dataset.results_run_id, name)
+    try:
+        if name == "clean.xlsx" and ctx.storage.exists(run_key(dataset.id, dataset.results_run_id, "clean.csv")):
+            try:
+                ensure_xlsx(ctx, dataset)
+            except StorageNotFound:
+                raise
+            except Exception:
+                log.exception("building clean.xlsx failed for dataset %s", dataset.id)
+                raise errors.ApiError(
+                    500, "excel_failed",
+                    "The Excel file could not be built. The CSV file and the report are still available.",
+                )
+        elif not ctx.storage.exists(key):
+            raise errors.not_ready("This file is not ready yet. Clean the file first.")
+    except StorageNotFound:
+        raise errors.not_found("This dataset")
+    return key
 
 
 @router.post("/datasets/{dataset_id}/downloads/clean.xlsx/prepare")
 def prepare_excel(request: Request, dataset_id: str):
     """Build clean.xlsx now, so the website can show "Preparing your Excel file" and then download."""
     ctx = _ctx(request)
-    _download_path(ctx, _dataset(ctx, dataset_id), "clean.xlsx")
+    _prepare_download(ctx, _dataset(ctx, dataset_id), "clean.xlsx")
     return {"ready": True}
 
 
@@ -300,7 +311,13 @@ def download(request: Request, dataset_id: str, name: str):
     dataset = _dataset(ctx, dataset_id)
     if name not in DOWNLOADS:
         raise errors.not_found("This download")
-    path = _download_path(ctx, dataset, name)
+    key = _prepare_download(ctx, dataset, name)
     suffix, media_type = DOWNLOADS[name]
-    stem = Path(dataset.filename).stem or "data"
-    return FileResponse(path, media_type=media_type, filename=stem + suffix)
+    filename = (Path(dataset.filename).stem or "data") + suffix
+    try:
+        stream = ctx.storage.open_stream(key)       # opened now, so a missing file is a clean 404
+    except StorageNotFound:
+        raise errors.not_found("This dataset")
+    quoted = urllib.parse.quote(filename)
+    disposition = f'attachment; filename="{filename}"' if quoted == filename else f"attachment; filename*=utf-8''{quoted}"
+    return StreamingResponse(stream, media_type=media_type, headers={"Content-Disposition": disposition})
