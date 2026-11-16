@@ -7,19 +7,19 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6, Part C. Step 12 (slim engine, storage and database adapters) done. Not tagged.
-- **Repo:** https://github.com/prince-092002/data-cleaner (private, `main`, CI green). Branch `spike-vercel` holds the throwaway spike and is never merged.
-- **Vercel:** spike project `data-cleaner-spike` kept (Neon Postgres + private Blob store, reused in Step 14). Its GitHub connection was removed; two CLI-made previews remain (8dd4bof5m Ready, g1hbbl176 failed build).
-- **Waiting for:** the owner's "go" for Step 13 (queue-based background processing, limits and cron). Do not start it before.
+- **Phase:** 1, milestone M6, Part C. Step 13 (queue jobs, limits, cleanup, cron, frontend states) done. Not tagged.
+- **Repo:** https://github.com/prince-092002/data-cleaner (private, `main`, CI green). Branch `spike-vercel` is the throwaway spike, never merged.
+- **Vercel:** spike project `data-cleaner-spike` kept (Neon + private Blob, reused in Step 14), GitHub connection removed.
+- **Waiting for:** the owner's "go" for Step 14 (deploy through GitHub on Vercel). Do not start it before.
 
-## Last milestone summary (M6 Step 12, 2026-11-16)
-- Engine has no DuckDB, pandas, numpy or pyarrow (Polars counts, openpyxl read-only). Outputs byte-identical on all 14 bundled files; evaluation unchanged. `requirements-vercel.txt` is 284.8 MB on Linux (limit 500); `requirements-dev.txt` adds test tools.
-- Backend: `StorageBackend` (local disk default, Vercel Blob with `DC_STORAGE_BACKEND=blob`), SQLite or Postgres (`DATABASE_URL`), job states superseded/expired, attempts, deadline, `claim_job`, a `Lease` table for cross-instance locks, downloads streamed from storage.
-- Fixed the three deferred review findings (cache write clash, Excel build guard, reason for user-edited mappings) and two HIGH review findings (column named `count`, Excel with a wrong dimension element).
-- Postgres tests passed against the spike's Neon database with the unpooled URL (throwaway schemas dropped). Blob only tested with a fake client.
-- Neon wake after 7 minutes idle: about 0.56 s (587 / 600 / 577 ms first connect vs 23 to 30 ms warm).
+## Last milestone summary (M6 Step 13, 2026-11-16)
+- Jobs: in-process runner locally, Vercel Queues consumer with `DC_JOB_RUNNER=queue` (claim first, 240 s deadline, at most two retries counted in the database, timed-out jobs never publish). Stuck jobs fail on the next status read and in the daily cleanup.
+- Cleanup and limits: `GET /api/cron/cleanup` (Bearer CRON_SECRET, daily in vercel.json), 800 MB stored-bytes guard (503 storage_full), daily caps on jobs and uploads (429 too_many_jobs / too_many_uploads), 4 MB live upload limit.
+- Frontend: queued, running, failed and expired states, resume from `?d=&j=&s=`, polling 2 s then 5 s, focus moves to error messages, 24-hour notice on Upload.
+- Chicago sample trimmed to the first 3,995 rows (3,999,150 bytes), byte-identical prefix. Scores unchanged (95.7 to 99.4).
+- Review: 2 HIGH plus 2 must-fix MEDIUM fixed with tests; 4 deferred (below). Postgres tests pass on Neon (unpooled URL). Queues, Blob and Cron only tested with fakes.
 
-Tests: **411 Python passed, 6 skipped (Postgres, run when TEST_DATABASE_URL is set), 60 frontend passed**, build OK, CI green.
+Tests: **450 Python passed, 7 skipped (Postgres), 100 frontend passed**, build OK. Evaluation unchanged.
 
 ## Decisions made
 - 2026-11-11 (M0, summarised) Repo root is the working folder. Change log has a `change_type` field. Auto fixes are listed and can be rejected; an unanswered suggestion is not applied. "Try a sample file" uses the normal upload endpoint. Added `engine/models.py`, `engine/rules/base.py`, `engine/errors.py`.
@@ -38,13 +38,8 @@ Tests: **411 Python passed, 6 skipped (Postgres, run when TEST_DATABASE_URL is s
 - 2026-11-11 (M3) An expired dataset answers 404 immediately; jobs left running by a server restart are marked failed (`interrupted`). Why: the UI must never poll forever.
 - 2026-11-11 (M3) New CONTRACT items: `inspection.json` in storage, `internal_error` and `interrupted` codes, 409 for a download before cleaning, `/api/health`.
 - 2026-11-11 (M3) M3 was also built in the main session; the helper agents are loaded now and can be used from M4.
-- 2026-11-11 (M4) Frontend uses native selects for change-log filters and plain divs for dimension bars. Why: simpler, keyboard-friendly, easier to test.
-- 2026-11-11 (M4) "Approve all safe fixes" = every proposal that is not destructive and not flag-mode. Auto and flag proposals run unless rejected; suggest proposals run only if approved (matches build_plan).
-- 2026-11-11 (M4) Day-first/month-first is a one-click toggle on the parse_dates card, not hidden in the edit dialog.
-- 2026-11-11 (M4) The Processing screen shows the server's `current_step` text only, no invented stage list.
-- 2026-11-11 (pre-M5) Short-value guard reference list is built in (`north, south, east, west, usa, uk, eu, yes, no, male, hr, it`). Why: no user-supplied list exists in Phase 1. Side effect: "Wset" and similar short typos are still not merged.
-- 2026-11-11 (pre-M5) Unparseable values ("abc", "31/02/2024") are kept as text and warned about, never guessed.
-- 2026-11-11 (pre-M5) Sales sample realism over score: duplicates capped at about 6% and empty rows at 8, so the starting score stays near 78.
+- 2026-11-11 (M4, summarised) Frontend uses native selects for change-log filters and plain divs for dimension bars. Why: simpler, keyboard-friendly, easier to test. "Approve all safe fixes" = every proposal that is not destructive and not flag-mode. Auto and flag proposals run unless rejected; suggest proposals run only if approved (matches build_plan). Day-first/month-first is a one-click toggle on the parse_dates card, not hidden in the edit dialog. The Processing screen shows the server's `current_step` text only, no invented stage list.
+- 2026-11-11 (pre-M5, summarised) Short-value guard reference list is built in (`north, south, east, west, usa, uk, eu, yes, no, male, hr, it`). Why: no user-supplied list exists in Phase 1. Side effect: "Wset" and similar short typos are still not merged. Unparseable values ("abc", "31/02/2024") are kept as text and warned about, never guessed. Sales sample realism over score: duplicates capped at about 6% and empty rows at 8, so the starting score stays near 78.
 - 2026-11-11 (M5) Owner decision: the sales sample stays at a starting score of about 78; the score weights are not changed.
 - 2026-11-11 (M5) Owner decision: success = per-dimension lift, recall on injected errors, zero damaged cells (CONTRACT section 11). Recall excludes errors that are not fixable by design, and they are listed separately.
 - 2026-11-11 (M5) The real public dataset (Chicago) is outside the ground-truth evaluation. Its test tolerates a 0.5-point uniqueness drop because of the free-text key-candidate artifact; engine left unchanged.
@@ -86,6 +81,8 @@ Tests: **411 Python passed, 6 skipped (Postgres, run when TEST_DATABASE_URL is s
 - 2026-11-16 (M6.12) Owner confirmed: the production engine drops DuckDB, pandas, numpy and pyarrow (outputs byte-identical, evaluation unchanged). Excel is read with openpyxl, keeping the old pandas NA strings and trimming; `reset_dimensions()` guards against a wrong sheet dimension.
 - 2026-11-16 (M6.12) Backends chosen by environment only: Postgres when DATABASE_URL is set, Blob only when DC_STORAGE_BACKEND=blob (never just because Vercel variables exist). API shows superseded and expired jobs as `failed` with that error code. User-chosen merges log the reason "merge chosen by the user".
 - 2026-11-16 (M6.12) Owner decision: the live upload limit stays 4 MB (README known limit). Spike project's GitHub connection removed, project kept for Step 14.
+- 2026-11-16 (M6.13) Job runner chosen by `DC_JOB_RUNNER` (inprocess default, queue in production). Deadline 240 s per attempt, lease 270 s; retries counted by the attempts column, never by the queue's max_attempts.
+- 2026-11-16 (M6.13) Kept Vercel Cron (owner's spec) although Vercel now calls it legacy in favour of Schedules (beta). Daily caps count at POST profile/clean and upload; a missing x-forwarded-for means no per-visitor cap so nobody shares a bucket. IP hashes salted with DC_IP_HASH_SALT or CRON_SECRET.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
@@ -102,16 +99,17 @@ Tests: **411 Python passed, 6 skipped (Postgres, run when TEST_DATABASE_URL is s
 - With no 80% majority, case variants are no longer merged unless the user approves the suggestion (demo file Region: west 17, WEST 7, West 6 now needs one click).
 - Held-out misses: "Northest" (tie between Northeast and Northwest), "Ctr" (not recognised as Central), one mojibake name ("Ã…berg"), emails in capitals, "unknown"/"n.a." placeholders, stray markers, synonyms.
 - Review (M6.9), low, not fixed: the id tokens "no" and "key" catch names like "Amount (no tax)"; `evaluation/stage_timing.py` times a function clean no longer calls; a cache miss hashes the file twice.
-- Review (M6.12), medium, not fixed: local `put_file`/`put_bytes` are not atomic, so a waiting Excel download could read a half-copied file (local only); the 24 h sweep is an in-process loop that will not run reliably on serverless (Step 13 cron); on Postgres nothing expires a job stuck in `running` (get_job ignores deadline_at); the Excel waiter polls Blob `list` every 0.2 s for up to 360 s.
-- Review (M6.12), low, not fixed: one failing prefix delete aborts the whole sweep; post-save cleanup errors mark a saved job failed; local `list_keys` walks the whole root; streams opened before the first read can leak a handle on disconnect; two cold starts can race in `create_all`; the 900 s claim lease is longer than the 300 s function limit (tune in Step 13).
-- Step 12, not verified: the real Blob SDK calls (only a fake client was used); the Postgres test fixture leaves its schema behind if engine creation fails, and needs the unpooled URL (Neon's pooler rejects `search_path`).
+- Review (M6.12), not fixed: local put_file not atomic; Excel waiter polls Blob list every 0.2 s; one failing prefix delete aborts the sweep; post-save cleanup errors mark a saved job failed; local list_keys walks the whole root; streams can leak a handle on disconnect; two cold starts can race in create_all. (Sweep and stuck jobs were fixed in Step 13.)
+- Review (M6.13), medium, not fixed: a redelivery of a crashed job inside its 270 s lease is acknowledged, so a crashed worker is not retried (the job fails as job_timeout later); the global daily caps can be spent by one caller with many IPs, and a failed enqueue does not refund the slot.
+- Review (M6.13), low, not fixed: a refused (429) profile request still saves the new sheet and header row; one failed status request stops polling and shows a failure for a job that may still finish.
+- Not verified yet: real Vercel Queues send and push delivery, Blob SDK calls and Cron (fakes only); Postgres tests need the unpooled URL and leave their schema behind if engine creation fails.
 - The `reason` is stored in changelog.csv only; the report and the UI table do not show it.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Wait for the owner's "go". Then Step 13: queue consumer (stop at about 270 s, short retention, idempotent via claim_job), limits, a cron sweep for 24 h cleanup and stuck jobs; show the `reason` column in the report and UI; narrow the "no"/"key" id tokens.
-2. Steps 14-15: deploy (reuse the spike's Neon and Blob) and verify, including real Blob calls.
-3. After the real deployment works: `vercel project remove data-cleaner-spike`, remove its Neon database and Blob store in the dashboard, delete branch `spike-vercel`.
+1. Wait for the owner's "go". Then Step 14: deploy through GitHub on Vercel with the production variables listed in README (DC_JOB_RUNNER=queue, DC_STORAGE_BACKEND=blob, DC_MAX_UPLOAD_MB=4, CRON_SECRET, DC_IP_HASH_SALT); first real test of Queues, Blob and Cron on a preview.
+2. Step 15: verify the live site. Later: show the `reason` column in the report and UI, narrow the "no"/"key" id tokens, move Cron to Schedules.
+3. After the real deployment works: `vercel project remove data-cleaner-spike`, remove its Neon database and Blob store, delete branch `spike-vercel`.
 
 ## How to run
 ```bash
@@ -146,3 +144,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-15 | M6 Step 10 GitHub | Done. Safety scan clean, private repo prince-092002/data-cleaner, main and 4 tags pushed, CI green (Python + frontend + build).
 - 2026-11-15 | M6 Step 11 Vercel spike | Done. Go. Queues + Postgres + Blob work on Hobby; slim engine 271 MB (unmodified 590 MB fails); 4 MB Chicago cut 9 s warm, 198 MB; output identical to local. ADR written. No product code changed.
 - 2026-11-16 | M6 Step 12 Slim engine + adapters | Done. No DuckDB/pandas/numpy/pyarrow (284.8 MB, outputs identical, evaluation unchanged); Blob/Postgres adapters, claim, lease; 3 deferred + 2 HIGH review fixes. 411 Python + 60 frontend tests passing, CI green.
+- 2026-11-16 | M6 Step 13 Queue jobs, limits, cron | Done. Queue consumer with 240 s deadline and retries, cron cleanup, storage and daily caps, frontend states and URL resume, Chicago trimmed to 3,995 rows. 450 Python + 100 frontend tests, evaluation unchanged.

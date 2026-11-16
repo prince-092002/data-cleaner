@@ -16,7 +16,7 @@ Upload a messy CSV or Excel file. Get back a clean file, a cleaning report, a re
 ```
 frontend/ (React + TS + Vite + Tailwind + shadcn/ui)
     |  HTTP (JSON)
-backend/  (FastAPI, BackgroundTasks, jobs table on SQLite or Postgres, files on local disk or Vercel Blob)
+backend/  (FastAPI; jobs run in-process locally or through Vercel Queues; SQLite or Postgres; local disk or Vercel Blob)
     |  Python calls to engine.pipeline only
 engine/   (Polars + openpyxl, 10 cleaning rules, zero web code)
 ```
@@ -39,7 +39,7 @@ Requirements: Python 3.12, Node 20 or newer.
 python -m venv .venv
 .venv/Scripts/activate                 # Windows (Git Bash: source .venv/Scripts/activate); macOS/Linux: source .venv/bin/activate
 pip install -e ".[backend,dev]"
-pytest -q                              # about 410 tests, about 2 minutes
+pytest -q                              # about 450 tests, about 3 minutes
 uvicorn backend.main:app --port 8000   # backend; API docs at http://localhost:8000/docs
 ```
 In a second terminal:
@@ -60,6 +60,21 @@ Backends are chosen by environment variables. Without them everything runs local
 - `DC_STORAGE_BACKEND=blob`: files live in a private Vercel Blob store.
 
 The deployed function installs `requirements-vercel.txt` (no DuckDB, pandas, numpy or pyarrow; about 285 MB on Linux, limit 500 MB). `requirements-dev.txt` adds the test tools.
+
+Production settings (Vercel environment variables; never commit their values):
+| Variable | Value | Purpose |
+|---|---|---|
+| `DC_JOB_RUNNER` | `queue` | Run jobs through Vercel Queues (default `inprocess`) |
+| `DC_STORAGE_BACKEND` | `blob` | Files in Vercel Blob (default `local`) |
+| `DATABASE_URL` | set by the Neon integration | Postgres instead of SQLite |
+| `DC_MAX_UPLOAD_MB` | `4` | Live upload limit (default 50 locally) |
+| `CRON_SECRET` | a long random string | Protects the daily cleanup at `/api/cron/cleanup` |
+| `DC_IP_HASH_SALT` | a long random string | Salt for the hashed IP counters (falls back to `CRON_SECRET`) |
+| `DC_DAILY_JOB_CAP`, `DC_DAILY_IP_CAP` | 200, 10 | Daily job limits (whole site, per visitor) |
+| `DC_DAILY_UPLOAD_CAP`, `DC_DAILY_IP_UPLOAD_CAP` | 300, 20 | Daily upload limits |
+| `DC_STORAGE_LIMIT_MB` | 800 | New uploads are refused above this much stored data (Blob free store is 1 GB) |
+
+`vercel.json` schedules the cleanup once a day (Vercel Cron, Hobby plan). Each job has a 240 second limit; a slower file fails with "This file took too long to process. Try a smaller file." Results and uploads are deleted after 24 hours. A link with `?d=...&j=...` reopens a job or its results until then.
 
 ## Screenshots
 | Upload (header-row check) | Profile |
@@ -154,7 +169,9 @@ Measured at M5. In M6 the file is read once (a Parquet cache shared by profile a
 - **Live site upload limit: 4 MB per file.** Vercel limits a request body to 4.5 MB. Local runs accept up to 50 MB.
 - Latin-script files are read as Windows-1252. Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Category merging does not catch swapped letters in short words ("Wset").
-- Jobs run inside the API process; two big files at once slow each other.
+- **Live site daily limits:** 10 jobs and 20 uploads per visitor, 200 jobs and 300 uploads for the whole site, and 800 MB of stored files. Over a limit the site says so and asks you to try again tomorrow.
+- **Live site time limit:** 240 seconds per job.
+- Locally, jobs run inside the API process; two big files at once slow each other.
 - Change records are held in memory until written.
 
 ## Milestones

@@ -86,3 +86,10 @@ All read on 2026-11-15.
 - The deployed function's requirements (`requirements-vercel.txt`, now including the backend, `vercel` and `psycopg`) install to 284.8 MB on Linux, against the 500 MB limit.
 - Postgres runs with prepared statements turned off (Neon's pooled URL goes through PgBouncer). The pooled URL also rejects the `search_path` startup option, so the Postgres tests, which use a throwaway schema, need the unpooled URL.
 - The spike project's GitHub connection was removed on 2026-11-16. A push to the repo had created a deployment on it by itself.
+
+## Update after Step 13 (2026-11-16)
+- Jobs: `DC_JOB_RUNNER=queue` sends the job id to topic `dc-jobs` (15 minute retention). The consumer (`backend/worker.py`, listed in `pyproject.toml`) claims the job first, so a redelivery for a finished, failed, superseded or expired job does nothing. Each attempt has a 240 s deadline (claim lease 270 s, function limit 300 s); a job past it fails with `job_timeout` and the consumer returns normally, so the queue does not redeliver. Crashes not caused by the file are retried at most twice, counted in the database.
+- Stuck jobs (queued or running past their deadline) are failed by the next status read and by the daily cleanup.
+- Daily cleanup: `GET /api/cron/cleanup`, `Authorization: Bearer <CRON_SECRET>`, scheduled once a day in `vercel.json`. Vercel now calls Cron Jobs a legacy feature to be migrated to Schedules (beta), read 2026-11-16 at https://vercel.com/docs/cron-jobs. Cron still runs on Hobby once a day, anywhere within the scheduled hour, on production deployments only, with no retry. Revisit when Schedules leaves beta.
+- Limits so the free plans are never exceeded: new uploads refused above 800 MB stored (Blob free store 1 GB); daily caps of 200 jobs and 300 uploads for the site, 10 jobs and 20 uploads per visitor (salted hash of the `x-forwarded-for` address; no header means no per-visitor cap).
+- Real Vercel Queues, Blob and Cron have only been exercised with fakes so far; the first real run is Step 14 on a preview deployment.
