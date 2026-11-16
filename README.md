@@ -16,9 +16,9 @@ Upload a messy CSV or Excel file. Get back a clean file, a cleaning report, a re
 ```
 frontend/ (React + TS + Vite + Tailwind + shadcn/ui)
     |  HTTP (JSON)
-backend/  (FastAPI, BackgroundTasks, SQLite jobs table, ./storage)
+backend/  (FastAPI, BackgroundTasks, jobs table on SQLite or Postgres, files on local disk or Vercel Blob)
     |  Python calls to engine.pipeline only
-engine/   (Polars + DuckDB, 10 cleaning rules, zero web code)
+engine/   (Polars + openpyxl, 10 cleaning rules, zero web code)
 ```
 Interfaces are defined in [docs/CONTRACT.md](docs/CONTRACT.md).
 
@@ -39,7 +39,7 @@ Requirements: Python 3.12, Node 20 or newer.
 python -m venv .venv
 .venv/Scripts/activate                 # Windows (Git Bash: source .venv/Scripts/activate); macOS/Linux: source .venv/bin/activate
 pip install -e ".[backend,dev]"
-pytest -q                              # 384 tests, about 90 seconds
+pytest -q                              # about 410 tests, about 2 minutes
 uvicorn backend.main:app --port 8000   # backend; API docs at http://localhost:8000/docs
 ```
 In a second terminal:
@@ -53,7 +53,13 @@ Uploads are kept for 24 hours under `./storage` (change with `DC_STORAGE_DIR`). 
 For the demo with the sales sample, approve the Region suggestion on the fixes screen: west, WEST and West have no 80% majority spelling, so they become "West" only after you approve it.
 
 ## Deploying
-Live URL: coming soon. The plan is to host the code on GitHub and deploy it on Vercel, on the free tier.
+Live URL: coming soon. The site will run on Vercel's free (Hobby) plan with Neon Postgres and Vercel Blob; see [docs/ADR-hosting-vercel.md](docs/ADR-hosting-vercel.md).
+
+Backends are chosen by environment variables. Without them everything runs locally (SQLite, files under `./storage`):
+- `DATABASE_URL` set: jobs and datasets live in Postgres.
+- `DC_STORAGE_BACKEND=blob`: files live in a private Vercel Blob store.
+
+The deployed function installs `requirements-vercel.txt` (no DuckDB, pandas, numpy or pyarrow; about 285 MB on Linux, limit 500 MB). `requirements-dev.txt` adds the test tools.
 
 ## Screenshots
 | Upload (header-row check) | Profile |
@@ -145,6 +151,7 @@ Measured at M5. In M6 the file is read once (a Parquet cache shared by profile a
 **Supported file size:** up to 50 MB when run locally (about 4 to 5 minutes and 1.8 GB of memory at the top end), and 4 MB on the live site (Vercel's request limit is 4.5 MB; a 4 MB file is about 75,000 rows and takes well under a minute).
 
 ## Known limitations
+- **Live site upload limit: 4 MB per file.** Vercel limits a request body to 4.5 MB. Local runs accept up to 50 MB.
 - Latin-script files are read as Windows-1252. Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Category merging does not catch swapped letters in short words ("Wset").
 - Jobs run inside the API process; two big files at once slow each other.

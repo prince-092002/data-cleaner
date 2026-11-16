@@ -1,6 +1,6 @@
 # ADR 0001: Engine stack and text-first ingest
 
-- Status: Accepted
+- Status: Accepted. Partly superseded on 2026-11-16: DuckDB and pandas were removed from the engine (Polars counts and openpyxl reading instead), see docs/ADR-hosting-vercel.md.
 - Date: 2026-11-11
 
 ## Context

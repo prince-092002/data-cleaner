@@ -7,19 +7,19 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6, Part C. Step 11 (Vercel feasibility spike) done: verdict **go**, see [docs/ADR-hosting-vercel.md](docs/ADR-hosting-vercel.md).
-- **Repo:** https://github.com/prince-092002/data-cleaner (private, default branch `main`, CI on every push). Branch `spike-vercel` holds the throwaway `spike/` folder and is never merged.
-- **Vercel:** account prince-092002 (Hobby). Spike project `data-cleaner-spike` with Neon Postgres and a private Blob store still exists; delete it once the real deployment works.
-- **Waiting for:** the owner's "go" for Step 12. Do not start it before.
+- **Phase:** 1, milestone M6, Part C. Step 12 (slim engine, storage and database adapters) done. Not tagged.
+- **Repo:** https://github.com/prince-092002/data-cleaner (private, `main`, CI green). Branch `spike-vercel` holds the throwaway spike and is never merged.
+- **Vercel:** spike project `data-cleaner-spike` kept (Neon Postgres + private Blob store, reused in Step 14). Its GitHub connection was removed; two CLI-made previews remain (8dd4bof5m Ready, g1hbbl176 failed build).
+- **Waiting for:** the owner's "go" for Step 13 (queue-based background processing, limits and cron). Do not start it before.
 
-## Last milestone summary (M6 Step 11, 2026-11-15)
-- Three subagents: docs research (Haiku, 2 rounds), bundle size (Haiku, 1 round), prototype (Opus, 1 round). No Opus escalation. The coordinator re-ran the progress test and the engine comparison.
-- Works on Hobby: Vercel Queues push consumer (Beta) with progress in a Postgres row read by other requests; Blob write/read/delete; Neon; the slim engine (270.73 MB bundle, limit 500 MB). The unmodified engine fails the build at 590.33 MB.
-- Real engine on a 4 MB Chicago cut (3,995 rows): profile 3.3 s, clean 5.8 s, peak 198 MB warm; about 15 s cold. Output is byte-identical to the local unmodified engine on the demo file and the Chicago cut.
-- A job that runs past 300 s is killed and redelivered every 5 minutes; `max_attempts` did not stop it. Without a queue, a job inside the request survived a dropped connection (one test).
-- Not measured: Neon wake after idle (the retrying test job kept it awake). One spike deployment became production by accident (static page only, public).
+## Last milestone summary (M6 Step 12, 2026-11-16)
+- Engine has no DuckDB, pandas, numpy or pyarrow (Polars counts, openpyxl read-only). Outputs byte-identical on all 14 bundled files; evaluation unchanged. `requirements-vercel.txt` is 284.8 MB on Linux (limit 500); `requirements-dev.txt` adds test tools.
+- Backend: `StorageBackend` (local disk default, Vercel Blob with `DC_STORAGE_BACKEND=blob`), SQLite or Postgres (`DATABASE_URL`), job states superseded/expired, attempts, deadline, `claim_job`, a `Lease` table for cross-instance locks, downloads streamed from storage.
+- Fixed the three deferred review findings (cache write clash, Excel build guard, reason for user-edited mappings) and two HIGH review findings (column named `count`, Excel with a wrong dimension element).
+- Postgres tests passed against the spike's Neon database with the unpooled URL (throwaway schemas dropped). Blob only tested with a fake client.
+- Neon wake after 7 minutes idle: about 0.56 s (587 / 600 / 577 ms first connect vs 23 to 30 ms warm).
 
-Tests: **384 Python passed, 60 frontend passed** (no product code changed in Step 11).
+Tests: **411 Python passed, 6 skipped (Postgres, run when TEST_DATABASE_URL is set), 60 frontend passed**, build OK, CI green.
 
 ## Decisions made
 - 2026-11-11 (M0, summarised) Repo root is the working folder. Change log has a `change_type` field. Auto fixes are listed and can be rejected; an unanswered suggestion is not applied. "Try a sample file" uses the normal upload endpoint. Added `engine/models.py`, `engine/rules/base.py`, `engine/errors.py`.
@@ -83,6 +83,9 @@ Tests: **384 Python passed, 60 frontend passed** (no product code changed in Ste
 - 2026-11-15 (M6.11) Hosting decision: Vercel Hobby with Queues (push consumer) for jobs, Neon Postgres for rows, private Blob for files. Fallback: job inside the request with the same status row. Details and sources in docs/ADR-hosting-vercel.md.
 - 2026-11-15 (M6.11) Pending CONTRACT change for Step 12 (owner to confirm): the deployed engine drops DuckDB, pandas, numpy and pyarrow (Polars + openpyxl do their work). Why: the bundle is 590 MB with them, 271 MB without; limit 500 MB.
 - 2026-11-15 (M6.11) Step 12 rules from the spike: consumer stops itself at about 270 s and marks the job failed; messages sent with short retention; consumer checks the job row first (at-least-once delivery); live upload limit stays 4 MB unless the browser uploads straight to Blob.
+- 2026-11-16 (M6.12) Owner confirmed: the production engine drops DuckDB, pandas, numpy and pyarrow (outputs byte-identical, evaluation unchanged). Excel is read with openpyxl, keeping the old pandas NA strings and trimming; `reset_dimensions()` guards against a wrong sheet dimension.
+- 2026-11-16 (M6.12) Backends chosen by environment only: Postgres when DATABASE_URL is set, Blob only when DC_STORAGE_BACKEND=blob (never just because Vercel variables exist). API shows superseded and expired jobs as `failed` with that error code. User-chosen merges log the reason "merge chosen by the user".
+- 2026-11-16 (M6.12) Owner decision: the live upload limit stays 4 MB (README known limit). Spike project's GitHub connection removed, project kept for Step 14.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
@@ -98,16 +101,16 @@ Tests: **384 Python passed, 60 frontend passed** (no product code changed in Ste
 - Review (M6.6), efficiency: Tier 2 category analysis runs up to 3 times per column (Step 7); every route loads profile/results JSON from the Dataset row (Step 12).
 - With no 80% majority, case variants are no longer merged unless the user approves the suggestion (demo file Region: west 17, WEST 7, West 6 now needs one click).
 - Held-out misses: "Northest" (tie between Northeast and Northwest), "Ctr" (not recognised as Central), one mojibake name ("Ã…berg"), emails in capitals, "unknown"/"n.a." placeholders, stray markers, synonyms.
-- Review (M6.9), medium, not fixed: two profile jobs storing the same cache entry at once share one temp file name and can fail one job (`engine/cache.py` store; a cache write error also fails the profile).
-- Review (M6.9), medium, not fixed: `build_xlsx` has no lock; two downloads at once both build the file, and on Windows the second can get a 500 while the first is streaming.
-- Review (M6.9), medium, not fixed: a category value the user adds or retargets in an edited mapping is logged with the rule's reason ("majority spelling", ...) instead of "merge chosen by the user".
-- Review (M6.9), low, not fixed: a dataset deleted during an Excel build answers 500 instead of 404; the id tokens "no" and "key" catch names like "Amount (no tax)"; `evaluation/stage_timing.py` still times a function clean no longer calls; a cache miss hashes the file twice.
+- Review (M6.9), low, not fixed: the id tokens "no" and "key" catch names like "Amount (no tax)"; `evaluation/stage_timing.py` times a function clean no longer calls; a cache miss hashes the file twice.
+- Review (M6.12), medium, not fixed: local `put_file`/`put_bytes` are not atomic, so a waiting Excel download could read a half-copied file (local only); the 24 h sweep is an in-process loop that will not run reliably on serverless (Step 13 cron); on Postgres nothing expires a job stuck in `running` (get_job ignores deadline_at); the Excel waiter polls Blob `list` every 0.2 s for up to 360 s.
+- Review (M6.12), low, not fixed: one failing prefix delete aborts the whole sweep; post-save cleanup errors mark a saved job failed; local `list_keys` walks the whole root; streams opened before the first read can leak a handle on disconnect; two cold starts can race in `create_all`; the 900 s claim lease is longer than the 300 s function limit (tune in Step 13).
+- Step 12, not verified: the real Blob SDK calls (only a fake client was used); the Postgres test fixture leaves its schema behind if engine creation fails, and needs the unpooled URL (Neon's pooler rejects `search_path`).
 - The `reason` is stored in changelog.csv only; the report and the UI table do not show it.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Wait for the owner's "go". Then Step 12 (adapters: Postgres, Blob, queue consumer, slim engine). Fold in from the review: cache temp-file clash between two profile jobs, no lock on the Excel build, wrong reason text for user-edited mappings.
-2. Step 13: also show the `reason` column in the report and UI, and narrow the "no" and "key" id tokens. Steps 14-15: deploy and verify.
+1. Wait for the owner's "go". Then Step 13: queue consumer (stop at about 270 s, short retention, idempotent via claim_job), limits, a cron sweep for 24 h cleanup and stuck jobs; show the `reason` column in the report and UI; narrow the "no"/"key" id tokens.
+2. Steps 14-15: deploy (reuse the spike's Neon and Blob) and verify, including real Blob calls.
 3. After the real deployment works: `vercel project remove data-cleaner-spike`, remove its Neon database and Blob store in the dashboard, delete branch `spike-vercel`.
 
 ## How to run
@@ -142,3 +145,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-15 | M6 Step 9 | Done. Owner decisions, code review (1 high fixed, 6 deferred), fresh Chicago hand check 98 correct / 2 useful flags / 0 wrong; evaluation unchanged. 384 Python + 60 frontend tests passing. Tagged phase1-m6b, branch renamed to main.
 - 2026-11-15 | M6 Step 10 GitHub | Done. Safety scan clean, private repo prince-092002/data-cleaner, main and 4 tags pushed, CI green (Python + frontend + build).
 - 2026-11-15 | M6 Step 11 Vercel spike | Done. Go. Queues + Postgres + Blob work on Hobby; slim engine 271 MB (unmodified 590 MB fails); 4 MB Chicago cut 9 s warm, 198 MB; output identical to local. ADR written. No product code changed.
+- 2026-11-16 | M6 Step 12 Slim engine + adapters | Done. No DuckDB/pandas/numpy/pyarrow (284.8 MB, outputs identical, evaluation unchanged); Blob/Postgres adapters, claim, lease; 3 deferred + 2 HIGH review fixes. 411 Python + 60 frontend tests passing, CI green.

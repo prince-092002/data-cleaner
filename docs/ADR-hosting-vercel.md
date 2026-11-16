@@ -1,6 +1,6 @@
 # ADR: Hosting on Vercel (Hobby plan)
 
-- Status: Proposed (waiting for the owner's go for Step 12)
+- Status: Accepted (owner's go for Step 12 on 2026-11-16)
 - Date: 2026-11-15
 - Evidence: a throwaway spike on branch `spike-vercel` (folder `spike/`, never merged), deployed as the separate Vercel project `data-cleaner-spike`.
 
@@ -36,7 +36,7 @@ Preview deployments, Deployment Protection left on, reached with `vercel curl`.
 | Fallback: job inside the request, client cut after 3 s | The job still reached step 20 | No |
 | Blob: write, read, delete | All worked with a private store and no token (OIDC through `BLOB_STORE_ID`) | No |
 | Postgres: connect, insert, read | Worked. Connect 26 to 29 ms warm, 81 to 82 ms on a new function instance | No |
-| Neon wake after 6 minutes idle | **Not measured.** The retrying 400 s job kept the database awake. Neon's documentation says a few hundred milliseconds | No |
+| Neon wake after 7 minutes idle (measured 2026-11-16, three rounds 7 minutes apart, after the retrying deployment was deleted) | First connect 587, 600, 577 ms; a second connect right after 25, 23, 30 ms. Wake cost about 0.56 s. The first HTTP request took about 5 s in total, mostly function cold start | Results file read |
 | Unmodified engine build | Failed: `Total bundle size (590.33 MB) exceeds the maximum function size (500 MB)` | Deployment status read |
 | Slim engine build | 270.73 MB, passed. Above 250 MB Vercel ships a 65.42 MB function and installs the dependencies at cold start (2.46 s in the logs) | No |
 | Chicago sample (3,995 rows, 3,999,150 bytes), warm | Profile 3.3 s, clean 5.8 s, total 9.2 s, peak memory 198 MB. Same machine locally: 2.0 s and 3.5 s | Yes |
@@ -80,3 +80,9 @@ All read on 2026-11-15.
 - The bundle grows back toward 500 MB (a new heavy dependency).
 - Neon compute-hours or Blob operations run out on the free plans.
 - Any required feature turns out to need a paid plan. The project is free only.
+
+## Update after Step 12 (2026-11-16)
+- The engine no longer uses DuckDB, pandas, numpy or pyarrow. Outputs are byte-identical to the previous engine on all 14 bundled files (only ISO timestamps masked), and the evaluation numbers did not move.
+- The deployed function's requirements (`requirements-vercel.txt`, now including the backend, `vercel` and `psycopg`) install to 284.8 MB on Linux, against the 500 MB limit.
+- Postgres runs with prepared statements turned off (Neon's pooled URL goes through PgBouncer). The pooled URL also rejects the `search_path` startup option, so the Postgres tests, which use a throwaway schema, need the unpooled URL.
+- The spike project's GitHub connection was removed on 2026-11-16. A push to the repo had created a deployment on it by itself.
