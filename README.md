@@ -110,7 +110,7 @@ How to read these numbers:
 - No quality dimension drops on any of the seven files. Full tables: [evaluation/RESULTS.md](evaluation/RESULTS.md).
 
 ### A real public dataset (not in the evaluation)
-Chicago Food Inspections, 5,000 rows, 17 columns, about 4.9 MB, City of Chicago open data, unmodified ([sample_data/DATASETS.md](sample_data/DATASETS.md)). It has no ground truth, so it is scored only before and after:
+Chicago Food Inspections, 3,995 rows, 17 columns, 4.0 MB (the first 3,995 rows of a 5,000-row download; the kept bytes are unmodified, see [sample_data/DATASETS.md](sample_data/DATASETS.md)). It has no ground truth, so it is scored only before and after. The scores below were measured on the 5,000-row file; the trimmed file gives the same overall scores (95.7 and 99.4):
 
 | | Before | After |
 |---|---|---|
