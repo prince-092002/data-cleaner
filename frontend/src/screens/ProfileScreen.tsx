@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
-import { getJob, getProfile } from '@/api/client'
+import { useState } from 'react'
+import { getProfile } from '@/api/client'
 import type { ColumnProfile, IssueCode, ProfileResponse, QualityScore, SourceInfo } from '@/api/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { friendlyJobError } from '@/lib/jobErrors'
+import { FocusedAlert } from '@/components/FocusedAlert'
+import { ExpiredCard } from '@/components/ExpiredCard'
+import { friendlyJobError, isNotFound } from '@/lib/jobErrors'
+import { useJobPolling } from '@/lib/useJobPolling'
 import { useAppState } from '@/state/AppState'
 
 const ISSUE_LABELS: Record<IssueCode, string> = {
@@ -33,8 +36,6 @@ const DIMENSIONS: (keyof Omit<QualityScore, 'overall'>)[] = [
   'uniqueness',
   'conformity',
 ]
-
-const POLL_MS = 2000
 
 function ScoreBar({ label, value }: { label: string; value: number }) {
   const v = Math.round(value)
@@ -108,51 +109,39 @@ export function ProfileScreen() {
   const [pct, setPct] = useState(0)
   const [step, setStep] = useState('Starting')
   const [error, setError] = useState<string | null>(null)
+  const [expired, setExpired] = useState(false)
+  const [queued, setQueued] = useState(true)
 
-  useEffect(() => {
-    if (profile || !jobId || !datasetId) return
-    let stopped = false
-    let cancelled = false
-    const id = setInterval(async () => {
-      try {
-        const job = await getJob(jobId)
-        if (stopped) return
-        setPct(job.progress_pct)
-        setStep(job.current_step)
-        if (job.status === 'failed') {
-          stopped = true
-          clearInterval(id)
-          dispatch({ type: 'job_finished' })
-          setError(friendlyJobError(job.error?.code, job.error?.message, 'Profiling failed.'))
-        } else if (job.status === 'done') {
-          stopped = true
-          clearInterval(id)
-          dispatch({ type: 'job_finished' })
-          const p = await getProfile(datasetId)
-          dispatch({ type: 'profile_loaded', profile: p })
-        }
-      } catch (e) {
-        if (cancelled) return
-        stopped = true
-        clearInterval(id)
+  useJobPolling(
+    profile || !datasetId ? null : jobId,
+    async (job) => {
+      setQueued(job.status === 'queued')
+      setPct(job.progress_pct)
+      setStep(job.current_step)
+      if (job.status === 'failed') {
         dispatch({ type: 'job_finished' })
-        setError(e instanceof Error ? e.message : 'Something went wrong.')
+        setError(friendlyJobError(job.error?.code, job.error?.message, 'Profiling failed.'))
+        setExpired(job.error?.code === 'expired')
+      } else if (job.status === 'done') {
+        dispatch({ type: 'job_finished' })
+        const p = await getProfile(datasetId!)
+        dispatch({ type: 'profile_loaded', profile: p })
       }
-    }, POLL_MS)
-    return () => {
-      cancelled = true
-      stopped = true
-      clearInterval(id)
-    }
-  }, [profile, jobId, datasetId, dispatch])
+    },
+    (e) => {
+      dispatch({ type: 'job_finished' })
+      setError(e instanceof Error ? e.message : 'Something went wrong.')
+      setExpired(isNotFound(e))
+    },
+  )
+
+  if (error && expired) return <ExpiredCard />
 
   if (error) {
     return (
       <Card>
         <CardContent className="space-y-4 pt-6">
-          <p role="alert" className="text-red-700">
-            {error}
-          </p>
+          <FocusedAlert className="text-red-700">{error}</FocusedAlert>
           <Button onClick={() => dispatch({ type: 'reset' })}>Back to upload</Button>
         </CardContent>
       </Card>
@@ -170,7 +159,7 @@ export function ProfileScreen() {
         <CardContent className="space-y-3">
           <Progress value={pct} aria-label="Profiling progress" />
           <p aria-live="polite" className="text-sm text-slate-700">
-            {step} ({Math.round(pct)}%)
+            {queued ? 'Waiting to start. Your file is in line.' : `${step} (${Math.round(pct)}%)`}
           </p>
         </CardContent>
       </Card>

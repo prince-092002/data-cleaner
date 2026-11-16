@@ -95,4 +95,23 @@ describe('api client', () => {
   it('builds download URLs', () => {
     expect(downloadUrl('d1', 'clean.csv')).toBe('/api/datasets/d1/downloads/clean.csv')
   })
+
+  it.each([
+    [413, 'file_too_large', /too large/],
+    [429, 'too_many_jobs', /Too many files/],
+    [503, 'storage_full', /demo is full/],
+  ])('gives a friendly message for %i when the server sends none', async (status, code, text) => {
+    mockFetch(async () => new Response('', { status }))
+    await expect(startClean('d1', { approved: [], rejected: [], edited: [] })).rejects.toMatchObject({ status, message: expect.stringMatching(text) })
+    expect(code).toBeTruthy()
+  })
+
+  it("keeps the server's own message and code for 429 and 503", async () => {
+    mockFetch(async () => json({ error: { code: 'storage_full', message: 'The demo is full right now. Please try again tomorrow.' } }, 503))
+    await expect(uploadDataset(new File(['a'], 'x.csv'))).rejects.toMatchObject({
+      status: 503,
+      code: 'storage_full',
+      message: 'The demo is full right now. Please try again tomorrow.',
+    })
+  })
 })

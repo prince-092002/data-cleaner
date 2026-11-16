@@ -1,4 +1,5 @@
-import { createContext, useContext, useReducer, type Dispatch, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useReducer, type Dispatch, type ReactNode } from 'react'
+import { buildSearch, parseUrl } from '@/lib/urlState'
 import type { Decisions, ProfileResponse, ResultsResponse, UploadResponse } from '@/api/types'
 
 export const STEPS = [
@@ -75,10 +76,27 @@ export function reducer(state: AppState, action: Action): AppState {
   }
 }
 
+/** Rebuilds the state from `?d=&j=&s=` so a reload or reopened link picks up where it was. */
+export function initFromUrl(search: string): AppState {
+  const u = parseUrl(search)
+  if (!u) return initialState
+  const step = u.step === 3 && !u.jobId ? 2 : u.step
+  const jobRunning = !!u.jobId && (step === 1 || step === 3)
+  return { ...initialState, step, datasetId: u.datasetId, jobId: u.jobId, jobRunning }
+}
+
 const Ctx = createContext<{ state: AppState; dispatch: Dispatch<Action> } | null>(null)
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [state, dispatch] = useReducer(reducer, window.location.search, initFromUrl)
+  const { step, datasetId, jobId } = state
+  useEffect(() => {
+    const search = buildSearch({ step, datasetId, jobId })
+    if (search !== window.location.search) {
+      const { pathname, hash } = window.location
+      window.history.replaceState(null, '', `${pathname}${search}${hash}`)
+    }
+  }, [step, datasetId, jobId])
   return <Ctx.Provider value={{ state, dispatch }}>{children}</Ctx.Provider>
 }
 
@@ -87,3 +105,4 @@ export function useAppState() {
   if (!ctx) throw new Error('useAppState must be used inside AppStateProvider')
   return ctx
 }
+

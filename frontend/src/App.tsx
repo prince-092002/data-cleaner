@@ -5,6 +5,7 @@ import { FixesScreen } from '@/screens/FixesScreen'
 import { ProcessingScreen } from '@/screens/ProcessingScreen'
 import { ResultsScreen } from '@/screens/ResultsScreen'
 import { DownloadsScreen } from '@/screens/DownloadsScreen'
+import { RestoreGate } from '@/screens/RestoreGate'
 import { AppStateProvider, useAppState } from '@/state/AppState'
 
 function Shell() {
@@ -24,19 +25,21 @@ function Shell() {
         </div>
       </header>
       <main id="main" className="mx-auto max-w-5xl px-4 py-6">
-        {state.step === 0 ? (
-          <UploadScreen />
-        ) : state.step === 1 ? (
-          <ProfileScreen />
-        ) : state.step === 2 ? (
-          <FixesScreen />
-        ) : state.step === 3 ? (
-          <ProcessingScreen />
-        ) : state.step === 4 ? (
-          <ResultsScreen />
-        ) : (
-          <DownloadsScreen />
-        )}
+        <RestoreGate>
+          {state.step === 0 ? (
+            <UploadScreen />
+          ) : state.step === 1 ? (
+            <ProfileScreen />
+          ) : state.step === 2 ? (
+            <FixesScreen />
+          ) : state.step === 3 ? (
+            <ProcessingScreen />
+          ) : state.step === 4 ? (
+            <ResultsScreen />
+          ) : (
+            <DownloadsScreen />
+          )}
+        </RestoreGate>
       </main>
     </div>
   )

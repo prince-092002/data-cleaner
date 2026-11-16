@@ -124,4 +124,39 @@ describe('UploadScreen', () => {
     expect((vi.mocked(uploadDataset).mock.calls[0][0] as File).name).toBe('sales_orders_messy.csv')
     expect(screen.queryByRole('combobox', { name: 'Sheet' })).not.toBeInTheDocument()
   })
+
+  it('tells people files are deleted after 24 hours', () => {
+    setup()
+    expect(screen.getByText('Files are deleted after 24 hours. Do not upload sensitive data.')).toBeInTheDocument()
+  })
+
+  it('does not guess a size limit when the server cannot be reached', async () => {
+    vi.mocked(getHealth).mockRejectedValue(new Error('down'))
+    const user = setup()
+    expect(screen.queryByText(/MB or smaller/)).not.toBeInTheDocument()
+    const big = new File(['x'], 'big.csv')
+    Object.defineProperty(big, 'size', { value: 60 * 1024 * 1024 })
+    vi.mocked(uploadDataset).mockResolvedValue({ ...xlsx, file_type: 'csv', sheets: [xlsx.sheets[0]] })
+    await user.upload(input(), big)
+    await waitFor(() => expect(uploadDataset).toHaveBeenCalledTimes(1))
+  })
+
+  it.each([
+    [429, 'too_many_jobs', 'Too many files have been processed today. Please try again tomorrow.'],
+    [503, 'storage_full', 'The demo is full right now. Please try again tomorrow.'],
+  ])('shows the server message for %i on upload', async (status, code, message) => {
+    vi.mocked(uploadDataset).mockRejectedValue(new ApiError(status, code, message))
+    const user = setup()
+    await user.upload(input(), new File(['x'], 'a.csv'))
+    expect(await screen.findByRole('alert')).toHaveTextContent(message)
+  })
+
+  it('shows the daily cap message when starting the profile', async () => {
+    vi.mocked(uploadDataset).mockResolvedValue(xlsx)
+    vi.mocked(startProfile).mockRejectedValue(new ApiError(429, 'too_many_jobs', 'The daily limit is reached. Try again tomorrow.'))
+    const user = setup()
+    await user.upload(input(), new File(['x'], 'book.xlsx'))
+    await user.click(await screen.findByRole('button', { name: 'Continue' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('The daily limit is reached. Try again tomorrow.')
+  })
 })

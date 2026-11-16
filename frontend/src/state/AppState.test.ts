@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { UploadResponse } from '@/api/types'
-import { initialState, reducer } from './AppState'
+import { initFromUrl, initialState, reducer } from './AppState'
 
 const upload: UploadResponse = {
   dataset_id: 'd1',
@@ -33,5 +33,22 @@ describe('app reducer', () => {
   it('resets', () => {
     const s = reducer(reducer(initialState, { type: 'uploaded', upload }), { type: 'reset' })
     expect(s).toEqual(initialState)
+})
+  it('restores a running clean job from the URL', () => {
+    const s = initFromUrl('?d=d1&j=j9&s=processing')
+    expect(s).toMatchObject({ step: 3, datasetId: 'd1', jobId: 'j9', jobRunning: true })
+  })
+
+  it('restores a running profile job, and later screens without a running job', () => {
+    expect(initFromUrl('?d=d1&j=j1&s=profile').jobRunning).toBe(true)
+    expect(initFromUrl('?d=d1&j=j1&s=results')).toMatchObject({ step: 4, jobRunning: false })
+  })
+
+  it('falls back to Suggested fixes when Processing has no job id', () => {
+    expect(initFromUrl('?d=d1&s=processing').step).toBe(2)
+  })
+
+  it('starts fresh without usable URL ids', () => {
+    expect(initFromUrl('')).toEqual(initialState)
   })
 })

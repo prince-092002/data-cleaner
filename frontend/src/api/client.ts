@@ -12,6 +12,13 @@ import type {
 
 const BASE = '/api'
 
+// Used only when the server sends no message of its own.
+const STATUS_FALLBACKS: Record<number, string> = {
+  413: 'This file is too large. Please choose a smaller file.',
+  429: 'Too many files have been processed today. Please try again tomorrow.',
+  503: 'The demo is full right now. Please try again tomorrow.',
+}
+
 export class ApiError extends Error {
   status: number
   code: string
@@ -36,7 +43,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (!res.ok) {
     let code = 'internal_error'
-    let message = `The server returned an error (${res.status}).`
+    let message = STATUS_FALLBACKS[res.status] ?? `The server returned an error (${res.status}).`
     try {
       const body = (await res.json()) as Partial<ApiErrorBody>
       if (body.error?.code) code = body.error.code
