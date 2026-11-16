@@ -9,7 +9,7 @@ from pathlib import Path
 
 import logging
 
-from sqlalchemy import DateTime, Engine, TypeDecorator, inspect, update
+from sqlalchemy import DateTime, Engine, TypeDecorator, case, inspect, update
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Column, Field, Session, SQLModel, create_engine, delete, select
 
@@ -86,6 +86,13 @@ class Lease(SQLModel, table=True):
     dataset_id: str = Field(index=True)
     holder: str
     expires_at: dt.datetime = Field(sa_column=_time())
+
+
+class Counter(SQLModel, table=True):
+    """Shared counters: "stored_bytes", "jobs:<UTC date>", "ip:<UTC date>:<hash>". See backend/limits.py."""
+
+    key: str = Field(primary_key=True)
+    n: int = 0
 
 
 ACTIVE = ("queued", "running")
@@ -211,3 +218,41 @@ def fail_interrupted_jobs(engine: Engine) -> int:
             session.add(job)
         session.commit()
         return len(stuck)
+
+
+def counter_add(engine: Engine, key: str, delta: int = 1, cap: int | None = None) -> bool:
+    """Atomically add delta to a counter (created on first use, never below 0). With a cap the add
+    happens only if the result stays within it (one conditional UPDATE, or an INSERT for a new key),
+    so concurrent instances cannot overshoot. Returns False when the cap refused it."""
+    new = case((Counter.n + delta < 0, 0), else_=Counter.n + delta)
+    guard = [Counter.key == key] + ([Counter.n + delta <= cap] if cap is not None else [])
+    with Session(engine) as session:
+        for _ in range(2):          # the second pass covers an INSERT that lost a race
+            if session.execute(update(Counter).where(*guard).values(n=new)).rowcount == 1:
+                session.commit()
+                return True
+            if cap is not None and delta > cap:
+                return False
+            try:
+                session.add(Counter(key=key, n=max(delta, 0)))
+                session.commit()
+                return True
+            except IntegrityError:
+                session.rollback()
+        return False
+
+
+def counter_set(engine: Engine, key: str, n: int) -> None:
+    with Session(engine) as session:
+        if session.execute(update(Counter).where(Counter.key == key).values(n=n)).rowcount == 0:
+            try:
+                session.add(Counter(key=key, n=n))
+            except IntegrityError:
+                pass
+        session.commit()
+
+
+def counter_get(engine: Engine, key: str) -> int:
+    with Session(engine) as session:
+        row = session.get(Counter, key)
+        return row.n if row else 0

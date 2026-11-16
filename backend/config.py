@@ -1,11 +1,13 @@
 """Backend settings. Override with environment variables (DC_STORAGE_DIR, DC_CORS_ORIGINS,
-DC_MAX_UPLOAD_MB), plus the two adapter switches:
+DC_MAX_UPLOAD_MB, DC_STORAGE_LIMIT_MB, DC_DAILY_JOB_CAP, DC_DAILY_IP_CAP), plus the two adapter switches:
 
 - DATABASE_URL: when set, jobs and datasets live in Postgres (postgres:// and postgresql:// both
   work); when not set, SQLite at <storage dir>/app.db.
 - DC_STORAGE_BACKEND: "local" (default, files under DC_STORAGE_DIR) or "blob" (Vercel Blob). Blob is
   used only when asked for explicitly, so a developer who has Vercel env vars never writes to
   Blob by accident. On Vercel, Blob authenticates through OIDC with BLOB_STORE_ID (no token).
+
+CRON_SECRET (never kept in Settings) is read from the environment by backend/cron.py on each call.
 """
 
 from __future__ import annotations
@@ -28,6 +30,19 @@ def _max_upload_bytes() -> int:
     return int(mb * MB)
 
 
+def _int_env(name: str, default: int) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        value = -1
+    if value < 0:
+        raise ValueError(f"{name} must be a whole number, 0 or more (got {raw!r}).")
+    return value
+
+
 def _default_origins() -> list[str]:
     raw = os.environ.get("DC_CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
     return [o.strip() for o in raw.split(",") if o.strip()]
@@ -46,6 +61,9 @@ class Settings:
     max_upload_bytes: int = field(default_factory=_max_upload_bytes)
     storage_backend: str = field(default_factory=_storage_backend)
     database_url: str | None = field(default_factory=lambda: os.environ.get("DATABASE_URL") or None)
+    storage_limit_bytes: int = field(default_factory=lambda: _int_env("DC_STORAGE_LIMIT_MB", 800) * MB)
+    daily_job_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_JOB_CAP", 200))
+    daily_ip_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_CAP", 10))
     job_lease_seconds: int = 900       # a running job not finished by then may be claimed again
     job_max_attempts: int = 3
     ttl_hours: int = 24

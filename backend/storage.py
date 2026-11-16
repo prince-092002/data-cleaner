@@ -104,6 +104,10 @@ class StorageBackend(ABC):
     @abstractmethod
     def delete_prefix(self, prefix: str) -> None: ...
 
+    @abstractmethod
+    def size_under(self, prefix: str) -> int:
+        """Total bytes of everything under prefix ("" is the whole store)."""
+
     def download_prefix(self, prefix: str, dest: Path) -> None:
         """Copy every file under prefix into dest (names relative to the prefix)."""
         for key, _ in self.list_keys(prefix):
@@ -198,6 +202,9 @@ class LocalStorage(StorageBackend):
                 out.append((key, dt.datetime.fromtimestamp(path.stat().st_mtime, dt.timezone.utc)))
         return out
 
+    def size_under(self, prefix):
+        return sum(self._path(key).stat().st_size for key, _ in self.list_keys(prefix) if self._path(key).exists())
+
     def delete_prefix(self, prefix):
         folder = self._path(prefix.rstrip("/"))
         if prefix.endswith("/") and folder.is_dir():
@@ -266,6 +273,9 @@ class BlobStorage(StorageBackend):
 
     def list_keys(self, prefix):
         return [(b.pathname, b.uploaded_at) for b in self.c.query_blobs(prefix=prefix or None)]
+
+    def size_under(self, prefix):
+        return sum(b.size for b in self.c.query_blobs(prefix=prefix or None))
 
     def delete_prefix(self, prefix):
         keys = [k for k, _ in self.list_keys(prefix)]

@@ -12,8 +12,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend import errors
 from backend.cleanup import cleanup_loop
 from backend.config import MB, Settings
+from backend.cron import router as cron_router
 from backend.db import fail_interrupted_jobs, make_engine
 from backend.jobs import Context
+from backend.limits import MeteredStorage
 from backend.routes import router
 from backend.storage import StorageBackend, make_storage
 
@@ -80,7 +82,7 @@ def create_app(settings: Settings | None = None, storage: StorageBackend | None 
     settings = settings or Settings()
     storage = storage or make_storage(settings)
     engine = make_engine(settings.database_url or settings.db_path)
-    ctx = Context(settings=settings, engine=engine, storage=storage)
+    ctx = Context(settings=settings, engine=engine, storage=MeteredStorage(storage, engine))
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -89,6 +91,7 @@ def create_app(settings: Settings | None = None, storage: StorageBackend | None 
         interrupted = fail_interrupted_jobs(ctx.engine) if ctx.engine.dialect.name == "sqlite" else 0
         if interrupted:
             log.warning("marked %s interrupted job(s) as failed", interrupted)
+        # Development only: in production Vercel Cron calls /api/cron/cleanup (serverless has no long-lived loop).
         task = asyncio.create_task(cleanup_loop(ctx))     # runs once now, then every hour
         try:
             yield
@@ -111,6 +114,7 @@ def create_app(settings: Settings | None = None, storage: StorageBackend | None 
         expose_headers=["Content-Disposition"],
     )
     app.include_router(router)
+    app.include_router(cron_router)
 
     @app.get("/api/health")
     def health():

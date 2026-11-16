@@ -19,9 +19,10 @@ from sqlmodel import Session
 
 from backend import errors
 from backend.db import Dataset, Job, iso, mark_superseded, start_generation, utcnow
+from backend.limits import check_storage_room, count_job
 from backend.jobs import Context, ensure_xlsx, run_clean_job, run_profile_job
 from backend.storage import (DOWNLOADS, StorageNotFound, TooLarge, file_key, is_uuid, looks_like, original_key,
-                             run_key, write_limited)
+                             run_key, runs_prefix, write_limited)
 from engine import pipeline
 from engine.errors import IngestError, PlanError
 from engine.models import DatasetProfile, Decisions
@@ -78,6 +79,7 @@ def _new_job(ctx: Context, dataset_id: str, job_type: str) -> str:
 @router.post("/datasets", status_code=201)
 def upload_dataset(request: Request, file: UploadFile):
     ctx = _ctx(request)
+    check_storage_room(ctx)
     filename = _display_name(file.filename)
     file_type = ALLOWED.get(Path(filename).suffix.lower())
     if file_type is None:
@@ -161,7 +163,9 @@ def start_profile(
     dataset.sheet, dataset.header_row = sheet["name"], header_row
 
     # A new profile replaces the old one and anything cleaned from it (a new generation).
+    count_job(ctx, request)
     job_id = _new_job(ctx, dataset_id, "profile")
+    ctx.storage.delete_prefix(runs_prefix(dataset_id))      # the old results are gone now, not at 24 h
     background.add_task(run_profile_job, ctx, job_id, dataset)
     return {"job_id": job_id}
 
@@ -210,6 +214,7 @@ def start_clean(request: Request, dataset_id: str, decisions: Decisions, backgro
     except PlanError as exc:
         raise errors.invalid_request(exc.message)
 
+    count_job(ctx, request)
     job_id = _new_job(ctx, dataset_id, "clean")
     ctx.storage.put_bytes(run_key(dataset_id, job_id, "plan.json"), plan.model_dump_json().encode("utf-8"))
     background.add_task(run_clean_job, ctx, job_id, dataset, plan)

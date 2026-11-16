@@ -20,6 +20,7 @@ def delete_dataset(ctx: Context, session: Session, dataset: Dataset) -> None:
         session.delete(job)
     session.delete(dataset)
     session.execute(delete(Lease).where(Lease.dataset_id == dataset.id))
+    session.commit()      # rows first and released: the storage delete also writes the byte counter (SQLite has one writer)
     ctx.storage.delete_prefix(dataset_prefix(dataset.id))
 
 

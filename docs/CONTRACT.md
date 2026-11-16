@@ -443,10 +443,13 @@ Error body for every non-2xx response:
 | 400 | `invalid_request` | bad body, unknown sheet, unknown proposal id |
 | 404 | `not_found` | unknown dataset or job, or files already deleted |
 | 409 | `not_ready` | profile or results requested before the job finished; clean requested before profile |
-| 413 | `file_too_large` | upload over the limit (`DC_MAX_UPLOAD_MB`, default 50) |
+| 401 | `unauthorized` | `/api/cron/cleanup` called without the right `Authorization: Bearer $CRON_SECRET` |
+| 413 | `file_too_large` | upload over the limit (`DC_MAX_UPLOAD_MB`, default 50; production 4). Also answered when the body has no `Content-Length`; the message states the limit, for example "Files must be 4 MB or smaller." |
 | 415 | `unsupported_file_type` | not `.csv` or `.xlsx` (checked by extension **and** content sniffing) |
 | 422 | `unreadable_file` | file passes type checks but cannot be parsed, or is empty |
+| 429 | `too_many_jobs` | a daily cap is reached (section 8.9) |
 | 500 | `internal_error` | unexpected server error (no internal details in the message) |
+| 503 | `storage_full` | upload refused because stored bytes are at the limit (section 8.9) |
 | 500 | `excel_failed` | clean.xlsx could not be built; the clean job and the other downloads are not affected |
 
 A failed job's `error.code` is one of `unreadable_file`, `invalid_request`, `internal_error`, `interrupted` (the server restarted while the job was queued or running), or `superseded` (a newer profile or clean job was started for the same dataset, so this job's result was discarded).
@@ -540,6 +543,21 @@ Query params for the change log table: `limit` (default 100, max 500), `offset`,
 **Lease.** Table `Lease` (`key`, `dataset_id`, `holder`, `expires_at`): a lock shared by all instances. `acquire_lease` inserts, or takes over an expired row, in one statement. It makes the Excel build run once per clean run (key `xlsx:{run_id}`, 120 seconds): a second request for the same run waits for the file instead of building it again.
 `Dataset`: `id` (UUID4, pk), `filename`, `file_type`, `size_bytes`, `sheet`, `header_row`, `created_at`, `expires_at`, `generation` (int), `profile_json` (DatasetProfile or null), `results_json` (CleanResult or null), `results_run_id` (clean job whose folder holds the downloads, or null).
 
+### 8.9 Free-tier guards (Step 13)
+
+Hobby limits are firm, so new work is refused politely before a limit is reached. All counters are rows of table `Counter` (`key` pk, `n` int) and change by one atomic statement (`UPDATE ... SET n = n + 1 WHERE n < cap`, or an INSERT for a new key), so several instances cannot overshoot.
+
+- **Stored bytes** (`Counter` key `stored_bytes`): `+size` on every storage write, `-size` on every storage delete (a wrapper around the storage backend, so cleanup and the immediate delete below count too). An overwrite is counted again, so the figure can drift upward; the cron recomputes it from the storage listing. `POST /api/datasets` answers `503 storage_full`, "The demo is full right now. Please try again tomorrow.", when the total is at or above `DC_STORAGE_LIMIT_MB` (default 800). Profile and clean are not refused by this guard.
+- **Daily job caps.** Every `POST /profile` and every `POST /clean` takes one slot: a clean also starts a background job, so it counts, even for an already-profiled dataset. Global cap `DC_DAILY_JOB_CAP` (default 200), key `jobs:<UTC date>`. Per-IP cap `DC_DAILY_IP_CAP` (default 10), key `ip:<UTC date>:<hash>`. The counters reset by UTC date (the date is in the key; the cron deletes old keys). Over a cap: `429 too_many_jobs`, with "The demo has reached today's limit. Please try again tomorrow." (global) or "You have reached today's limit for this demo. Please try again tomorrow." (per IP). The IP slot is taken first and given back if the global cap refuses, so a refused call uses nothing. A request refused here creates no job.
+- **Client IP.** The first entry of the `x-forwarded-for` header, which Vercel sets to the client's public IP and overwrites so it cannot be spoofed (docs: vercel.com/docs/headers/request-headers, checked 2026-11-16). Only a SHA-256 of `<date>:<ip>` is stored, never the address. With no such header (local development) there is no per-IP cap: one shared "unknown" bucket would fill up and lock everyone out, and the global cap still protects the demo. The per-IP cap is best effort (shared networks share a slot, a user can change address).
+- **Upload limit.** `DC_MAX_UPLOAD_MB` (production: 4). Counted while the body streams, so a `413 file_too_large` also comes back when the request has no `Content-Length`. `GET /api/health` reports the same number as `max_upload_mb`, which the Upload screen shows.
+
+### 8.10 `GET /api/cron/cleanup` (Vercel Cron)
+
+Called by Vercel Cron (`vercel.json`, daily `0 4 * * *`; Hobby allows once per day and may run it any time in that hour; delivery is best effort and may repeat, per vercel.com/docs/cron-jobs/manage-cron-jobs and /usage-and-pricing, checked 2026-11-16). Vercel sends GET with `Authorization: Bearer <CRON_SECRET>`, where `CRON_SECRET` is an environment variable of the project. The endpoint compares it in constant time; a missing or wrong header, or `CRON_SECRET` not set, answers `401 unauthorized` and does nothing. The secret is only ever read from the environment.
+
+It takes the `Lease` row `cron:cleanup` (10 minutes); if another run holds it the answer is `200 {"skipped": true}`, so two calls at once are safe. Otherwise it deletes expired datasets (`expires_at` passed: files and rows together) and folders with no row, deletes the previous days' `Counter` rows, recomputes `stored_bytes` from the storage listing, and answers `200 {"skipped": false, "removed": n, "stored_bytes": n}`. Stuck-job expiry is added in the next change (`db.expire_stuck_jobs`). The hourly in-process loop in `backend/main.py` stays for local development only; production does not rely on it.
+
 ---
 
 ## 9. Storage and cleanup
@@ -563,7 +581,7 @@ The engine never sees a storage key. A job downloads the original and the `cache
 The profile and results are stored in the `Dataset` row (section 8.8), not as files. Downloads come from `runs/{results_run_id}/`. When a clean job's result is saved, the other run folders of that dataset are deleted, except those of clean jobs still queued or running; a superseded or failed clean job deletes its own folder. A download whose file is missing answers `409 not_ready`; a dataset (or run) deleted while a request was running answers `404`, never `500`. Downloads are streamed from storage through the API.
 
 - `clean.csv`: UTF-8, comma-delimited, header = column `name`s, no `_row_id`. `clean.xlsx`: one sheet named `clean`, numbers/dates/booleans written as real Excel types.
-- A cleanup task runs at startup and every hour: deletes any dataset folder and its database rows where `expires_at` (upload time + 24 hours) has passed. An expired dataset answers `404` even before the task has run. Prefixes with no database row are removed once their newest file is over an hour old.
+- A cleanup task runs at startup and every hour: deletes any dataset folder and its database rows where `expires_at` (upload time + 24 hours) has passed. An expired dataset answers `404` even before the task has run. In production the same sweep runs from `GET /api/cron/cleanup` (section 8.10). Starting a new profile deletes the dataset's old `runs/` folders at once. Prefixes with no database row are removed once their newest file is over an hour old.
 - The upload limit (`DC_MAX_UPLOAD_MB`, default 50) is enforced twice: by an ASGI layer that counts body bytes as they arrive (refusing at once from a declared `Content-Length`, otherwise stopping as soon as the body passes the limit plus 1 MB of form overhead, so chunked uploads with no `Content-Length` are also refused before the form is parsed), and again on the file bytes while streaming to disk.
 - Stored file names are fixed (above). User-supplied filenames are never used as paths.
 

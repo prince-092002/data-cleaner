@@ -41,4 +41,4 @@ class FakeBlobClient:
         now = dt.datetime.now(dt.timezone.utc)
         for p in sorted(self.blobs):
             if p.startswith(prefix or ""):
-                yield SimpleNamespace(pathname=p, uploaded_at=now)
+                yield SimpleNamespace(pathname=p, uploaded_at=now, size=len(self.blobs[p]))
