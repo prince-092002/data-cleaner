@@ -9,7 +9,7 @@ from pathlib import Path
 
 import logging
 
-from sqlalchemy import DateTime, Engine, TypeDecorator, case, inspect, update
+from sqlalchemy import DateTime, Engine, TypeDecorator, case, exists, inspect, update
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Column, Field, Session, SQLModel, create_engine, delete, select
 
@@ -132,14 +132,14 @@ def start_generation(session: Session, dataset_id: str, *, clear_profile: bool) 
     return session.execute(select(Dataset.generation).where(Dataset.id == dataset_id)).scalar_one()
 
 
-def save_if_current(engine: Engine, dataset_id: str, generation: int, **values) -> bool:
-    """One guarded UPDATE: writes only while the dataset is still at this generation."""
+def save_if_current(engine: Engine, dataset_id: str, generation: int, job_id: str | None = None, **values) -> bool:
+    """One guarded UPDATE: writes only while the dataset is still at this generation and, when job_id is
+    given, that job is still running (a timed-out or replaced job can never publish)."""
     with Session(engine) as session:
-        result = session.execute(
-            update(Dataset)
-            .where(Dataset.id == dataset_id, Dataset.generation == generation)
-            .values(**values)
-        )
+        guard = [Dataset.id == dataset_id, Dataset.generation == generation]
+        if job_id is not None:
+            guard.append(exists().where(Job.id == job_id, Job.status == "running"))
+        result = session.execute(update(Dataset).where(*guard).values(**values))
         session.commit()
         return result.rowcount == 1
 

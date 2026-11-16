@@ -330,3 +330,56 @@ def test_get_job_expires_a_stuck_job(client, queue):
 def test_the_lease_matches_the_deadline():
     s = Settings()
     assert s.job_deadline_seconds == 240 and 240 < s.job_lease_seconds <= 300
+
+
+# --------------------------------------------------------------------------- round 2: timed-out and retried clean jobs
+
+def _profiled_through_queue(client, queue):
+    dataset_id, job_id = start_profile(client)
+    queue.deliver(client.app.state.ctx, job_id)
+    proposals = client.get(f"/api/datasets/{dataset_id}/profile").json()["proposals"]
+    return dataset_id, {"approved": [p["id"] for p in proposals]}
+
+
+def test_a_timed_out_clean_can_never_publish_results(tmp_path, queue, monkeypatch):
+    app = make_app(tmp_path, job_deadline_seconds=0.3)
+    blob = app.state.ctx.storage.c
+    real = jobs.pipeline.clean
+
+    def slow_then_finish(*args, **kwargs):
+        time.sleep(0.8)
+        kwargs["progress"] = lambda *a: None             # never sees the cancel flag: the thread runs to the end
+        return real(*args, **kwargs)
+
+    with TestClient(app) as client:
+        dataset_id, body = _profiled_through_queue(client, queue)
+        clean_id = client.post(f"/api/datasets/{dataset_id}/clean", json=body).json()["job_id"]
+        monkeypatch.setattr(jobs.pipeline, "clean", slow_then_finish)
+        queue.deliver(app.state.ctx, clean_id)
+        assert job_state(client, clean_id)["error"]["code"] == "job_timeout"
+        left = lambda: [k for k in blob.blobs if f"/runs/{clean_id}/" in k]
+        deadline = time.monotonic() + 15                    # the abandoned thread finishes and cleans up meanwhile
+        while left() and time.monotonic() < deadline:
+            time.sleep(0.1)
+        with Session(app.state.ctx.engine) as s:
+            dataset = s.get(Dataset, dataset_id)
+            assert dataset.results_json is None and dataset.results_run_id is None
+        assert not left()
+        assert job_state(client, clean_id)["error"]["code"] == "job_timeout"
+
+
+def test_a_clean_crash_that_goes_away_on_retry_ends_done(client, queue, monkeypatch):
+    dataset_id, body = _profiled_through_queue(client, queue)
+    clean_id = client.post(f"/api/datasets/{dataset_id}/clean", json=body).json()["job_id"]
+    real = jobs.pipeline.clean
+    state = {"n": 0}
+
+    def flaky(*args, **kwargs):
+        state["n"] += 1
+        if state["n"] == 1:
+            raise RuntimeError("boom")
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(jobs.pipeline, "clean", flaky)
+    assert queue.deliver(client.app.state.ctx, clean_id) == 2
+    assert job_state(client, clean_id)["status"] == "done"
