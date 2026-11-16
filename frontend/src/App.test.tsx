@@ -96,4 +96,12 @@ describe('resume from the URL', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: 'Upload your file' })).toBeTruthy()
   })
+
+  it('focuses the expired message after a failed restore', async () => {
+    window.history.replaceState(null, '', '/?d=gone&s=fixes')
+    vi.mocked(getProfile).mockRejectedValue(notFound())
+    render(<App />)
+    await wait(0)
+    expect(document.activeElement).toBe(screen.getByRole('alert'))
+  })
 })

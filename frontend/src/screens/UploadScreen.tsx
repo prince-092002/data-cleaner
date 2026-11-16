@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react'
 import { ApiError, getHealth, startProfile, uploadDataset } from '@/api/client'
 import type { UploadResponse } from '@/api/types'
+import { FocusedAlert } from '@/components/FocusedAlert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -193,12 +194,10 @@ export function UploadScreen() {
         </div>
 
         <div aria-live="polite" className="text-sm">
-          {busy === 'upload' && <p className="text-slate-700">Uploading and reading your file...</p>}
-          {busy === 'profile' && <p className="text-slate-700">Starting analysis...</p>}
+          {busy === 'upload' && <p className="text-slate-700">Uploading and reading your file…</p>}
+          {busy === 'profile' && <p className="text-slate-700">Starting analysis…</p>}
           {error && (
-            <p role="alert" className="rounded border border-red-300 bg-red-50 p-3 text-red-800">
-              {error}
-            </p>
+            <FocusedAlert className="rounded border border-red-300 bg-red-50 p-3 text-red-800">{error}</FocusedAlert>
           )}
         </div>
 

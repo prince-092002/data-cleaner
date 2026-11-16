@@ -203,4 +203,18 @@ describe('ProcessingScreen', () => {
     })
     expect(getJob).toHaveBeenCalledTimes(1)
   })
+
+  it('moves keyboard focus to the message when the job fails', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({ status: 'failed', error: { code: 'internal_error', message: 'Boom' } }))
+    setup()
+    await tick()
+    expect(document.activeElement).toBe(screen.getByRole('alert'))
+  })
+
+  it('moves keyboard focus to the message when the result has expired', async () => {
+    vi.mocked(getJob).mockRejectedValue(Object.assign(new Error('Not found'), { status: 404 }))
+    setup()
+    await tick()
+    expect(document.activeElement).toBe(screen.getByRole('alert'))
+  })
 })

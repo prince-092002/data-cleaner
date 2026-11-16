@@ -7,6 +7,7 @@ import { useAppState } from '@/state/AppState'
 import { PAGE_SIZE } from './ResultsScreen'
 import { ExpiredCard } from '@/components/ExpiredCard'
 import { friendlyJobError, isNotFound } from '@/lib/jobErrors'
+import { FocusedAlert } from '@/components/FocusedAlert'
 import { useJobPolling } from '@/lib/useJobPolling'
 
 export function ProcessingScreen() {
@@ -67,9 +68,7 @@ export function ProcessingScreen() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p role="alert" className="text-red-700">
-            {failure.message}
-          </p>
+          <FocusedAlert className="text-red-700">{failure.message}</FocusedAlert>
           <div className="flex flex-wrap gap-3">
             <Button onClick={() => dispatch({ type: 'goto', step: 2 })}>Back to suggested fixes</Button>
             <Button variant="outline" onClick={() => dispatch({ type: 'reset' })}>

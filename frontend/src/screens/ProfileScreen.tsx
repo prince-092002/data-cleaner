@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { FocusedAlert } from '@/components/FocusedAlert'
 import { ExpiredCard } from '@/components/ExpiredCard'
 import { friendlyJobError, isNotFound } from '@/lib/jobErrors'
 import { useJobPolling } from '@/lib/useJobPolling'
@@ -140,9 +141,7 @@ export function ProfileScreen() {
     return (
       <Card>
         <CardContent className="space-y-4 pt-6">
-          <p role="alert" className="text-red-700">
-            {error}
-          </p>
+          <FocusedAlert className="text-red-700">{error}</FocusedAlert>
           <Button onClick={() => dispatch({ type: 'reset' })}>Back to upload</Button>
         </CardContent>
       </Card>

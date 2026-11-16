@@ -4,6 +4,7 @@ import { ExpiredCard } from '@/components/ExpiredCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { isNotFound } from '@/lib/jobErrors'
+import { useFocusOnMount } from '@/lib/useFocusOnMount'
 import { useAppState } from '@/state/AppState'
 import { PAGE_SIZE } from './ResultsScreen'
 
@@ -45,23 +46,28 @@ export function RestoreGate({ children }: { children: ReactNode }) {
   if (!kind) return <>{children}</>
   if (failure?.kind === kind) {
     if (failure.expired) return <ExpiredCard />
-    return (
-      <Card>
-        <CardContent className="space-y-4 pt-6">
-          <p role="alert" className="text-red-700">
-            {failure.message}
-          </p>
-          <Button onClick={() => dispatch({ type: 'reset' })}>Upload another file</Button>
-        </CardContent>
-      </Card>
-    )
+    return <FailureCard message={failure.message} onAction={() => dispatch({ type: 'reset' })} />
   }
   return (
     <Card>
       <CardContent className="pt-6">
         <p aria-live="polite" className="text-sm text-slate-700">
-          Loading your file...
+          Loading your file…
         </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function FailureCard({ message, onAction }: { message: string; onAction: () => void }) {
+  const msg = useFocusOnMount<HTMLParagraphElement>()
+  return (
+    <Card>
+      <CardContent className="space-y-4 pt-6">
+        <p ref={msg} tabIndex={-1} role="alert" className="text-red-700 outline-none">
+          {message}
+        </p>
+        <Button onClick={onAction}>Upload another file</Button>
       </CardContent>
     </Card>
   )
