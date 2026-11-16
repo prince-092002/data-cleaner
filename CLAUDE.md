@@ -9,7 +9,7 @@ A website where a user uploads a messy CSV or Excel file. The system profiles an
 **The single source of truth for interfaces is [docs/CONTRACT.md](docs/CONTRACT.md). Read it before writing any code.** If code and contract disagree, stop and report; do not silently change either.
 
 ## Stack
-- **Engine** (`engine/`): Python 3.12, Polars (transforms), DuckDB (profiling), pandas only at the edges (Excel reading). charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic.
+- **Engine** (`engine/`): Python 3.12, Polars (transforms and profiling counts), openpyxl read-only (Excel reading). No DuckDB, pandas, numpy or pyarrow at runtime. charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic.
 - **Backend** (`backend/`): FastAPI + Pydantic, BackgroundTasks, SQLite via SQLModel (jobs table), files under `./storage`, deleted after 24 hours.
 - **Frontend** (`frontend/`): React + TypeScript + Vite + Tailwind CSS + shadcn/ui. Not Streamlit.
 - **Tests**: pytest (`tests/engine`, `tests/api`), Vitest (frontend logic).

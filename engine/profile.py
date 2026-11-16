@@ -10,7 +10,6 @@ import statistics
 from collections import Counter
 from typing import Callable
 
-import duckdb
 import polars as pl
 from ftfy.badness import is_bad
 
@@ -36,10 +35,6 @@ OUTLIER_MIN_VALUES = 20
 OUTLIER_K = 1.5
 
 ProgressFn = Callable[[int, str], None]
-
-
-def _q(name: str) -> str:
-    return '"' + name.replace('"', '""') + '"'
 
 
 def _pct(part: float, whole: float) -> float:
@@ -298,54 +293,45 @@ def profile_dataframe(
         originals = [source_names.get(c, c) for c in data_cols]
         names = P.normalize_header_names(originals)
 
-    con = duckdb.connect()
-    try:
-        con.register("t", df.select(data_cols).to_arrow())
-        if n and data_cols:
-            cols_sql = ", ".join(_q(c) for c in data_cols)
-            distinct_rows = con.execute(
-                f"SELECT count(*) FROM (SELECT DISTINCT {cols_sql} FROM t)"
-            ).fetchone()[0]
-        else:
-            distinct_rows = n
-        duplicate_rows = n - distinct_rows
-        row_uniqueness = 1 - duplicate_rows / n if n else 0.0
+    if n and data_cols:
+        distinct_rows = df.select(data_cols).unique().height
+    else:
+        distinct_rows = n
+    duplicate_rows = n - distinct_rows
+    row_uniqueness = 1 - duplicate_rows / n if n else 0.0
 
-        if n and data_cols:
-            tokens = list(P.NULL_TOKENS)
-            empty_rows = df.select(
-                pl.all_horizontal(
-                    [
-                        pl.col(c).is_null()
-                        | pl.col(c).str.strip_chars().str.to_lowercase().is_in(tokens)
-                        for c in data_cols
-                    ]
-                ).sum()
-            ).item()
-        else:
-            empty_rows = 0
+    if n and data_cols:
+        tokens = list(P.NULL_TOKENS)
+        empty_rows = df.select(
+            pl.all_horizontal(
+                [
+                    pl.col(c).is_null()
+                    | pl.col(c).str.strip_chars().str.to_lowercase().is_in(tokens)
+                    for c in data_cols
+                ]
+            ).sum()
+        ).item()
+    else:
+        empty_rows = 0
 
-        columns: list[ColumnProfile] = []
-        for i, (col, name, original) in enumerate(zip(data_cols, names, originals)):
-            report(30 + int(50 * i / max(len(data_cols), 1)), "Profiling columns")
-            rows = con.execute(
-                f"SELECT {_q(col)}, count(*) FROM t WHERE {_q(col)} IS NOT NULL GROUP BY 1"
-            ).fetchall()
-            samples = df.get_column(col).drop_nulls().unique(maintain_order=True).head(25).to_list()
-            columns.append(
-                profile_column(
-                    name=name,
-                    source_name=original,
-                    position=i,
-                    row_count=n,
-                    counts=dict(rows),
-                    samples=samples,
-                    row_uniqueness=row_uniqueness,
-                    header_ok=(original == name),
-                )
+    columns: list[ColumnProfile] = []
+    for i, (col, name, original) in enumerate(zip(data_cols, names, originals)):
+        report(30 + int(50 * i / max(len(data_cols), 1)), "Profiling columns")
+        vc = df.get_column(col).drop_nulls().value_counts()
+        counts = dict(zip(vc.get_column(col).to_list(), vc.get_column("count").to_list()))
+        samples = df.get_column(col).drop_nulls().unique(maintain_order=True).head(25).to_list()
+        columns.append(
+            profile_column(
+                name=name,
+                source_name=original,
+                position=i,
+                row_count=n,
+                counts=counts,
+                samples=samples,
+                row_uniqueness=row_uniqueness,
+                header_ok=(original == name),
             )
-    finally:
-        con.close()
+        )
 
     report(85, "Scoring quality")
     return DatasetProfile(

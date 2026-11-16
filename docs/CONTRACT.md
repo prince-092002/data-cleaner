@@ -20,7 +20,7 @@ Contents: 1 Terms · 2 Rule interface · 3 Profile schema · 4 Quality score · 
 | mode | `auto` (applied unless rejected), `suggest` (applied only if approved), `flag` (adds information, changes no existing value). |
 
 Conventions:
-- **Text-first.** Ingest reads every cell as a string (`pl.Utf8`). Empty cells are `null`; a cell holding only spaces stays text. Excel numbers, dates and booleans are turned into text (`1200.5`, `2024-04-03`, `TRUE`). Types are decided by rules, not by the reader.
+- **Text-first.** Ingest reads every cell as a string (`pl.Utf8`). Empty cells are `null`; a cell holding only spaces stays text. Excel numbers, dates and booleans are turned into text (`1200.5`, `2024-04-03`, `TRUE`). Types are decided by rules, not by the reader. Excel is read with openpyxl directly (read-only); as the old pandas reader did, error cells and the strings `NA`, `N/A`, `null`, `None`, `nan` and similar read as empty, and trailing blank rows and columns are dropped. The engine runtime depends on Polars, openpyxl and the other libraries in `requirements-vercel.txt`, not on DuckDB, pandas, numpy or pyarrow.
 - **Dataframe columns before `normalize_headers`** carry the header text as uploaded, made unique only where needed (empty becomes `column_<n>`, repeats get `_2`). `IngestResult.source_names` keeps the exact uploaded text.
 - **The original upload is never modified.** All outputs are new files.
 - **Column names.** Every column has a `source_name` (as uploaded) and a `name` (after `normalize_headers`). Profiles, proposals, the change log and recipes use `name`.

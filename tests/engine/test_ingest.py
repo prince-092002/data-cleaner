@@ -121,3 +121,24 @@ def test_errors(tmp_path):
         ingest.ingest(_write(tmp_path, "fake.xlsx", "not really excel"))
     with pytest.raises(IngestError):
         ingest.ingest(CUSTOMERS, sheet="Nope")
+
+
+def test_excel_reads_like_the_old_pandas_reader(tmp_path):
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    ws = wb.active
+    ws.append(["id", "note", "n"])
+    ws.append([1, "NA", 2.0])
+    ws.append([2, "null", 1.5])
+    ws.append([3, "ok", None])
+    ws["B3"] = "=1/0"       # formula errors are saved as text, not as error cells; set a real error
+    ws["B3"].data_type = "e"
+    ws["F9"] = None          # extends the sheet dimension with blank rows and columns
+    path = tmp_path / "t.xlsx"
+    wb.save(path)
+    df = ingest.ingest(path).df
+    assert df.columns == ["_row_id", "id", "note", "n"]       # trailing blank columns are not data
+    assert df["id"].to_list() == ["1", "2", "3"]               # trailing blank rows are not data
+    assert df["note"].to_list() == [None, None, "ok"]          # NA strings and error cells are empty
+    assert df["n"].to_list() == ["2", "1.5", None]
