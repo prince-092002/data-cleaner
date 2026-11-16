@@ -52,6 +52,9 @@ npm run test -- --run                  # frontend tests
 Uploads are kept for 24 hours under `./storage` (change with `DC_STORAGE_DIR`). Use "Try a sample file" on the first screen, or upload your own `.csv` / `.xlsx` (up to 50 MB).
 For the demo with the sales sample, approve the Region suggestion on the fixes screen: west, WEST and West have no 80% majority spelling, so they become "West" only after you approve it.
 
+## Deploying
+Live URL: coming soon. The plan is to host the code on GitHub and deploy it on Vercel, on the free tier.
+
 ## Screenshots
 | Upload (header-row check) | Profile |
 |---|---|

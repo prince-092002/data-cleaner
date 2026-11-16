@@ -9,3 +9,29 @@ node_modules/
 frontend/dist/
 .env
 .DS_Store
+
+# Environment files (keep a committed .env.example if one is ever added)
+.env.*
+!.env.example
+
+# Build output and caches
+*.egg-info/
+build/
+dist/
+*.tsbuildinfo
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.parquet
+
+# Generated large files (timing runs write here when given --out-dir)
+evaluation/out/
+*.log
+
+# Claude Code worktrees
+.claude/worktrees/
+
+# OS junk
+Thumbs.db
+desktop.ini
