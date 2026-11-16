@@ -12,10 +12,8 @@ Data Cleaner is a website where a user uploads a messy CSV or Excel file; the sy
 - **Waiting for:** the owner's "go" for Step 11 (Vercel feasibility spike). Do not start it before.
 
 ## Last milestone summary (M6 Step 10, 2026-11-15)
-- Housekeeping: Agent A's worktree removed; merged branches `m6b-fixes`, `m6b-idcols`, `m6b-majority` deleted. Only `main` is left.
+- Housekeeping: worktree removed, merged m6b branches deleted, only `main` left. `.gitignore` widened (`.env.*`, build output, `*.parquet`, caches, `.claude/worktrees/`, OS junk). README has a "Deploying" placeholder.
 - Safety scan before the first push. Whole history: no file over 20 MB was ever committed (largest is the Chicago CSV, 4.8 MB), and no `.env`, key, certificate or secret pattern was found (one false positive, the UI label "Placeholder nulls"). Samples other than Chicago (public city data) are synthetic: generated with fixed seeds, emails on `@example.com`.
-- `.gitignore` widened: `.env.*`, build output, `*.parquet`, tool caches, `evaluation/out/`, `.claude/worktrees/`, Windows junk.
-- README has a "Deploying" placeholder (live URL coming soon; GitHub plus Vercel, free tier).
 - Private repo created and pushed: `main` plus tags phase1-m4, phase1-m5, phase1-m6a, phase1-m6b. Verified with gh: private, default branch main, 163 files on GitHub = 163 tracked locally.
 - GitHub Actions (`.github/workflows/ci.yml`): Python tests on 3.12, frontend tests and build on Node 24. First run passed in about 1 minute.
 
