@@ -140,20 +140,45 @@ def _excel_cell(value: object) -> str | None:
     return text if text != "" else None
 
 
+# Strings pandas read_excel turned into empty cells (its default NA list); kept so output is unchanged.
+_EXCEL_NA = frozenset({
+    "", "#N/A", "#N/A N/A", "#NA", "-1.#IND", "-1.#QNAN", "-NaN", "-nan", "1.#IND", "1.#QNAN",
+    "<NA>", "N/A", "NA", "NULL", "NaN", "None", "n/a", "nan", "null",
+})
+
+
 def _excel_file(path: Path):
-    import pandas as pd
+    from openpyxl import load_workbook
 
     try:
-        return pd.ExcelFile(path, engine="openpyxl")
+        return load_workbook(path, read_only=True, data_only=True)
     except Exception as exc:  # corrupt or not really an xlsx
         raise IngestError("This Excel file could not be opened.") from exc
 
 
-def _read_excel_sheet(xl, sheet: str, max_rows: int | None = None) -> list[Row]:
-    import pandas as pd
+def _excel_raw(cell) -> object:
+    """Cell value as pandas' openpyxl reader gave it: errors and NA strings are empty, whole floats are ints."""
+    value = cell.value
+    if cell.data_type == "e":
+        return None
+    if isinstance(value, str):
+        return None if value in _EXCEL_NA else value
+    if isinstance(value, float) and not isinstance(value, bool) and math.isfinite(value) and int(value) == value:
+        return int(value)
+    return value
 
-    frame = pd.read_excel(xl, sheet_name=sheet, header=None, dtype=object, nrows=max_rows)
-    return [[_excel_cell(v) for v in row] for row in frame.itertuples(index=False, name=None)]
+
+def _read_excel_sheet(xl, sheet: str, max_rows: int | None = None) -> list[Row]:
+    rows: list[Row] = []
+    for raw in xl[sheet].iter_rows(max_row=max_rows):
+        # trailing blank cells are not part of the sheet (the reader pandas used trimmed them too)
+        end = len(raw)
+        while end and (raw[end - 1].value is None or raw[end - 1].value == ""):
+            end -= 1
+        rows.append([_excel_cell(_excel_raw(c)) for c in raw[:end]])
+    while rows and not rows[-1]:
+        rows.pop()
+    return rows
 
 
 # --------------------------------------------------------------------------- header row
@@ -195,9 +220,9 @@ def inspect(path: Path) -> FileInspection:
     else:
         xl = _excel_file(path)
         try:
-            for name in xl.sheet_names:
+            for name in xl.sheetnames:
                 rows = _read_excel_sheet(xl, name, max_rows=HEADER_SCAN_ROWS)
-                estimate = getattr(xl.book[name], "max_row", None) or len(rows)
+                estimate = getattr(xl[name], "max_row", None) or len(rows)
                 sheets.append(_sheet_inspection(name, rows, estimate))
         finally:
             xl.close()
@@ -240,8 +265,8 @@ def ingest(
         xl = _excel_file(path)
         try:
             if sheet is None:
-                sheet = xl.sheet_names[0]
-            elif sheet not in xl.sheet_names:
+                sheet = xl.sheetnames[0]
+            elif sheet not in xl.sheetnames:
                 raise IngestError(f'Sheet "{sheet}" was not found in this file.')
             rows = _read_excel_sheet(xl, sheet)
         finally:

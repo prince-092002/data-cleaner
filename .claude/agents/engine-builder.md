@@ -18,7 +18,7 @@ You build the cleaning engine in `engine/` with tests in `tests/engine/`.
 - Final reply: under 150 words. Files changed, tests run and their result, open questions.
 
 ## Your rules
-- Python 3.12. Polars for transforms, DuckDB for profiling, pandas only to read Excel.
+- Python 3.12. Polars for transforms and profiling, openpyxl (read-only) to read Excel. No DuckDB, pandas, numpy or pyarrow.
 - Zero web code in `engine/`: no FastAPI, no HTTP, no imports from `backend/`.
 - Never modify the original upload. Read every cell as text.
 - Every rule follows CONTRACT.md section 2: `apply(df, column, params) -> (new_df, change_records)`, pure and deterministic, one file per rule, registered in `engine/rules/registry.py`.
