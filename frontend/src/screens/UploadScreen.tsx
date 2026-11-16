@@ -7,20 +7,19 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAppState } from '@/state/AppState'
 
-export const DEFAULT_MAX_MB = 50          // until the server says otherwise
 export const SAMPLES = [
   { file: 'sales_orders_messy.csv', label: 'Sales orders (CSV)' },
   { file: 'customers_messy.xlsx', label: 'Customers (Excel)' },
   { file: 'hr_survey_messy.csv', label: 'HR survey (CSV)' },
 ]
 
-/** Friendly client-side check only; the server stays the authority. */
-export function validateFile(file: File, maxMb = DEFAULT_MAX_MB): string | null {
+/** Friendly client-side check only; the server stays the authority. No size check until the server has told us its limit. */
+export function validateFile(file: File, maxMb: number | null): string | null {
   const name = file.name.toLowerCase()
   if (!name.endsWith('.csv') && !name.endsWith('.xlsx')) {
     return 'Only .csv and .xlsx files are supported.'
   }
-  if (file.size > maxMb * 1024 * 1024) {
+  if (maxMb !== null && file.size > maxMb * 1024 * 1024) {
     return `This file is larger than ${maxMb} MB. Please choose a smaller file.`
   }
   return null
@@ -49,7 +48,7 @@ export function UploadScreen() {
   const [busy, setBusy] = useState<null | 'upload' | 'profile'>(null)
   const [error, setError] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
-  const [maxMb, setMaxMb] = useState(DEFAULT_MAX_MB)
+  const [maxMb, setMaxMb] = useState<number | null>(null)
 
   useEffect(() => {
     let live = true
@@ -140,9 +139,12 @@ export function UploadScreen() {
         <CardTitle>
           <h2>Upload your file</h2>
         </CardTitle>
-        <CardDescription>Choose a CSV or Excel (.xlsx) file, {maxMb} MB or smaller.</CardDescription>
+        <CardDescription>
+          Choose a CSV or Excel (.xlsx) file{maxMb !== null && `, ${maxMb} MB or smaller`}.
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
+        <p className="text-sm text-slate-700">Files are deleted after 24 hours. Do not upload sensitive data.</p>
         <div
           data-testid="dropzone"
           onDragOver={(e) => {

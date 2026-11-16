@@ -137,4 +137,27 @@ describe('ProfileScreen', () => {
     expect(getJob).not.toHaveBeenCalled()
     expect(screen.getAllByTestId('column-card')).toHaveLength(2)
   })
+
+  it('shows a waiting state while the profile job is queued', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({ status: 'queued', progress_pct: 0, current_step: 'Queued' }))
+    setup()
+    await act(() => vi.advanceTimersByTimeAsync(2000))
+    expect(screen.getByText(/Waiting to start/)).toBeTruthy()
+  })
+
+  it('shows the expired message when the job is a 404', async () => {
+    vi.mocked(getJob).mockRejectedValue(Object.assign(new Error('Not found'), { status: 404 }))
+    setup()
+    await act(() => vi.advanceTimersByTimeAsync(2000))
+    expect(screen.getByRole('alert').textContent).toBe('This result has expired. Please upload the file again.')
+  })
+
+  it('shows the timeout message from the server', async () => {
+    vi.mocked(getJob).mockResolvedValue(
+      job({ status: 'failed', error: { code: 'job_timeout', message: 'This file took too long to process. Try a smaller file.' } }),
+    )
+    setup()
+    await act(() => vi.advanceTimersByTimeAsync(2000))
+    expect(screen.getByRole('alert').textContent).toMatch(/took too long/)
+  })
 })

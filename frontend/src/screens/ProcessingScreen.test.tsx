@@ -87,12 +87,12 @@ describe('ProcessingScreen', () => {
     expect(screen.getByTestId('probe').textContent).toBe('2|none')
   })
 
-  it('shows a friendlier line for interrupted jobs and can start over', async () => {
+  it('shows a friendlier line for interrupted jobs and can try another file', async () => {
     vi.mocked(getJob).mockResolvedValue(job({ status: 'failed', error: { code: 'interrupted', message: 'raw' } }))
     setup()
     await tick()
     expect(screen.getByRole('alert').textContent).toMatch(/server restarted/)
-    act(() => screen.getByRole('button', { name: 'Start over' }).click())
+    act(() => screen.getByRole('button', { name: 'Try another file' }).click())
     expect(screen.getByTestId('probe').textContent).toBe('0|none')
   })
 
@@ -102,7 +102,7 @@ describe('ProcessingScreen', () => {
     setup()
     await tick()
     expect(screen.getByRole('alert').textContent).toBe('Results unavailable')
-    expect(screen.getByRole('button', { name: 'Start over' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Try another file' })).toBeTruthy()
   })
 
   it('clears the interval on unmount', async () => {
@@ -120,5 +120,87 @@ describe('ProcessingScreen', () => {
     setup(false)
     expect(screen.getByRole('button', { name: 'Back to suggested fixes' })).toBeTruthy()
     expect(getJob).not.toHaveBeenCalled()
+  })
+
+  it('shows a waiting state while the job is queued', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({ status: 'queued', progress_pct: 0, current_step: 'Queued' }))
+    setup()
+    await tick()
+    expect(screen.getByText(/Waiting to start/)).toBeTruthy()
+    expect(screen.queryByText(/^Queued/)).toBeNull()
+  })
+
+  it('shows the step and percentage while running', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({ progress_pct: 45, current_step: 'Applying fixes' }))
+    setup()
+    await tick()
+    expect(screen.getByText('Applying fixes (45%)')).toBeTruthy()
+    expect(screen.queryByText(/Waiting to start/)).toBeNull()
+  })
+
+  it('shows the timeout message with a way back to Upload', async () => {
+    vi.mocked(getJob).mockResolvedValue(
+      job({ status: 'failed', error: { code: 'job_timeout', message: 'This file took too long to process. Try a smaller file.' } }),
+    )
+    setup()
+    await tick()
+    expect(screen.getByRole('alert').textContent).toBe('This file took too long to process. Try a smaller file.')
+    act(() => screen.getByRole('button', { name: 'Try another file' }).click())
+    expect(screen.getByTestId('probe').textContent).toBe('0|none')
+  })
+
+  it('falls back to a plain timeout message when the server sends none', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({ status: 'failed', error: { code: 'job_timeout' } as JobStatus['error'] }))
+    setup()
+    await tick()
+    expect(screen.getByRole('alert').textContent).toMatch(/took too long/)
+  })
+
+  it('shows the expired message for a failed job with code expired', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({ status: 'failed', error: { code: 'expired', message: 'raw' } }))
+    setup()
+    await tick()
+    expect(screen.getByRole('alert').textContent).toBe('This result has expired. Please upload the file again.')
+    act(() => screen.getByRole('button', { name: 'Upload another file' }).click())
+    expect(screen.getByTestId('probe').textContent).toBe('0|none')
+  })
+
+  it('shows the expired message when the job is a 404', async () => {
+    vi.mocked(getJob).mockRejectedValue(Object.assign(new Error('Not found'), { status: 404 }))
+    setup()
+    await tick()
+    expect(screen.getByRole('alert').textContent).toBe('This result has expired. Please upload the file again.')
+  })
+
+  it('shows the expired message when the results are a 404', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({ status: 'done', progress_pct: 100 }))
+    vi.mocked(getResults).mockRejectedValue(Object.assign(new Error('Not found'), { status: 404 }))
+    setup()
+    await tick()
+    expect(screen.getByRole('alert').textContent).toMatch(/has expired/)
+  })
+
+  it('polls every 2 s, then every 5 s after a minute', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({}))
+    setup()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000)
+    })
+    expect(getJob).toHaveBeenCalledTimes(30)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10_000)
+    })
+    expect(getJob).toHaveBeenCalledTimes(32)
+  })
+
+  it('stops polling once the job is done', async () => {
+    vi.mocked(getJob).mockResolvedValue(job({ status: 'done', progress_pct: 100 }))
+    vi.mocked(getResults).mockResolvedValue({ run_id: 'j1' } as unknown as ResultsResponse)
+    setup()
+    await tick()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(20_000)
+    })
+    expect(getJob).toHaveBeenCalledTimes(1)
   })
 })
