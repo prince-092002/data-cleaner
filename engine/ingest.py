@@ -170,7 +170,9 @@ def _excel_raw(cell) -> object:
 
 def _read_excel_sheet(xl, sheet: str, max_rows: int | None = None) -> list[Row]:
     rows: list[Row] = []
-    for raw in xl[sheet].iter_rows(max_row=max_rows):
+    ws = xl[sheet]
+    ws.reset_dimensions()  # some exporters write a wrong <dimension>; read what is really there
+    for raw in ws.iter_rows(max_row=max_rows):
         # trailing blank cells are not part of the sheet (the reader pandas used trimmed them too)
         end = len(raw)
         while end and (raw[end - 1].value is None or raw[end - 1].value == ""):
@@ -221,8 +223,9 @@ def inspect(path: Path) -> FileInspection:
         xl = _excel_file(path)
         try:
             for name in xl.sheetnames:
+                declared = getattr(xl[name], "max_row", None) or 0  # read before the reader resets it
                 rows = _read_excel_sheet(xl, name, max_rows=HEADER_SCAN_ROWS)
-                estimate = getattr(xl[name], "max_row", None) or len(rows)
+                estimate = max(declared, len(rows))
                 sheets.append(_sheet_inspection(name, rows, estimate))
         finally:
             xl.close()

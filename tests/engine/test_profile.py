@@ -250,3 +250,12 @@ def test_profile_is_json_serialisable_and_matches_contract_fields():
         "format_patterns", "issues", "quality",
     }
     assert DatasetProfile.model_validate(data) == p
+
+
+def test_a_column_named_count_can_be_profiled(tmp_path):
+    from engine import pipeline
+
+    path = tmp_path / "c.csv"
+    path.write_text("id,count,v,n,name\n1,5,a,x,p\n2,6,b,y,q\n3,5,c,x,r\n", encoding="utf-8")
+    prof = pipeline.profile(path)
+    assert [c.name for c in prof.columns] == ["id", "count", "v", "n", "name"]

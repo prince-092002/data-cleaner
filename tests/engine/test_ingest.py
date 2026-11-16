@@ -142,3 +142,30 @@ def test_excel_reads_like_the_old_pandas_reader(tmp_path):
     assert df["id"].to_list() == ["1", "2", "3"]               # trailing blank rows are not data
     assert df["note"].to_list() == [None, None, "ok"]          # NA strings and error cells are empty
     assert df["n"].to_list() == ["2", "1.5", None]
+
+
+def test_excel_with_a_wrong_dimension_element_is_still_read_in_full(tmp_path):
+    import re
+    import zipfile
+
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    ws = wb.active
+    ws.append(["id", "name", "qty"])
+    for i in range(1, 6):
+        ws.append([i, f"n{i}", i * 2])
+    good = tmp_path / "good.xlsx"
+    wb.save(good)
+    bad = tmp_path / "bad.xlsx"
+    with zipfile.ZipFile(good) as zin, zipfile.ZipFile(bad, "w") as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename == "xl/worksheets/sheet1.xml":
+                data = re.sub(rb'<dimension ref="[^"]*"', b'<dimension ref="A1"', data)
+                assert b'<dimension ref="A1"' in data
+            zout.writestr(item, data)
+    df = ingest.ingest(bad).df
+    assert df.columns == ["_row_id", "id", "name", "qty"]
+    assert df.height == 5
+    assert ingest.inspect(bad).sheets[0].row_count_estimate > 1

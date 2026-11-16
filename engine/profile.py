@@ -317,8 +317,9 @@ def profile_dataframe(
     columns: list[ColumnProfile] = []
     for i, (col, name, original) in enumerate(zip(data_cols, names, originals)):
         report(30 + int(50 * i / max(len(data_cols), 1)), "Profiling columns")
-        vc = df.get_column(col).drop_nulls().value_counts()
-        counts = dict(zip(vc.get_column(col).to_list(), vc.get_column("count").to_list()))
+        # renamed so a data column called "count" cannot clash with the count column
+        vc = df.get_column(col).drop_nulls().alias("value").value_counts(name="n")
+        counts = dict(zip(vc.get_column("value").to_list(), vc.get_column("n").to_list()))
         samples = df.get_column(col).drop_nulls().unique(maintain_order=True).head(25).to_list()
         columns.append(
             profile_column(
