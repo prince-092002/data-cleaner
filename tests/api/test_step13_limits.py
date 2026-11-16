@@ -223,3 +223,40 @@ def test_global_refusal_does_not_use_up_the_ip_allowance(tmp_path):
         with Session(app.state.ctx.engine) as s:
             ip_rows = [k.n for k in s.exec(select(Counter)).all() if k.key.startswith("ip:")]
         assert ip_rows == [1]
+
+
+# ----------------------------------------------------------------------------- round 2
+
+def test_cron_expires_a_stuck_running_job(tmp_path):
+    app, _ = make(tmp_path)
+    with TestClient(app) as c:
+        dataset_id = upload(c)
+        now = utcnow()
+        with Session(app.state.ctx.engine) as s:
+            s.add(Job(id="11111111-1111-4111-8111-111111111111", dataset_id=dataset_id, type="profile",
+                      status="running", started_at=now - dt.timedelta(hours=1),
+                      deadline_at=now - dt.timedelta(minutes=5), created_at=now, updated_at=now))
+            s.commit()
+        r = c.get("/api/cron/cleanup", headers=AUTH)
+        assert r.status_code == 200 and r.json()["expired_jobs"] == 1
+        with Session(app.state.ctx.engine) as s:
+            assert s.get(Job, "11111111-1111-4111-8111-111111111111").status == "failed"
+
+
+def _ip_keys(tmp_path, monkeypatch, salt):
+    if salt:
+        monkeypatch.setenv("DC_IP_HASH_SALT", salt)
+    else:
+        monkeypatch.delenv("DC_IP_HASH_SALT", raising=False)
+    app, _ = make(tmp_path / (salt or "none"))
+    with TestClient(app) as c:
+        c.post(f"/api/datasets/{upload(c)}/profile", headers={"x-forwarded-for": "203.0.113.7"})
+        with Session(app.state.ctx.engine) as s:
+            return [k.key for k in s.exec(select(Counter)).all() if k.key.startswith("ip:")]
+
+
+def test_ip_key_hides_the_address_and_changes_with_the_salt(tmp_path, monkeypatch):
+    a = _ip_keys(tmp_path, monkeypatch, "salt-one")
+    b = _ip_keys(tmp_path, monkeypatch, "salt-two")
+    assert len(a) == len(b) == 1 and a != b
+    assert "203.0.113.7" not in a[0] and "salt-one" not in a[0]

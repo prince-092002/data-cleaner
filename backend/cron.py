@@ -11,11 +11,11 @@ from sqlmodel import Session, delete
 
 from backend import errors, limits
 from backend.cleanup import cleanup_expired
-from backend.db import Counter, acquire_lease, counter_set, release_lease
+from backend.db import Counter, acquire_lease, counter_set, expire_stuck_jobs, release_lease
 
 router = APIRouter(prefix="/api")
 log = logging.getLogger("data_cleaner.cron")
-LEASE_KEY = "cron:cleanup"
+LEASE_KEY = "cron:cleanup"     # held 600 s at most: a killed run never blocks the next daily run
 
 
 def _authorized(request: Request) -> bool:
@@ -36,13 +36,13 @@ def cron_cleanup(request: Request):
         return {"skipped": True}
     try:
         removed = cleanup_expired(ctx)
-        # TODO(Step 13, after Agent Q merges): call db.expire_stuck_jobs(ctx.engine) here and report its count.
+        expired_jobs = expire_stuck_jobs(ctx.engine)
         today = limits.utc_today().isoformat()
         with Session(ctx.engine) as session:              # yesterday's counters are no longer needed
             session.execute(delete(Counter).where(Counter.key != limits.BYTES_KEY, Counter.key.not_like(f"%:{today}%")))
             session.commit()
         stored = ctx.storage.size_under("")               # self-correct the running byte total
         counter_set(ctx.engine, limits.BYTES_KEY, stored)
-        return {"skipped": False, "removed": removed, "stored_bytes": stored}
+        return {"skipped": False, "removed": removed, "expired_jobs": expired_jobs, "stored_bytes": stored}
     finally:
         release_lease(ctx.engine, LEASE_KEY, holder)

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
+import os
 
 from fastapi import Request
 
@@ -36,8 +37,10 @@ def count_job(ctx: Context, request: Request) -> None:
     ip = client_ip(request)
     ip_key = None
     if ip is not None:
-        # Hash salted with the date: no raw address is stored, and the same address cannot be linked across days.
-        ip_key = f"ip:{day}:{hashlib.sha256(f'{day}:{ip}'.encode()).hexdigest()[:32]}"
+        # Only a hash is stored. Salted with a server secret when one is set (so the hash cannot be
+        # brute-forced from the IPv4 space), and always with the date (no linking across days).
+        salt = os.environ.get("DC_IP_HASH_SALT") or os.environ.get("CRON_SECRET") or ""
+        ip_key = f"ip:{day}:{hashlib.sha256(f'{salt}:{day}:{ip}'.encode()).hexdigest()[:32]}"
         if not counter_add(ctx.engine, ip_key, 1, cap=ctx.settings.daily_ip_cap):
             raise errors.ApiError(429, "too_many_jobs", IP_CAP)
     if not counter_add(ctx.engine, f"jobs:{day}", 1, cap=ctx.settings.daily_job_cap):
