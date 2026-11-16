@@ -280,7 +280,7 @@ overall           = 100 * sum(weight_d * dataset_dimension_d)
 | `new_value` | str or null | |
 | `action` | str | `auto` (mode auto or flag, not rejected) · `approved` (mode suggest, approved or edited by the user) |
 | `timestamp` | str | UTC ISO 8601 |
-| `reason` | str or null | short plain reason, filled by the rule (M6b); set for `standardize_categories` merges, empty for other records |
+| `reason` | str or null | short plain reason, filled by the rule (M6b); set for `standardize_categories` merges, empty for other records. Values: `majority spelling`; `Title Case spelling, no clear majority`; `most common spelling, no clear majority`; the Tier 2 reason; `merge chosen by the user` (Step 12: for every value the user added to a mapping or sent to a different target by editing, even when the rule had its own reason for that value; the plan records those values as `user_chosen` in the step's params) |
 
 Conventions by `change_type`:
 
@@ -487,7 +487,7 @@ Body: `{"sheet": "Q1" | null, "header_row": 0}` (both optional; defaults to the 
 }
 ```
 
-`type`: `profile` | `clean`. `status`: `queued` | `running` | `done` | `failed`. `error` is `{code, message}` when failed. `progress_pct` reaches 100 only when `status` is `done` (outputs saved).
+`type`: `profile` | `clean`. `status`: `queued` | `running` | `done` | `failed`. `error` is `{code, message}` when failed. The stored job state (section 8.8) has two more terminal values, `superseded` and `expired`; the API shows both as `failed`, with `error.code` `superseded` or `expired`. `progress_pct` reaches 100 only when `status` is `done` (outputs saved).
 
 ### 8.4 `GET /api/datasets/{id}/profile`
 
@@ -529,7 +529,15 @@ Query params for the change log table: `limit` (default 100, max 500), `offset`,
 
 ### 8.8 Jobs table (SQLModel)
 
-`Job`: `id` (UUID4, pk), `dataset_id`, `type`, `status`, `progress_pct` (int), `current_step` (str), `error_code`, `error_message`, `generation` (int), `created_at`, `updated_at`.
+`Job`: `id` (UUID4, pk), `dataset_id`, `type`, `status`, `progress_pct` (int), `current_step` (str), `error_code`, `error_message`, `generation` (int), `attempts` (int), `started_at`, `deadline_at`, `created_at`, `updated_at`.
+
+**Database (Step 12).** SQLite at `<storage dir>/app.db` by default. When `DATABASE_URL` is set the same tables (SQLModel) live in Postgres instead; `postgres://` and `postgresql://` are both accepted and mapped to the psycopg 3 driver, and prepared statements are off (`prepare_threshold=None`) because Neon's pooled URL goes through PgBouncer. Datetimes are stored as UTC and read back timezone-aware on both.
+
+**Job states.** `queued` -> `running` -> `done` | `failed`; plus `superseded` (a newer profile or clean of the same dataset replaced it; set when the newer job is created, and a late finish of the old job never overwrites it) and `expired` (ran past its deadline with no attempts left). `done`, `failed`, `superseded`, `expired` are terminal.
+
+**Claim (for the Step 13 queue worker).** `claim_job` is one conditional UPDATE, safe across processes: it succeeds only for a `queued` job, or a `running` job whose `deadline_at` has passed, and that has fewer than `job_max_attempts` (3) attempts. It sets `running`, adds 1 to `attempts`, and sets `started_at` and `deadline_at` (now + `job_lease_seconds`, 900). A redelivered message for a job that is running within its deadline, done, failed, superseded or expired does nothing (returns false). A running job past its deadline with no attempts left becomes `expired`. Every later write of a job (progress, done, failed) applies only while it is still `running`. The dataset `generation` guard is unchanged: results are saved by one UPDATE that matches only while the generation is still current.
+
+**Lease.** Table `Lease` (`key`, `dataset_id`, `holder`, `expires_at`): a lock shared by all instances. `acquire_lease` inserts, or takes over an expired row, in one statement. It makes the Excel build run once per clean run (key `xlsx:{run_id}`, 120 seconds): a second request for the same run waits for the file instead of building it again.
 `Dataset`: `id` (UUID4, pk), `filename`, `file_type`, `size_bytes`, `sheet`, `header_row`, `created_at`, `expires_at`, `generation` (int), `profile_json` (DatasetProfile or null), `results_json` (CleanResult or null), `results_run_id` (clean job whose folder holds the downloads, or null).
 
 ---
@@ -538,21 +546,24 @@ Query params for the change log table: `limit` (default 100, max 500), `offset`,
 
 ```
 storage/
-  app.db                      # SQLite
+  app.db                      # SQLite (only when DATABASE_URL is not set)
   {dataset_id}/
     original.csv | original.xlsx   # never modified
     inspection.json                # sheets and header rows found at upload
-    ingest-<key>.parquet / .json   # read-once cache (section 7), written by the profile job
-    runs/{run_id}/                 # one folder per clean job (M6)
+    cache/ingest-<key>.parquet / .json   # read-once cache (section 7), written by the profile job
+    runs/{run_id}/                 # one prefix per clean job (M6)
       plan.json
       clean.csv  report.html  recipe.yaml  changelog.csv  xlsx_spec.json
       clean.xlsx                   # only after the first Excel download or prepare call
 ```
 
-The profile and results are stored in the `Dataset` row (section 8.8), not as files. Downloads come from `runs/{results_run_id}/`. When a clean job's result is saved, the other run folders of that dataset are deleted, except those of clean jobs still queued or running; a superseded or failed clean job deletes its own folder. A download whose file is missing answers `409 not_ready`.
+**Storage backends (Step 12).** The backend talks to a `StorageBackend` (`backend/storage.py`) with string keys that look like the paths above: `put_file`, `put_bytes`, `get_file`, `read_bytes`, `open_stream`, `exists`, `list_keys`, `delete_prefix`. `DC_STORAGE_BACKEND=local` (default) keeps them as files under `DC_STORAGE_DIR`. `DC_STORAGE_BACKEND=blob` uses a private Vercel Blob store (package `vercel`, `vercel.blob.sync`; on Vercel it authenticates by OIDC through `BLOB_STORE_ID`, with no long-lived token). Blob is used only when that variable is set explicitly, never because Vercel variables happen to be present. `DATABASE_URL` independently selects Postgres (section 8.8).
+
+The engine never sees a storage key. A job downloads the original and the `cache/` files into a temp folder, runs `engine.pipeline` there, uploads what it wrote and deletes the temp folder. Every clean run writes only under its own `runs/{run_id}/` prefix; the one deliberately shared place is `cache/`, whose files are named by content key, written with unique temp names and an atomic rename, so two profiles of the same file at once cannot fail each other (a cache write error is logged and does not fail the profile). Because the cache is in storage, a clean on another server instance reuses a profile's parse. Cleanup (and a deleted or expired dataset) removes `{dataset_id}/` by prefix, which is what keeps a Blob store inside its 1 GB free limit.
+The profile and results are stored in the `Dataset` row (section 8.8), not as files. Downloads come from `runs/{results_run_id}/`. When a clean job's result is saved, the other run folders of that dataset are deleted, except those of clean jobs still queued or running; a superseded or failed clean job deletes its own folder. A download whose file is missing answers `409 not_ready`; a dataset (or run) deleted while a request was running answers `404`, never `500`. Downloads are streamed from storage through the API.
 
 - `clean.csv`: UTF-8, comma-delimited, header = column `name`s, no `_row_id`. `clean.xlsx`: one sheet named `clean`, numbers/dates/booleans written as real Excel types.
-- A cleanup task runs at startup and every hour: deletes any dataset folder and its database rows where `expires_at` (upload time + 24 hours) has passed. An expired dataset answers `404` even before the task has run. Folders with no database row are removed once they are over an hour old.
+- A cleanup task runs at startup and every hour: deletes any dataset folder and its database rows where `expires_at` (upload time + 24 hours) has passed. An expired dataset answers `404` even before the task has run. Prefixes with no database row are removed once their newest file is over an hour old.
 - The upload limit (`DC_MAX_UPLOAD_MB`, default 50) is enforced twice: by an ASGI layer that counts body bytes as they arrive (refusing at once from a declared `Content-Length`, otherwise stopping as soon as the body passes the limit plus 1 MB of form overhead, so chunked uploads with no `Content-Length` are also refused before the form is parsed), and again on the file bytes while streaming to disk.
 - Stored file names are fixed (above). User-supplied filenames are never used as paths.
 

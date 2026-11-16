@@ -18,7 +18,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-backend = ["fastapi>=0.111", "uvicorn[standard]>=0.30", "sqlmodel>=0.0.19", "python-multipart>=0.0.9"]
+backend = ["fastapi>=0.111", "uvicorn[standard]>=0.30", "sqlmodel>=0.0.19", "python-multipart>=0.0.9",
+           "vercel==0.13.0", "psycopg[binary]==3.3.9"]
 dev = ["pytest>=8.2", "httpx>=0.27"]
 
 [tool.pytest.ini_options]

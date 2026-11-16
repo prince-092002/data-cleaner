@@ -15,7 +15,7 @@ from backend.config import MB, Settings
 from backend.db import fail_interrupted_jobs, make_engine
 from backend.jobs import Context
 from backend.routes import router
-from backend.storage import Storage
+from backend.storage import StorageBackend, make_storage
 
 log = logging.getLogger("data_cleaner")
 _MULTIPART_OVERHEAD = MB      # form boundaries and headers around the file
@@ -76,14 +76,17 @@ class UploadLimit:
             await self._reject(send)
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, storage: StorageBackend | None = None) -> FastAPI:
     settings = settings or Settings()
-    storage = Storage(settings.storage_dir)
-    ctx = Context(settings=settings, engine=make_engine(settings.db_path), storage=storage)
+    storage = storage or make_storage(settings)
+    engine = make_engine(settings.database_url or settings.db_path)
+    ctx = Context(settings=settings, engine=engine, storage=storage)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI):
-        interrupted = fail_interrupted_jobs(ctx.engine)
+        # With one SQLite file there is one server process, so a job found running died with the
+        # previous process. With a shared database other instances may own it; its deadline handles that.
+        interrupted = fail_interrupted_jobs(ctx.engine) if ctx.engine.dialect.name == "sqlite" else 0
         if interrupted:
             log.warning("marked %s interrupted job(s) as failed", interrupted)
         task = asyncio.create_task(cleanup_loop(ctx))     # runs once now, then every hour

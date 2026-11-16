@@ -78,3 +78,15 @@ def test_report_and_recipe_are_written_when_changes_carry_a_reason(tmp_path):
     step = next(s for s in saved.steps if s.rule_id == "standardize_categories")
     assert step.params["mapping"] == {"Chicago": "CHICAGO"}
     assert "majority spelling" not in (out / "recipe.yaml").read_text(encoding="utf-8")
+
+
+def test_a_retargeted_merge_is_logged_as_chosen_by_the_user(tmp_path):
+    """Step 12: the user changed where WEST goes, so the automatic reason no longer applies."""
+    from engine.models import EditedProposal
+    regions = ["WEST"] * 60 + ["West"] * 40 + ["North"] * 100
+    src = _write(tmp_path / "r.csv", ["id", "region"], [[i, r] for i, r in enumerate(regions, 1)])
+    prof = pipeline.profile(src)
+    cat = next(p for p in prof.proposals if p.rule_id == "standardize_categories")
+    _, rows = _clean(tmp_path, src, Decisions(edited=[EditedProposal(id=cat.id, params={"mapping": {"WEST": "Western"}})]))
+    region = [r for r in rows if r["column"] == "region"]
+    assert {(r["new_value"], r["reason"]) for r in region} == {("Western", "merge chosen by the user")}

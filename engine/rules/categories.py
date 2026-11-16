@@ -79,8 +79,11 @@ class StandardizeCategories(Rule):
 
         df, records = self.map_values(df, column, remap)
         reasons: dict[str, str] = params.get("reasons", {})
+        chosen = set(params.get("user_chosen", []))
         for r in records:
-            if params.get("tier") == 1:
+            if r.old_value in chosen or P.tidy_text(r.old_value) in chosen:
+                r.reason = EDITED_REASON
+            elif params.get("tier") == 1:
                 r.reason = MAJORITY_REASON
             elif params.get("case_suggestion"):
                 r.reason = f"{_case_kind(r.new_value)}, no clear majority"

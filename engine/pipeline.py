@@ -186,6 +186,9 @@ def build_plan(profile: DatasetProfile, decisions: Decisions) -> ApprovedPlan:
             if not_allowed:
                 raise PlanError(f'"{sorted(not_allowed)[0]}" cannot be edited for this suggestion.')
             params.update(edits[prop.id])
+            if "mapping" in edits[prop.id]:      # values the user added or retargeted: logged as user choices
+                original = prop.params.get("mapping", {})
+                params["user_chosen"] = sorted(v for v, t in params["mapping"].items() if original.get(v) != t)
         steps.append(
             PlanStep(
                 rule_id=prop.rule_id,
