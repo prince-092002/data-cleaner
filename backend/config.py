@@ -1,5 +1,5 @@
 """Backend settings. Override with environment variables (DC_STORAGE_DIR, DC_CORS_ORIGINS,
-DC_MAX_UPLOAD_MB, DC_JOB_RUNNER, DC_STORAGE_LIMIT_MB, DC_DAILY_JOB_CAP, DC_DAILY_IP_CAP, DC_IP_HASH_SALT),
+DC_MAX_UPLOAD_MB, DC_JOB_RUNNER, DC_STORAGE_LIMIT_MB, DC_DAILY_JOB_CAP, DC_DAILY_IP_CAP, DC_DAILY_UPLOAD_CAP, DC_DAILY_IP_UPLOAD_CAP, DC_IP_HASH_SALT),
 plus the adapter switches:
 
 - DATABASE_URL: when set, jobs and datasets live in Postgres (postgres:// and postgresql:// both
@@ -73,6 +73,8 @@ class Settings:
     storage_limit_bytes: int = field(default_factory=lambda: _int_env("DC_STORAGE_LIMIT_MB", 800) * MB)
     daily_job_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_JOB_CAP", 200))
     daily_ip_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_CAP", 10))
+    daily_upload_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_UPLOAD_CAP", 300))
+    daily_ip_upload_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_UPLOAD_CAP", 20))
     # "queue" (Vercel Queues, production) only when DC_JOB_RUNNER=queue; Vercel variables alone never select it.
     job_runner: str = field(default_factory=_job_runner)
     job_deadline_seconds: float = 240  # hard limit per attempt, inside the 300 s function limit

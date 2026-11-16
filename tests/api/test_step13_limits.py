@@ -260,3 +260,53 @@ def test_ip_key_hides_the_address_and_changes_with_the_salt(tmp_path, monkeypatc
     b = _ip_keys(tmp_path, monkeypatch, "salt-two")
     assert len(a) == len(b) == 1 and a != b
     assert "203.0.113.7" not in a[0] and "salt-one" not in a[0]
+
+
+# ----------------------------------------------------------------------------- round 3
+
+UP_GLOBAL = "The demo has reached today's upload limit. Please try again tomorrow."
+UP_IP = "You have reached today's upload limit for this demo. Please try again tomorrow."
+
+
+def post_upload(c, headers=None, name=SALES.name, data=None):
+    return c.post("/api/datasets", files={"file": (name, io.BytesIO(SALES.read_bytes() if data is None else data))},
+                  headers=headers or {})
+
+
+def test_upload_ip_cap_refuses_over_the_cap_and_resets_by_date(tmp_path, monkeypatch):
+    app, fake = make(tmp_path, daily_ip_upload_cap=2)
+    a, b = {"x-forwarded-for": "203.0.113.7"}, {"x-forwarded-for": "198.51.100.9"}
+    with TestClient(app) as c:
+        assert [post_upload(c, a).status_code for _ in range(2)] == [201, 201]
+        r = post_upload(c, a)
+        assert r.status_code == 429 and r.json()["error"] == {"code": "too_many_uploads", "message": UP_IP}
+        assert len(fake.blobs) == 4                           # the refused upload saved nothing
+        assert post_upload(c, b).status_code == 201           # another address is unaffected
+        assert post_upload(c).status_code == 201              # no header: no per-IP cap
+        tomorrow = limits.utc_today() + dt.timedelta(days=1)
+        monkeypatch.setattr(limits, "utc_today", lambda: tomorrow)
+        assert post_upload(c, a).status_code == 201
+
+
+def test_global_upload_cap(tmp_path):
+    app, _ = make(tmp_path, daily_upload_cap=1)
+    with TestClient(app) as c:
+        assert post_upload(c).status_code == 201
+        r = post_upload(c)
+        assert r.status_code == 429 and r.json()["error"] == {"code": "too_many_uploads", "message": UP_GLOBAL}
+
+
+def test_rejected_uploads_do_not_spend_an_upload_slot(tmp_path):
+    app, _ = make(tmp_path, daily_ip_upload_cap=1, daily_upload_cap=1, max_upload_bytes=1000)
+    h = {"x-forwarded-for": "203.0.113.7"}
+    with TestClient(app) as c:
+        assert post_upload(c, h, name="x.txt").status_code == 415      # wrong type
+        assert post_upload(c, h).status_code == 413                    # too large
+        assert post_upload(c, h, data=b"a,b\n1,2\n").status_code == 201  # slot still free
+    app2, _ = make(tmp_path / "full", daily_ip_upload_cap=1, storage_limit_bytes=1)
+    with TestClient(app2) as c:
+        assert post_upload(c, h, data=b"a,b\n1,2\n").status_code == 201
+        assert post_upload(c, h).status_code == 503                    # storage_full
+        with Session(app2.state.ctx.engine) as s:
+            used = [k.n for k in s.exec(select(Counter)).all() if k.key.startswith("upip:")]
+        assert used == [1]

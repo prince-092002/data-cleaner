@@ -19,7 +19,7 @@ from sqlmodel import Session
 
 from backend import errors, runner
 from backend.db import Dataset, Job, expire_stuck_jobs, iso, mark_superseded, start_generation, utcnow
-from backend.limits import check_storage_room, count_job
+from backend.limits import check_storage_room, count_job, count_upload
 from backend.jobs import Context, ensure_xlsx, run_clean_job, run_profile_job
 from backend.storage import (DOWNLOADS, StorageNotFound, TooLarge, file_key, is_uuid, looks_like, original_key,
                              run_key, runs_prefix, write_limited)
@@ -106,6 +106,7 @@ def upload_dataset(request: Request, file: UploadFile):
             inspection = pipeline.inspect(original)
         except IngestError as exc:
             raise errors.ApiError(422, "unreadable_file", exc.message)
+        count_upload(ctx, request)       # after every check, so a rejected upload spends no slot
         ctx.storage.put_file(original_key(dataset_id, file_type), original)
     ctx.storage.put_bytes(file_key(dataset_id, "inspection.json"), inspection.model_dump_json().encode("utf-8"))
     now = utcnow()

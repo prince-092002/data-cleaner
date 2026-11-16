@@ -15,10 +15,11 @@ from sqlmodel import Session
 from vercel.queue import Message, RetryAfter, subscribe
 
 from backend.config import Settings
-from backend.db import ACTIVE, Dataset, Job, fail_job, make_engine, utcnow
+from backend.db import ACTIVE, Dataset, Job, fail_job, utcnow
 from backend.jobs import Context, RetryJob, run_clean_job, run_profile_job
 from backend.runner import TOPIC
-from backend.storage import StorageNotFound, make_storage, run_key
+from backend.limits import make_context
+from backend.storage import StorageNotFound, run_key
 from engine.models import ApprovedPlan
 
 RETRY_DELAY_SECONDS = 20
@@ -26,9 +27,7 @@ RETRY_DELAY_SECONDS = 20
 
 @functools.cache
 def get_ctx() -> Context:
-    settings = Settings()
-    return Context(settings=settings, engine=make_engine(settings.database_url or settings.db_path),
-                   storage=make_storage(settings))
+    return make_context(Settings())
 
 
 def handle_message(ctx: Context, job_id: str) -> None:

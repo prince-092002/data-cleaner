@@ -89,7 +89,7 @@ class Lease(SQLModel, table=True):
 
 
 class Counter(SQLModel, table=True):
-    """Shared counters: "stored_bytes", "jobs:<UTC date>", "ip:<UTC date>:<hash>". See backend/limits.py."""
+    """Shared counters: "stored_bytes", "jobs:<UTC date>", "ip:<UTC date>:<hash>", "uploads:..." and "upip:..." (same shape). See backend/limits.py."""
 
     key: str = Field(primary_key=True)
     n: int = 0

@@ -330,3 +330,23 @@ def test_get_job_expires_a_stuck_job(client, queue):
 def test_the_lease_matches_the_deadline():
     s = Settings()
     assert s.job_deadline_seconds == 240 and 240 < s.job_lease_seconds <= 300
+
+
+def test_worker_writes_are_counted_in_stored_bytes(tmp_path, queue, monkeypatch):
+    """The queue consumer builds its own Context; its writes must reach the same byte counter as the routes'."""
+    from backend.db import counter_get
+    monkeypatch.setenv("DC_STORAGE_DIR", str(tmp_path / "s"))
+    monkeypatch.setenv("DC_STORAGE_BACKEND", "local")
+    worker.get_ctx.cache_clear()
+    app = create_app(Settings(storage_dir=tmp_path / "s", job_runner="queue"))
+    try:
+        with TestClient(app) as client:
+            dataset_id, job_id = start_profile(client)
+            ctx = worker.get_ctx()
+            queue.deliver(ctx, job_id)
+            clean_id = client.post(f"/api/datasets/{dataset_id}/clean", json={}).json()["job_id"]
+            queue.deliver(ctx, clean_id)
+            assert ctx.storage.size_under("") > 0
+            assert counter_get(ctx.engine, "stored_bytes") == ctx.storage.size_under("")
+    finally:
+        worker.get_ctx.cache_clear()

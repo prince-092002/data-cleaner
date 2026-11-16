@@ -13,11 +13,10 @@ from backend import errors
 from backend.cleanup import cleanup_loop
 from backend.config import MB, Settings
 from backend.cron import router as cron_router
-from backend.db import fail_interrupted_jobs, make_engine
-from backend.jobs import Context
-from backend.limits import MeteredStorage
+from backend.db import fail_interrupted_jobs
+from backend.limits import make_context
 from backend.routes import router
-from backend.storage import StorageBackend, make_storage
+from backend.storage import StorageBackend
 
 log = logging.getLogger("data_cleaner")
 _MULTIPART_OVERHEAD = MB      # form boundaries and headers around the file
@@ -80,9 +79,7 @@ class UploadLimit:
 
 def create_app(settings: Settings | None = None, storage: StorageBackend | None = None) -> FastAPI:
     settings = settings or Settings()
-    storage = storage or make_storage(settings)
-    engine = make_engine(settings.database_url or settings.db_path)
-    ctx = Context(settings=settings, engine=engine, storage=MeteredStorage(storage, engine))
+    ctx = make_context(settings, storage)
 
     @contextlib.asynccontextmanager
     async def lifespan(app: FastAPI):

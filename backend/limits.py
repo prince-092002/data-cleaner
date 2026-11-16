@@ -10,13 +10,16 @@ import os
 from fastapi import Request
 
 from backend import errors
-from backend.db import counter_add, counter_get
+from backend.db import counter_add, counter_get, make_engine
 from backend.jobs import Context
+from backend.storage import make_storage
 
 BYTES_KEY = "stored_bytes"
 STORAGE_FULL = "The demo is full right now. Please try again tomorrow."
 GLOBAL_CAP = "The demo has reached today's limit. Please try again tomorrow."
 IP_CAP = "You have reached today's limit for this demo. Please try again tomorrow."
+UPLOAD_GLOBAL_CAP = "The demo has reached today's upload limit. Please try again tomorrow."
+UPLOAD_IP_CAP = "You have reached today's upload limit for this demo. Please try again tomorrow."
 
 
 def utc_today() -> dt.date:
@@ -30,7 +33,8 @@ def client_ip(request: Request) -> str | None:
     return first or None
 
 
-def count_job(ctx: Context, request: Request) -> None:
+def _take_slot(ctx: Context, request: Request, keys: tuple[str, str], global_cap: int, ip_cap: int,
+               code: str, global_msg: str, ip_msg: str) -> None:
     """Take one slot of today's caps or raise 429. The IP slot is taken first and handed back if the
     global cap refuses, so a refused request uses up nothing."""
     day = utc_today().isoformat()
@@ -40,13 +44,23 @@ def count_job(ctx: Context, request: Request) -> None:
         # Only a hash is stored. Salted with a server secret when one is set (so the hash cannot be
         # brute-forced from the IPv4 space), and always with the date (no linking across days).
         salt = os.environ.get("DC_IP_HASH_SALT") or os.environ.get("CRON_SECRET") or ""
-        ip_key = f"ip:{day}:{hashlib.sha256(f'{salt}:{day}:{ip}'.encode()).hexdigest()[:32]}"
-        if not counter_add(ctx.engine, ip_key, 1, cap=ctx.settings.daily_ip_cap):
-            raise errors.ApiError(429, "too_many_jobs", IP_CAP)
-    if not counter_add(ctx.engine, f"jobs:{day}", 1, cap=ctx.settings.daily_job_cap):
+        ip_key = f"{keys[1]}:{day}:{hashlib.sha256(f'{salt}:{day}:{ip}'.encode()).hexdigest()[:32]}"
+        if not counter_add(ctx.engine, ip_key, 1, cap=ip_cap):
+            raise errors.ApiError(429, code, ip_msg)
+    if not counter_add(ctx.engine, f"{keys[0]}:{day}", 1, cap=global_cap):
         if ip_key:
             counter_add(ctx.engine, ip_key, -1)
-        raise errors.ApiError(429, "too_many_jobs", GLOBAL_CAP)
+        raise errors.ApiError(429, code, global_msg)
+
+
+def count_job(ctx: Context, request: Request) -> None:
+    _take_slot(ctx, request, ("jobs", "ip"), ctx.settings.daily_job_cap, ctx.settings.daily_ip_cap,
+               "too_many_jobs", GLOBAL_CAP, IP_CAP)
+
+
+def count_upload(ctx: Context, request: Request) -> None:
+    _take_slot(ctx, request, ("uploads", "upip"), ctx.settings.daily_upload_cap, ctx.settings.daily_ip_upload_cap,
+               "too_many_uploads", UPLOAD_GLOBAL_CAP, UPLOAD_IP_CAP)
 
 
 def check_storage_room(ctx: Context) -> None:
@@ -86,3 +100,10 @@ class MeteredStorage:
 
     def download_prefix(self, prefix, dest):
         self._inner.download_prefix(prefix, dest)
+
+
+def make_context(settings, storage=None) -> Context:
+    """The one way to build a Context (used by the web app and the queue consumer): the database
+    engine, and storage wrapped so every write and delete reaches the stored_bytes counter."""
+    engine = make_engine(settings.database_url or settings.db_path)
+    return Context(settings=settings, engine=engine, storage=MeteredStorage(storage or make_storage(settings), engine))
