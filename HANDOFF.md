@@ -108,7 +108,7 @@ Tests: **384 Python passed, 60 frontend passed** (no product code changed in Ste
 ## Next steps
 1. Wait for the owner's "go". Then Step 12 (adapters: Postgres, Blob, queue consumer, slim engine). Fold in from the review: cache temp-file clash between two profile jobs, no lock on the Excel build, wrong reason text for user-edited mappings.
 2. Step 13: also show the `reason` column in the report and UI, and narrow the "no" and "key" id tokens. Steps 14-15: deploy and verify.
-3. After the real deployment works: `vercel project rm data-cleaner-spike`, remove its Neon database and Blob store in the dashboard, delete branch `spike-vercel`.
+3. After the real deployment works: `vercel project remove data-cleaner-spike`, remove its Neon database and Blob store in the dashboard, delete branch `spike-vercel`.
 
 ## How to run
 ```bash
