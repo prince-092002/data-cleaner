@@ -7,30 +7,23 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`; Part B tagged `phase1-m6b`. Step 10 (GitHub) done.
-- **Repo:** https://github.com/prince-092002/data-cleaner (private, default branch `main`, all tags pushed). CI runs on every push.
-- **Waiting for:** the owner's "go" for Step 11 (Vercel feasibility spike). Do not start it before.
+- **Phase:** 1, milestone M6, Part C. Step 11 (Vercel feasibility spike) done: verdict **go**, see [docs/ADR-hosting-vercel.md](docs/ADR-hosting-vercel.md).
+- **Repo:** https://github.com/prince-092002/data-cleaner (private, default branch `main`, CI on every push). Branch `spike-vercel` holds the throwaway `spike/` folder and is never merged.
+- **Vercel:** account prince-092002 (Hobby). Spike project `data-cleaner-spike` with Neon Postgres and a private Blob store still exists; delete it once the real deployment works.
+- **Waiting for:** the owner's "go" for Step 12. Do not start it before.
 
-## Last milestone summary (M6 Step 10, 2026-11-15)
-- Housekeeping: worktree removed, merged m6b branches deleted, only `main` left. `.gitignore` widened (`.env.*`, build output, `*.parquet`, caches, `.claude/worktrees/`, OS junk). README has a "Deploying" placeholder.
-- Safety scan before the first push. Whole history: no file over 20 MB was ever committed (largest is the Chicago CSV, 4.8 MB), and no `.env`, key, certificate or secret pattern was found (one false positive, the UI label "Placeholder nulls"). Samples other than Chicago (public city data) are synthetic: generated with fixed seeds, emails on `@example.com`.
-- Private repo created and pushed: `main` plus tags phase1-m4, phase1-m5, phase1-m6a, phase1-m6b. Verified with gh: private, default branch main, 163 files on GitHub = 163 tracked locally.
-- GitHub Actions (`.github/workflows/ci.yml`): Python tests on 3.12, frontend tests and build on Node 24. First run passed in about 1 minute.
+## Last milestone summary (M6 Step 11, 2026-11-15)
+- Three subagents: docs research (Haiku, 2 rounds), bundle size (Haiku, 1 round), prototype (Opus, 1 round). No Opus escalation. The coordinator re-ran the progress test and the engine comparison.
+- Works on Hobby: Vercel Queues push consumer (Beta) with progress in a Postgres row read by other requests; Blob write/read/delete; Neon; the slim engine (270.73 MB bundle, limit 500 MB). The unmodified engine fails the build at 590.33 MB.
+- Real engine on a 4 MB Chicago cut (3,995 rows): profile 3.3 s, clean 5.8 s, peak 198 MB warm; about 15 s cold. Output is byte-identical to the local unmodified engine on the demo file and the Chicago cut.
+- A job that runs past 300 s is killed and redelivered every 5 minutes; `max_attempts` did not stop it. Without a queue, a job inside the request survived a dropped connection (one test).
+- Not measured: Neon wake after idle (the retrying test job kept it awake). One spike deployment became production by accident (static page only, public).
 
-Tests: **384 Python passed, 60 frontend passed**, build OK (locally and in CI).
+Tests: **384 Python passed, 60 frontend passed** (no product code changed in Step 11).
 
 ## Decisions made
-- 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
-- 2026-11-11 (M0) Change log has an extra `change_type` field, to record removed rows, removed columns, renamed headers and added columns.
-- 2026-11-11 (M0) Auto fixes are listed on the fixes screen and can be rejected; a suggestion with no answer is not applied.
-- 2026-11-11 (M0) "Try a sample file" uploads a bundled file through the normal upload endpoint; no extra endpoint.
-- 2026-11-11 (M0) Added `engine/models.py`, `engine/rules/base.py`, `engine/errors.py` to the layout.
-- 2026-11-11 (M1) Added `engine/parsing.py` so the profiler and the rules share one set of value parsers and cannot disagree.
-- 2026-11-11 (M1) CONTRACT change: category similarity threshold 90 -> 85. Why: a one-letter typo in a short word ("Nrth") scores 88.9 and was missed. Values whose digits differ are never merged.
-- 2026-11-11 (M1) CONTRACT change: key candidate = type `id`, `integer` or `text` AND distinct/non-null >= 0.95. Why: repeating id columns (zip codes) looked like broken keys.
-- 2026-11-11 (M1) CONTRACT change: conformity divides by (non-null + null-token cells). Why: otherwise fixing "N/A" placeholders would not move the score.
-- 2026-11-11 (M1) CONTRACT change: empty cells are null at ingest; Excel values become text; dataframe columns keep the uploaded header until `normalize_headers`. Why: avoids pointless `"" -> null` log entries and keeps duplicate or empty headers addressable.
-- 2026-11-11 (M1) CONTRACT clarification: type inference order written out; `id` needs numeric-looking values plus a leading zero or an id-like name.
+- 2026-11-11 (M0, summarised) Repo root is the working folder. Change log has a `change_type` field. Auto fixes are listed and can be rejected; an unanswered suggestion is not applied. "Try a sample file" uses the normal upload endpoint. Added `engine/models.py`, `engine/rules/base.py`, `engine/errors.py`.
+- 2026-11-11 (M1, summarised) `engine/parsing.py` shares value parsers between profiler and rules. CONTRACT changes: category similarity 90 -> 85 (values whose digits differ never merge); key candidate = id, integer or text with distinct/non-null >= 0.95; conformity divides by non-null + null-token cells; empty cells are null at ingest, Excel values are text, headers stay as uploaded until `normalize_headers`; type inference order written out.
 - 2026-11-11 (M1, M2) M0 to M2 were built in the main session, not through the helper agents (agent files created mid-session load only in a new session).
 - 2026-11-11 (M2) CONTRACT change: `trigger(profile)` returns lightweight candidates, and rules get an optional `prepare(df, column, params)`. Why: some params need the data, not just the profile (date order, category mapping), and must be computed after earlier fixes such as trimming.
 - 2026-11-11 (M2) CONTRACT change: proposals come from a dry run of all candidates in rule order. Why: gives true `rows_affected` and before/after samples, and drops fixes that would change nothing.
@@ -45,21 +38,17 @@ Tests: **384 Python passed, 60 frontend passed**, build OK (locally and in CI).
 - 2026-11-11 (M3) An expired dataset answers 404 immediately; jobs left running by a server restart are marked failed (`interrupted`). Why: the UI must never poll forever.
 - 2026-11-11 (M3) New CONTRACT items: `inspection.json` in storage, `internal_error` and `interrupted` codes, 409 for a download before cleaning, `/api/health`.
 - 2026-11-11 (M3) M3 was also built in the main session; the helper agents are loaded now and can be used from M4.
-
 - 2026-11-11 (M4) Frontend uses native selects for change-log filters and plain divs for dimension bars. Why: simpler, keyboard-friendly, easier to test.
 - 2026-11-11 (M4) "Approve all safe fixes" = every proposal that is not destructive and not flag-mode. Auto and flag proposals run unless rejected; suggest proposals run only if approved (matches build_plan).
 - 2026-11-11 (M4) Day-first/month-first is a one-click toggle on the parse_dates card, not hidden in the edit dialog.
 - 2026-11-11 (M4) The Processing screen shows the server's `current_step` text only, no invented stage list.
-
 - 2026-11-11 (pre-M5) Short-value guard reference list is built in (`north, south, east, west, usa, uk, eu, yes, no, male, hr, it`). Why: no user-supplied list exists in Phase 1. Side effect: "Wset" and similar short typos are still not merged.
 - 2026-11-11 (pre-M5) Unparseable values ("abc", "31/02/2024") are kept as text and warned about, never guessed.
 - 2026-11-11 (pre-M5) Sales sample realism over score: duplicates capped at about 6% and empty rows at 8, so the starting score stays near 78.
-
 - 2026-11-11 (M5) Owner decision: the sales sample stays at a starting score of about 78; the score weights are not changed.
 - 2026-11-11 (M5) Owner decision: success = per-dimension lift, recall on injected errors, zero damaged cells (CONTRACT section 11). Recall excludes errors that are not fixable by design, and they are listed separately.
 - 2026-11-11 (M5) The real public dataset (Chicago) is outside the ground-truth evaluation. Its test tolerates a 0.5-point uniqueness drop because of the free-text key-candidate artifact; engine left unchanged.
 - 2026-11-11 (M5) Reviewer findings on job overwrite and streaming size check were not fixed in M5 (demo scope); logged as known issues.
-
 - 2026-11-12 (M6.1) Answer key: duplicate_row goes on every later identical row, not on the inserted copy. Why: the rule keeps the first occurrence; 16 "misses" were correct removals of the other row.
 - 2026-11-12 (M6.1) Answer key: parentheses_negative expects -x (CONTRACT 2.3). Engine unchanged.
 - 2026-11-12 (M6.2) Tier 1 category merges are auto through a new `Candidate.auto_safe` flag, so the rule stays one of the 10 and stays destructive for Tier 2.
@@ -91,6 +80,9 @@ Tests: **384 Python passed, 60 frontend passed**, build OK (locally and in CI).
 - 2026-11-15 (M6.9) Branch renamed from master to main before GitHub.
 - 2026-11-15 (M6.10) Repo is private on the owner's account (`prince-092002/data-cleaner`); CI added because it took minutes. The gh token has no `workflow` scope, yet the first workflow push to a new repo was accepted; if a later workflow change is refused, run `gh auth refresh -s workflow`.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
+- 2026-11-15 (M6.11) Hosting decision: Vercel Hobby with Queues (push consumer) for jobs, Neon Postgres for rows, private Blob for files. Fallback: job inside the request with the same status row. Details and sources in docs/ADR-hosting-vercel.md.
+- 2026-11-15 (M6.11) Pending CONTRACT change for Step 12 (owner to confirm): the deployed engine drops DuckDB, pandas, numpy and pyarrow (Polars + openpyxl do their work). Why: the bundle is 590 MB with them, 271 MB without; limit 500 MB.
+- 2026-11-15 (M6.11) Step 12 rules from the spike: consumer stops itself at about 270 s and marks the job failed; messages sent with short retention; consumer checks the job row first (at-least-once delivery); live upload limit stays 4 MB unless the browser uploads straight to Blob.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
@@ -114,8 +106,9 @@ Tests: **384 Python passed, 60 frontend passed**, build OK (locally and in CI).
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Wait for the owner's "go". Then Step 11: Vercel feasibility spike. The owner must run `vercel login` when asked.
-2. Part C continues (Steps 12-15): adapters, deploy.
+1. Wait for the owner's "go". Then Step 12 (adapters: Postgres, Blob, queue consumer, slim engine). Fold in from the review: cache temp-file clash between two profile jobs, no lock on the Excel build, wrong reason text for user-edited mappings.
+2. Step 13: also show the `reason` column in the report and UI, and narrow the "no" and "key" id tokens. Steps 14-15: deploy and verify.
+3. After the real deployment works: `vercel project rm data-cleaner-spike`, remove its Neon database and Blob store in the dashboard, delete branch `spike-vercel`.
 
 ## How to run
 ```bash
@@ -148,3 +141,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-15 | M6 Step 8b | Done. Majority spelling and id-like names (two subagents, round 1 each). Chicago: debatable 31 -> 0, useless flags 3 -> 0, 0 wrong; evaluation unchanged. 370 Python + 59 frontend tests passing.
 - 2026-11-15 | M6 Step 9 | Done. Owner decisions, code review (1 high fixed, 6 deferred), fresh Chicago hand check 98 correct / 2 useful flags / 0 wrong; evaluation unchanged. 384 Python + 60 frontend tests passing. Tagged phase1-m6b, branch renamed to main.
 - 2026-11-15 | M6 Step 10 GitHub | Done. Safety scan clean, private repo prince-092002/data-cleaner, main and 4 tags pushed, CI green (Python + frontend + build).
+- 2026-11-15 | M6 Step 11 Vercel spike | Done. Go. Queues + Postgres + Blob work on Hobby; slim engine 271 MB (unmodified 590 MB fails); 4 MB Chicago cut 9 s warm, 198 MB; output identical to local. ADR written. No product code changed.
