@@ -187,6 +187,13 @@ def _fetch_inputs(ctx: Context, dataset: Dataset, tmp: Path) -> tuple[Path, Path
     return original, cache, {p.name for p in cache.glob("*")}
 
 
+def _read_or_none(ctx: Context, key: str) -> bytes | None:
+    try:
+        return ctx.storage.read_bytes(key)
+    except StorageNotFound:
+        return None
+
+
 def run_profile_job(ctx: Context, job_id: str, dataset: Dataset, retryable: bool = False) -> None:
     def work(generation: int, cancel: threading.Event) -> bool:
         with tempfile.TemporaryDirectory() as tmp:
@@ -202,7 +209,7 @@ def run_profile_job(ctx: Context, job_id: str, dataset: Dataset, retryable: bool
             )
             with _storage_errors():
                 ctx.storage.upload_dir(cache, cache_prefix(dataset.id), skip=known)
-        return save_if_current(ctx.engine, dataset.id, generation, profile_json=result.model_dump_json())
+        return save_if_current(ctx.engine, dataset.id, generation, job_id, profile_json=result.model_dump_json())
 
     _run(ctx, job_id, work, retryable)
 
@@ -224,12 +231,19 @@ def run_clean_job(ctx: Context, job_id: str, dataset: Dataset, plan: ApprovedPla
                     display_name=dataset.filename,
                     cache_dir=cache,
                 )
+                if cancel.is_set():                  # timed out while finishing: publish nothing
+                    raise JobCancelled()
                 with _storage_errors():
                     ctx.storage.upload_dir(out_dir, prefix)
-            saved = save_if_current(ctx.engine, dataset.id, generation,
+            saved = save_if_current(ctx.engine, dataset.id, generation, job_id,
                                     results_json=result.model_dump_json(), results_run_id=job_id)
-        except BaseException:
+        except BaseException as exc:
+            # A crashed attempt that will be retried keeps plan.json: the redelivery reads it.
+            plan_key = run_key(dataset.id, job_id, "plan.json")
+            keep = None if isinstance(exc, JobCancelled) else _read_or_none(ctx, plan_key)
             ctx.storage.delete_prefix(prefix)
+            if keep is not None:
+                ctx.storage.put_bytes(plan_key, keep)
             raise
         if saved:
             # Never delete a folder another clean job may still be writing; it removes its own.
