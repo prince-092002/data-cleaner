@@ -7,17 +7,19 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, DuckDB, pandas for Excel only, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`; Part B (Steps 7 to 9) tagged `phase1-m6b`. The branch is now `main` (renamed from master). Not pushed.
-- **Waiting for:** the owner's "go" for Step 10 (GitHub). Do not start it before.
+- **Phase:** 1, milestone M6. Part A tagged `phase1-m6a`; Part B tagged `phase1-m6b`. Step 10 (GitHub) done.
+- **Repo:** https://github.com/prince-092002/data-cleaner (private, default branch `main`, all tags pushed). CI runs on every push.
+- **Waiting for:** the owner's "go" for Step 11 (Vercel feasibility spike). Do not start it before.
 
-## Last milestone summary (M6 Step 9, 2026-11-15)
-- Fable coordinated three Opus subagents and verified each report itself (diff, tests, checklists). Fixer: 2 rounds, both passed. Reviewer: 1 round. Hand-checker: 1 round.
-- **Owner decisions:** the `reason` column stays (every reader already picks columns by name; tests now prove the API, report, recipe and UI viewer handle 11 columns). A count-like word in a column name wins over an id word. Lowercase majorities stay as they are. Region case variants stay a suggestion (README demo line added).
-- **Code review since phase1-m6a:** 1 high, 3 medium, 3 low. High fixed: the cache key now includes a hash of the engine source, so an engine upgrade can no longer serve old column types. Medium and low are under known issues.
-- **Fresh Chicago hand check** (new seed 20261115, 100 new changes of 11,840): 98 correct, 2 useful flags, 0 debatable, 0 useless flags, 0 wrong. Coordinator re-drew the sample and re-checked 14 verdicts against the raw file: all agree.
-- **Evaluation unchanged:** held-out detection 96.7%, fix 69.1%, precision 100%, 0 damaged; tuning 97.3%, 66.9%, 100%, 0.
+## Last milestone summary (M6 Step 10, 2026-11-15)
+- Housekeeping: Agent A's worktree removed; merged branches `m6b-fixes`, `m6b-idcols`, `m6b-majority` deleted. Only `main` is left.
+- Safety scan before the first push. Whole history: no file over 20 MB was ever committed (largest is the Chicago CSV, 4.8 MB), and no `.env`, key, certificate or secret pattern was found (one false positive, the UI label "Placeholder nulls"). Samples other than Chicago (public city data) are synthetic: generated with fixed seeds, emails on `@example.com`.
+- `.gitignore` widened: `.env.*`, build output, `*.parquet`, tool caches, `evaluation/out/`, `.claude/worktrees/`, Windows junk.
+- README has a "Deploying" placeholder (live URL coming soon; GitHub plus Vercel, free tier).
+- Private repo created and pushed: `main` plus tags phase1-m4, phase1-m5, phase1-m6a, phase1-m6b. Verified with gh: private, default branch main, 163 files on GitHub = 163 tracked locally.
+- GitHub Actions (`.github/workflows/ci.yml`): Python tests on 3.12, frontend tests and build on Node 24. First run passed in about 1 minute.
 
-Tests: **384 Python passed, 60 frontend passed**, build OK.
+Tests: **384 Python passed, 60 frontend passed**, build OK (locally and in CI).
 
 ## Decisions made
 - 2026-11-11 (M0) Repo root is the working folder itself, not a nested `data-cleaner/`, so Claude Code finds `.claude/agents` and CLAUDE.md.
@@ -89,6 +91,7 @@ Tests: **384 Python passed, 60 frontend passed**, build OK.
 - 2026-11-15 (M6.9) Owner decisions: keep the `reason` column; keep lowercase majorities; keep Region case variants as a suggestion.
 - 2026-11-15 (M6.9) CONTRACT change: the cache key also holds a hash of the engine source (`cache.ENGINE_FINGERPRINT`). Why: ENGINE_VERSION was never bumped, so an upgraded engine could serve cached column types from the old one. Any engine edit now costs one re-parse.
 - 2026-11-15 (M6.9) Branch renamed from master to main before GitHub.
+- 2026-11-15 (M6.10) Repo is private on the owner's account (`prince-092002/data-cleaner`); CI added because it took minutes. The gh token has no `workflow` scope, yet the first workflow push to a new repo was accepted; if a later workflow change is refused, run `gh auth refresh -s workflow`.
 - 2026-11-12 (M6.1) Outlier method unchanged: the missed salary of 1 is inside the IQR fence. A plausibility floor would be a new rule, not a fix.
 
 ## Open questions and known issues
@@ -113,8 +116,8 @@ Tests: **384 Python passed, 60 frontend passed**, build OK.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Wait for the owner's "go". Then Part C (Steps 10-15): GitHub, Vercel feasibility spike, adapters, deploy. The owner must run `gh auth login` and `vercel login` when asked.
-2. Branches `m6b-majority`, `m6b-idcols` and `m6b-fixes` are merged and can be deleted, with the leftover worktree under `.claude/worktrees/`.
+1. Wait for the owner's "go". Then Step 11: Vercel feasibility spike. The owner must run `vercel login` when asked.
+2. Part C continues (Steps 12-15): adapters, deploy.
 
 ## How to run
 ```bash
@@ -146,3 +149,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-15 | M6 Steps 7b + 8 | Done. Excel on download; held-out batch; detection 96.7%, fix recall 69.1%, precision 100%, 0 damaged; Chicago hand check 0 wrong. 312 Python + 58 frontend tests passing.
 - 2026-11-15 | M6 Step 8b | Done. Majority spelling and id-like names (two subagents, round 1 each). Chicago: debatable 31 -> 0, useless flags 3 -> 0, 0 wrong; evaluation unchanged. 370 Python + 59 frontend tests passing.
 - 2026-11-15 | M6 Step 9 | Done. Owner decisions, code review (1 high fixed, 6 deferred), fresh Chicago hand check 98 correct / 2 useful flags / 0 wrong; evaluation unchanged. 384 Python + 60 frontend tests passing. Tagged phase1-m6b, branch renamed to main.
+- 2026-11-15 | M6 Step 10 GitHub | Done. Safety scan clean, private repo prince-092002/data-cleaner, main and 4 tags pushed, CI green (Python + frontend + build).
