@@ -362,7 +362,7 @@ def _profiled_through_queue(client, queue):
 
 
 def test_a_timed_out_clean_can_never_publish_results(tmp_path, queue, monkeypatch):
-    app = make_app(tmp_path, job_deadline_seconds=0.3)
+    app = make_app(tmp_path)
     blob = app.state.ctx.storage.c
     real = jobs.pipeline.clean
 
@@ -374,6 +374,7 @@ def test_a_timed_out_clean_can_never_publish_results(tmp_path, queue, monkeypatc
     with TestClient(app) as client:
         dataset_id, body = _profiled_through_queue(client, queue)
         clean_id = client.post(f"/api/datasets/{dataset_id}/clean", json=body).json()["job_id"]
+        app.state.ctx.settings.job_deadline_seconds = 0.3     # tiny deadline for the clean only, not the profile
         monkeypatch.setattr(jobs.pipeline, "clean", slow_then_finish)
         queue.deliver(app.state.ctx, clean_id)
         assert job_state(client, clean_id)["error"]["code"] == "job_timeout"
