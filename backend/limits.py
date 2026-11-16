@@ -1,4 +1,4 @@
-"""Free-tier guards (CONTRACT 8.9): stored-byte total, daily job caps, per-IP cap. Counters live in
+"""Free-tier guards (CONTRACT 8.10): stored-byte total, daily job caps, per-IP cap. Counters live in
 the database so every serverless instance shares them (db.counter_add is one atomic statement)."""
 
 from __future__ import annotations

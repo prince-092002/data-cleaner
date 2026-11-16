@@ -9,15 +9,19 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import tempfile
+import threading
 import time
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
 from sqlalchemy import Engine, update
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, select
 
 from backend.config import Settings
-from backend.db import (Dataset, Job, acquire_lease, claim_job, release_lease, save_if_current, utcnow)
+from backend.db import (TIMEOUT_MESSAGE, Dataset, Job, acquire_lease, claim_job, release_lease, save_if_current,
+                        utcnow)
 from backend.storage import (StorageBackend, StorageNotFound, cache_prefix, dataset_prefix, original_key, run_key,
                              run_prefix, runs_prefix)
 from engine import pipeline
@@ -43,10 +47,37 @@ def _update(ctx: Context, job_id: str, **fields) -> None:
         session.commit()
 
 
-def _progress(ctx: Context, job_id: str):
+class RetryJob(Exception):
+    """The attempt crashed for a reason that is not the file's fault and attempts are left: the job is
+    queued again and the consumer asks the queue to deliver the message once more."""
+
+
+class JobCancelled(Exception):
+    """Raised in the engine thread, at its next progress report, once the job passed its deadline."""
+
+
+class DeadlineExceeded(Exception):
+    pass
+
+
+class StorageError(Exception):
+    """Any failure of the storage backend (the original is chained, never shown to the user)."""
+
+
+@contextmanager
+def _storage_errors():
+    try:
+        yield
+    except Exception as exc:
+        raise StorageError(type(exc).__name__) from exc
+
+
+def _progress(ctx: Context, job_id: str, cancel: threading.Event):
     last = {"pct": -1, "step": ""}
 
     def report(pct: int, step: str) -> None:
+        if cancel.is_set():
+            raise JobCancelled()
         pct = max(0, min(99, int(pct)))          # 100 is set only when the outputs are saved
         if pct == last["pct"] and step == last["step"]:
             return
@@ -59,9 +90,9 @@ def _progress(ctx: Context, job_id: str):
 SUPERSEDED = "A newer run was started for this file, so this result was not kept."
 
 
-def _generation(ctx: Context, job_id: str) -> int:
+def _job(ctx: Context, job_id: str) -> Job:
     with Session(ctx.engine) as session:
-        return session.get(Job, job_id).generation
+        return session.get(Job, job_id)
 
 
 def _active_clean_runs(ctx: Context, dataset_id: str) -> set[str]:
@@ -77,27 +108,73 @@ def _active_clean_runs(ctx: Context, dataset_id: str) -> set[str]:
         ).all())
 
 
-def _run(ctx: Context, job_id: str, work) -> bool:
-    """work(generation) computes the result and saves it with save_if_current; returns that bool.
-    Returns False when the job was not claimed (a redelivery, or the job was replaced)."""
+def _with_deadline(work, generation: int, cancel: threading.Event, seconds: float) -> bool:
+    """Run the synchronous engine in a worker thread so the deadline can be enforced. A Python thread
+    cannot be killed: past the deadline it is told to stop (it raises JobCancelled at its next progress
+    report and removes its own output) and is abandoned. On a serverless function it ends with the instance."""
+    box: dict = {}
+
+    def target() -> None:
+        try:
+            box["saved"] = work(generation, cancel)
+        except BaseException as exc:
+            box["error"] = exc
+
+    thread = threading.Thread(target=target, daemon=True)
+    thread.start()
+    thread.join(seconds)
+    if thread.is_alive():
+        cancel.set()
+        raise DeadlineExceeded()
+    if "error" in box:
+        raise box["error"]
+    return box["saved"]
+
+
+def _fail(ctx: Context, job_id: str, code: str, message: str) -> None:
+    try:
+        _update(ctx, job_id, status="failed", error_code=code, error_message=message)
+    except SQLAlchemyError:
+        log.exception("job %s: could not record the failure; its deadline will expire it", job_id)
+
+
+def _run(ctx: Context, job_id: str, work, retryable: bool = False) -> bool:
+    """work(generation, cancel) computes the result and saves it with save_if_current; returns that bool.
+    Returns False when the job was not claimed (a redelivery, or the job was replaced).
+    retryable: an unexpected crash puts the job back to queued and raises RetryJob while attempts are left."""
     s = ctx.settings
     if not claim_job(ctx.engine, job_id, lease_seconds=s.job_lease_seconds, max_attempts=s.job_max_attempts):
         return False                            # a redelivery of a job that is running, finished or replaced
     try:
-        saved = work(_generation(ctx, job_id))
+        saved = _with_deadline(work, _job(ctx, job_id).generation, threading.Event(), s.job_deadline_seconds)
     except IngestError as exc:
-        _update(ctx, job_id, status="failed", error_code="unreadable_file", error_message=exc.message)
+        _fail(ctx, job_id, "unreadable_file", exc.message)
     except EngineError as exc:
-        _update(ctx, job_id, status="failed", error_code="invalid_request", error_message=exc.message)
+        _fail(ctx, job_id, "invalid_request", exc.message)
+    except DeadlineExceeded:
+        log.error("job %s passed its %s s deadline", job_id, s.job_deadline_seconds)
+        _fail(ctx, job_id, "job_timeout", TIMEOUT_MESSAGE)
+    except StorageError:
+        log.exception("job %s: storage error", job_id)
+        _fail(ctx, job_id, "storage_error", "The file store was not available. Please try again.")
+    except SQLAlchemyError:
+        log.exception("job %s: database error", job_id)
+        _fail(ctx, job_id, "database_error", "The database was not available. Please try again.")
     except Exception:
         log.exception("job %s failed", job_id)
-        _update(ctx, job_id, status="failed", error_code="internal_error",
-                error_message="Something went wrong while processing the file.")
+        if retryable and _job(ctx, job_id).attempts < s.job_max_attempts:
+            _update(ctx, job_id, status="queued", progress_pct=0, current_step="Retrying",
+                    deadline_at=utcnow() + dt.timedelta(seconds=s.job_queue_wait_seconds))
+            raise RetryJob()
+        _fail(ctx, job_id, "internal_error", "Something went wrong while processing the file.")
     else:
-        if saved:
-            _update(ctx, job_id, status="done", progress_pct=100, current_step="Done")
-        else:
-            _update(ctx, job_id, status="superseded", error_code="superseded", error_message=SUPERSEDED)
+        try:
+            if saved:
+                _update(ctx, job_id, status="done", progress_pct=100, current_step="Done")
+            else:
+                _update(ctx, job_id, status="superseded", error_code="superseded", error_message=SUPERSEDED)
+        except SQLAlchemyError:
+            log.exception("job %s: could not record the result", job_id)
     return True
 
 
@@ -110,41 +187,45 @@ def _fetch_inputs(ctx: Context, dataset: Dataset, tmp: Path) -> tuple[Path, Path
     return original, cache, {p.name for p in cache.glob("*")}
 
 
-def run_profile_job(ctx: Context, job_id: str, dataset: Dataset) -> None:
-    def work(generation: int) -> bool:
+def run_profile_job(ctx: Context, job_id: str, dataset: Dataset, retryable: bool = False) -> None:
+    def work(generation: int, cancel: threading.Event) -> bool:
         with tempfile.TemporaryDirectory() as tmp:
-            original, cache, known = _fetch_inputs(ctx, dataset, Path(tmp))
+            with _storage_errors():
+                original, cache, known = _fetch_inputs(ctx, dataset, Path(tmp))
             result = pipeline.profile(
                 original,
                 sheet=dataset.sheet,
                 header_row=dataset.header_row,
-                progress=_progress(ctx, job_id),
+                progress=_progress(ctx, job_id, cancel),
                 display_name=dataset.filename,
                 cache_dir=cache,      # read-once cache for the clean job (same cache key, so a copy is as good)
             )
-            ctx.storage.upload_dir(cache, cache_prefix(dataset.id), skip=known)
+            with _storage_errors():
+                ctx.storage.upload_dir(cache, cache_prefix(dataset.id), skip=known)
         return save_if_current(ctx.engine, dataset.id, generation, profile_json=result.model_dump_json())
 
-    _run(ctx, job_id, work)
+    _run(ctx, job_id, work, retryable)
 
 
-def run_clean_job(ctx: Context, job_id: str, dataset: Dataset, plan: ApprovedPlan) -> None:
+def run_clean_job(ctx: Context, job_id: str, dataset: Dataset, plan: ApprovedPlan, retryable: bool = False) -> None:
     prefix = run_prefix(dataset.id, job_id)          # only this job writes under it
 
-    def work(generation: int) -> bool:
+    def work(generation: int, cancel: threading.Event) -> bool:
         try:
             with tempfile.TemporaryDirectory() as tmp:
-                original, cache, _ = _fetch_inputs(ctx, dataset, Path(tmp))
+                with _storage_errors():
+                    original, cache, _ = _fetch_inputs(ctx, dataset, Path(tmp))
                 out_dir = Path(tmp) / "out"
                 out_dir.mkdir()
                 result = pipeline.clean(
                     original, plan, out_dir,
                     run_id=job_id,
-                    progress=_progress(ctx, job_id),
+                    progress=_progress(ctx, job_id, cancel),
                     display_name=dataset.filename,
                     cache_dir=cache,
                 )
-                ctx.storage.upload_dir(out_dir, prefix)
+                with _storage_errors():
+                    ctx.storage.upload_dir(out_dir, prefix)
             saved = save_if_current(ctx.engine, dataset.id, generation,
                                     results_json=result.model_dump_json(), results_run_id=job_id)
         except BaseException:
@@ -160,7 +241,7 @@ def run_clean_job(ctx: Context, job_id: str, dataset: Dataset, plan: ApprovedPla
             ctx.storage.delete_prefix(prefix)
         return saved
 
-    if not _run(ctx, job_id, work):
+    if not _run(ctx, job_id, work, retryable):
         with Session(ctx.engine) as session:
             job = session.get(Job, job_id)
         if job is not None and job.status == "superseded":        # replaced before it started: nothing to keep

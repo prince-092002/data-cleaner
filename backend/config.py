@@ -1,8 +1,10 @@
 """Backend settings. Override with environment variables (DC_STORAGE_DIR, DC_CORS_ORIGINS,
-DC_MAX_UPLOAD_MB, DC_STORAGE_LIMIT_MB, DC_DAILY_JOB_CAP, DC_DAILY_IP_CAP), plus the two adapter switches:
+DC_MAX_UPLOAD_MB, DC_JOB_RUNNER, DC_STORAGE_LIMIT_MB, DC_DAILY_JOB_CAP, DC_DAILY_IP_CAP, DC_IP_HASH_SALT),
+plus the adapter switches:
 
 - DATABASE_URL: when set, jobs and datasets live in Postgres (postgres:// and postgresql:// both
   work); when not set, SQLite at <storage dir>/app.db.
+- DC_JOB_RUNNER: "inprocess" (default, BackgroundTasks) or "queue" (Vercel Queues consumer in backend/worker.py).
 - DC_STORAGE_BACKEND: "local" (default, files under DC_STORAGE_DIR) or "blob" (Vercel Blob). Blob is
   used only when asked for explicitly, so a developer who has Vercel env vars never writes to
   Blob by accident. On Vercel, Blob authenticates through OIDC with BLOB_STORE_ID (no token).
@@ -55,6 +57,13 @@ def _storage_backend() -> str:
     return raw
 
 
+def _job_runner() -> str:
+    raw = os.environ.get("DC_JOB_RUNNER", "inprocess").strip().lower() or "inprocess"
+    if raw not in ("inprocess", "queue"):
+        raise ValueError(f'DC_JOB_RUNNER must be "inprocess" or "queue" (got {raw!r}).')
+    return raw
+
+
 @dataclass
 class Settings:
     storage_dir: Path = field(default_factory=lambda: Path(os.environ.get("DC_STORAGE_DIR", "storage")))
@@ -64,7 +73,11 @@ class Settings:
     storage_limit_bytes: int = field(default_factory=lambda: _int_env("DC_STORAGE_LIMIT_MB", 800) * MB)
     daily_job_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_JOB_CAP", 200))
     daily_ip_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_CAP", 10))
-    job_lease_seconds: int = 900       # a running job not finished by then may be claimed again
+    # "queue" (Vercel Queues, production) only when DC_JOB_RUNNER=queue; Vercel variables alone never select it.
+    job_runner: str = field(default_factory=_job_runner)
+    job_deadline_seconds: float = 240  # hard limit per attempt, inside the 300 s function limit
+    job_lease_seconds: int = 270       # deadline + 30 s: a running job not finished by then is stuck
+    job_queue_wait_seconds: int = 300  # a queued job nobody picked up by then is failed (lost message)
     job_max_attempts: int = 3
     ttl_hours: int = 24
     cleanup_interval_seconds: int = 3600

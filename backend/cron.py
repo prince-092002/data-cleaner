@@ -1,4 +1,4 @@
-"""Vercel Cron target (CONTRACT 8.10). Vercel calls GET with `Authorization: Bearer $CRON_SECRET`."""
+"""Vercel Cron target (CONTRACT 8.11). Vercel calls GET with `Authorization: Bearer $CRON_SECRET`."""
 
 from __future__ import annotations
 

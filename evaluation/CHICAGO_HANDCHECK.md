@@ -2,6 +2,8 @@
 
 File: `sample_data/chicago_food_inspections.csv`, 5,000 real rows, no ground truth. Every proposal was approved.
 
+Note (2026-11-16): the bundled file is now the first 3,995 rows of the 5,000-row download. The checks below were made on the 5,000-row file and are kept as recorded; the seeded draws were not repeated on the trimmed file.
+
 - **First check, 2026-11-15 (M6 step 8):** the clean made 17,347 changes. `evaluation/chicago_sample.py` drew 100 of
   them with a fixed seed (8). Each was read and judged.
 - **Re-check, 2026-11-15 (M6 step 8b):** after two engine fixes (clear-majority spelling wins; license-style names

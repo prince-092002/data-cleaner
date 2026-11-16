@@ -26,7 +26,7 @@ def real_run(tmp_path_factory):
 
 def test_real_file_loads_with_expected_rows(real_run):
     _, result, *_ = real_run
-    assert 3000 <= result.summary.rows_before <= 5000
+    assert result.summary.rows_before == 3995
 
 
 def test_original_upload_is_not_modified(real_run):

@@ -154,7 +154,7 @@ def mark_superseded(session: Session, dataset_id: str, keep_job_id: str) -> None
     )
 
 
-def claim_job(engine: Engine, job_id: str, *, lease_seconds: int = 900, max_attempts: int = 3) -> bool:
+def claim_job(engine: Engine, job_id: str, *, lease_seconds: int = 270, max_attempts: int = 3) -> bool:
     """Idempotent and safe across processes: ONE conditional UPDATE decides who runs the job.
 
     Claimable: queued, or running with its deadline passed (the earlier worker died). A job that is
@@ -179,6 +179,33 @@ def claim_job(engine: Engine, job_id: str, *, lease_seconds: int = 900, max_atte
             )
         session.commit()
         return claimed
+
+
+TIMEOUT_MESSAGE = "This file took too long to process. Try a smaller file."
+
+
+def fail_job(engine: Engine, job_id: str, code: str, message: str) -> None:
+    """End a queued or running job as failed (a job that already ended is left alone)."""
+    with Session(engine) as session:
+        session.execute(update(Job).where(Job.id == job_id, Job.status.in_(ACTIVE))
+                        .values(status="failed", error_code=code, error_message=message, updated_at=utcnow()))
+        session.commit()
+
+
+def expire_stuck_jobs(engine: Engine) -> int:
+    """Fail every queued or running job past its deadline; returns how many changed. Two conditional
+    UPDATEs, so it is safe to call from any instance at any time (GET /api/jobs and the cron route).
+    A running job past its deadline lost its worker (out of memory, timeout): job_timeout. A queued one
+    lost its message: expired."""
+    now, changed = utcnow(), 0
+    with Session(engine) as session:
+        for status, code in (("running", "job_timeout"), ("queued", "expired")):
+            changed += session.execute(
+                update(Job).where(Job.status == status, Job.deadline_at <= now)
+                .values(status="failed", error_code=code, error_message=TIMEOUT_MESSAGE, updated_at=now)
+            ).rowcount
+        session.commit()
+    return changed
 
 
 def acquire_lease(engine: Engine, key: str, dataset_id: str, seconds: int = 120) -> str | None:

@@ -17,8 +17,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlmodel import Session
 
-from backend import errors
-from backend.db import Dataset, Job, iso, mark_superseded, start_generation, utcnow
+from backend import errors, runner
+from backend.db import Dataset, Job, expire_stuck_jobs, iso, mark_superseded, start_generation, utcnow
 from backend.limits import check_storage_room, count_job
 from backend.jobs import Context, ensure_xlsx, run_clean_job, run_profile_job
 from backend.storage import (DOWNLOADS, StorageNotFound, TooLarge, file_key, is_uuid, looks_like, original_key,
@@ -68,8 +68,9 @@ def _new_job(ctx: Context, dataset_id: str, job_type: str) -> str:
     with Session(ctx.engine) as session:
         generation = start_generation(session, dataset_id, clear_profile=job_type == "profile")
         mark_superseded(session, dataset_id, keep_job_id=job_id)
-        session.add(Job(id=job_id, dataset_id=dataset_id, type=job_type, generation=generation,
-                        created_at=now, updated_at=now))
+        # A queued job needs a deadline too, so a lost message cannot leave it queued forever.
+        session.add(Job(id=job_id, dataset_id=dataset_id, type=job_type, generation=generation, created_at=now,
+                        updated_at=now, deadline_at=now + dt.timedelta(seconds=ctx.settings.job_queue_wait_seconds)))
         session.commit()
     return job_id
 
@@ -166,13 +167,17 @@ def start_profile(
     count_job(ctx, request)
     job_id = _new_job(ctx, dataset_id, "profile")
     ctx.storage.delete_prefix(runs_prefix(dataset_id))      # the old results are gone now, not at 24 h
-    background.add_task(run_profile_job, ctx, job_id, dataset)
+    if ctx.settings.job_runner == "queue":
+        runner.enqueue(ctx, job_id)
+    else:
+        background.add_task(run_profile_job, ctx, job_id, dataset)
     return {"job_id": job_id}
 
 
 @router.get("/jobs/{job_id}")
 def get_job(request: Request, job_id: str):
     ctx = _ctx(request)
+    expire_stuck_jobs(ctx.engine)            # a job past its deadline lost its worker: fail it now, never poll forever
     with Session(ctx.engine) as session:
         job = session.get(Job, job_id) if is_uuid(job_id) else None
         if job is None:
@@ -217,7 +222,10 @@ def start_clean(request: Request, dataset_id: str, decisions: Decisions, backgro
     count_job(ctx, request)
     job_id = _new_job(ctx, dataset_id, "clean")
     ctx.storage.put_bytes(run_key(dataset_id, job_id, "plan.json"), plan.model_dump_json().encode("utf-8"))
-    background.add_task(run_clean_job, ctx, job_id, dataset, plan)
+    if ctx.settings.job_runner == "queue":
+        runner.enqueue(ctx, job_id)
+    else:
+        background.add_task(run_clean_job, ctx, job_id, dataset, plan)
     return {"job_id": job_id}
 
 
