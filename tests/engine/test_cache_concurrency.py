@@ -36,3 +36,9 @@ def test_a_cache_write_error_does_not_fail_the_profile(tmp_path, monkeypatch):
     monkeypatch.setattr(pl.DataFrame, "write_parquet", boom)
     prof = pipeline.profile(SALES, cache_dir=tmp_path)
     assert prof.proposals
+
+
+def test_a_miss_then_store_hashes_the_file_once(tmp_path):
+    cache._content_hash.cache_clear()
+    pipeline.profile(SALES, sheet=None, header_row=0, cache_dir=tmp_path / "c")
+    assert cache._content_hash.cache_info().misses == 1
