@@ -6,7 +6,9 @@ import csv
 import datetime as dt
 import json
 import logging
+import os
 import tempfile
+import time
 import urllib.parse
 import uuid
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -230,25 +232,47 @@ def start_clean(request: Request, dataset_id: str, decisions: Decisions, backgro
     return {"job_id": job_id}
 
 
+_CHANGELOG_CACHE_FILES = 20
+
+
+def _changelog_path(ctx: Context, dataset: Dataset) -> Path:
+    """The run's change log in the instance temp folder: downloaded once, reused by every page and
+    filter request while the file exists. A run's change log never changes, and the folder keeps
+    only the newest few files."""
+    # shortcut: a per-instance temp copy (lost on a cold start), fine because one re-download per instance per run is cheap, revisit if Blob transfer runs short
+    cache = Path(tempfile.gettempdir()) / "dc-changes"
+    path = cache / f"{dataset.id}-{dataset.results_run_id}.csv"
+    if path.exists():
+        return path
+    cache.mkdir(parents=True, exist_ok=True)
+    part = cache / f"{path.name}.{uuid.uuid4().hex}.part"
+    try:
+        ctx.storage.get_file(run_key(dataset.id, dataset.results_run_id, "changelog.csv"), part)
+    except StorageNotFound:
+        part.unlink(missing_ok=True)
+        raise errors.not_ready("The results are not ready yet. Start a clean job and wait for it to finish.")
+    os.replace(part, path)
+    # Copies older than the retention time go too: a deleted dataset's change log must not outlive the 24 h promise.
+    expired = time.time() - ctx.settings.ttl_hours * 3600
+    files = sorted(cache.glob("*.csv"), key=lambda f: f.stat().st_mtime, reverse=True)
+    for old in [f for f in files if f.stat().st_mtime < expired] + files[_CHANGELOG_CACHE_FILES:]:
+        old.unlink(missing_ok=True)
+    return path
+
+
 def _changes(ctx: Context, dataset: Dataset, filters: dict[str, str], limit: int, offset: int) -> dict[str, Any]:
-    """Read one page of the change log (downloaded to a temp file), filtering as it streams."""
+    """Read one page of the change log (a cached temp file), filtering as it streams."""
     total = 0
     items: list[dict[str, Any]] = []
-    with tempfile.TemporaryDirectory() as tmp:
-        path = Path(tmp) / "changelog.csv"
-        try:
-            ctx.storage.get_file(run_key(dataset.id, dataset.results_run_id, "changelog.csv"), path)
-        except StorageNotFound:
-            raise errors.not_ready("The results are not ready yet. Start a clean job and wait for it to finish.")
-        with open(path, encoding="utf-8", newline="") as fh:
-            for row in csv.DictReader(fh):
-                if any(row[key] != value for key, value in filters.items()):
-                    continue
-                if offset <= total < offset + limit:
-                    item: dict[str, Any] = {k: (v if v != "" else None) for k, v in row.items()}
-                    item["row_id"] = int(item["row_id"]) if item["row_id"] is not None else None
-                    items.append(item)
-                total += 1
+    with open(_changelog_path(ctx, dataset), encoding="utf-8", newline="") as fh:
+        for row in csv.DictReader(fh):
+            if any(row[key] != value for key, value in filters.items()):
+                continue
+            if offset <= total < offset + limit:
+                item: dict[str, Any] = {k: (v if v != "" else None) for k, v in row.items()}
+                item["row_id"] = int(item["row_id"]) if item["row_id"] is not None else None
+                items.append(item)
+            total += 1
     return {"total": total, "limit": limit, "offset": offset, "items": items}
 
 

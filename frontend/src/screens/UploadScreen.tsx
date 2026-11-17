@@ -32,9 +32,13 @@ export function formatSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
-function messageOf(e: unknown): string {
+function messageOf(e: unknown, maxMb: number | null): string {
   if (e instanceof ApiError && e.code === 'file_too_large') {
     return `${e.message} Please choose a smaller file.`
+  }
+  // The host answers a body over its own limit with a non-JSON 413, so the code is not file_too_large.
+  if (e instanceof ApiError && e.status === 413 && maxMb !== null) {
+    return `Files must be ${maxMb} MB or smaller. Please choose a smaller file.`
   }
   if (e instanceof ApiError) return e.message
   return 'Something went wrong. Please try again.'
@@ -80,7 +84,7 @@ export function UploadScreen() {
       setHeaderRow(res.sheets[0]?.detected_header_row ?? 0)
     } catch (e) {
       setUpload(null)
-      setError(messageOf(e))
+      setError(messageOf(e, maxMb))
     } finally {
       setBusy(null)
     }
@@ -127,7 +131,7 @@ export function UploadScreen() {
       dispatch({ type: 'uploaded', upload })
       dispatch({ type: 'job_started', jobId: job.job_id, sheet: sheet.name, headerRow })
     } catch (e) {
-      setError(messageOf(e))
+      setError(messageOf(e, maxMb))
       setBusy(null)
     }
   }

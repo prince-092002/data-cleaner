@@ -86,6 +86,17 @@ describe('UploadScreen', () => {
     expect(alert).toHaveTextContent('Please choose a smaller file')
   })
 
+  it('shows the same 4 MB message when the host rejects the body with its own non-JSON 413', async () => {
+    vi.mocked(getHealth).mockResolvedValue({ status: 'ok', max_upload_mb: 4 })
+    vi.mocked(uploadDataset).mockRejectedValue(
+      new ApiError(413, 'internal_error', 'This file is too large. Please choose a smaller file.'),
+    )
+    const user = setup()
+    await screen.findByText(/4 MB or smaller/)
+    await user.upload(input(), new File(['x'], 'a.csv'))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Files must be 4 MB or smaller. Please choose a smaller file.')
+  })
+
   it('shows server error messages', async () => {
     vi.mocked(uploadDataset).mockRejectedValue(new ApiError(422, 'unreadable_file', 'File is empty.'))
     const user = setup()

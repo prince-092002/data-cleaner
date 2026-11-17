@@ -15,7 +15,7 @@ Totals: 14 CLOSED, 1 PARTLY CLOSED, 2 DEFERRED.
 | 4 | Excel size bomb | CLOSED | `backend/storage.py:26,307` (60 MB uncompressed); test `test_xlsx_that_expands_past_the_limit_is_rejected`. |
 | 5 | Cron has no time budget | CLOSED | `backend/cron.py:19,39-43` and `backend/cleanup.py:35,49`; test `test_cron_stops_at_its_budget_and_the_next_run_resumes`. |
 | 6 | Excel wait outlasts the function | CLOSED | `backend/jobs.py:277` one lease of 120 s; test `test_excel_wait_is_one_lease_and_gives_the_clean_error`. |
-| 7 | Bundle over 250 MB | DEFERRED | `requirements-vercel.txt` still pins `vercel`, `vercel-sandbox`, `vercel-workflow`, `vercel-cache`, `websockets`, `zstandard`. Known and accepted. |
+| 7 | Bundle over 250 MB | DEFERRED | `requirements.txt` still pins `vercel`, `vercel-sandbox`, `vercel-workflow`, `vercel-cache`, `websockets`, `zstandard`. Known and accepted. |
 | 8 | Refused profile changes the dataset | CLOSED | `backend/routes.py:160` calls `count_job` before the write; test `test_refused_profile_request_leaves_the_dataset_unchanged`. |
 | 9 | Clean-run folder cleanup is complex | DEFERRED | `_active_clean_runs` and the listing loop are unchanged at `backend/jobs.py:98-108,248-256`. Known. |
 | 10 | `drop_all` migration | CLOSED | No `drop_all` or `inspect` left in `backend/db.py` (grep). |

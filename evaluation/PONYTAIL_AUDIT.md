@@ -63,7 +63,7 @@ Buckets: **KEEP** (a documented limit, correctness or security, or a test that f
 - Fix: `give_up = time.monotonic() + XLSX_LEASE_SECONDS`. One line.
 
 **7. The deployed bundle is just over Vercel's 250 MB mark.** Bucket: SIMPLIFY.
-- Where: `requirements-vercel.txt:50-58` pins the `vercel` meta package and everything it pulls (`vercel-sandbox`, `vercel-workflow`, `vercel-cache`, `cryptography`, `cbor2`, `websockets`, `zstandard`, `h2`).
+- Where: `requirements.txt:50-58` pins the `vercel` meta package and everything it pulls (`vercel-sandbox`, `vercel-workflow`, `vercel-cache`, `cryptography`, `cbor2`, `websockets`, `zstandard`, `h2`).
 - Why it matters: The ADR measured 284.8 MB. Above 250 MB Vercel installs the dependencies at cold start, which cost 2.46 s in the spike logs. Code only imports `vercel.blob` and `vercel.queue`.
 - Fix: try `vercel-blob` and `vercel-queue` alone (they are already listed as separate pins) and measure the install size. If the import paths still work and the size drops under 250 MB, keep it. This is unverified: if `vercel.blob` needs the meta package, drop the idea. Estimated gain: about 2.5 s on cold starts.
 

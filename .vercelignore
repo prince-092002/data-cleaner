@@ -1,0 +1,14 @@
+# Keep development material out of the upload and the function bundle.
+# frontend/ stays: the build compiles it into the static site (frontend/public/samples included).
+tests/
+evaluation/
+sample_data/
+docs/
+.claude/
+storage/
+node_modules/
+.venv/
+frontend/dist/
+.pytest_cache/
+__pycache__/
+*.db
