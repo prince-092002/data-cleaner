@@ -70,8 +70,8 @@ Production settings (Vercel environment variables; never commit their values):
 | `DC_MAX_UPLOAD_MB` | `4` | Live upload limit (default 50 locally) |
 | `CRON_SECRET` | a long random string | Protects the daily cleanup at `/api/cron/cleanup` |
 | `DC_IP_HASH_SALT` | a long random string | Salt for the hashed IP counters (falls back to `CRON_SECRET`) |
-| `DC_DAILY_JOB_CAP`, `DC_DAILY_IP_CAP` | 200, 10 | Daily job limits (whole site, per visitor). The per-visitor value never exceeds the site value |
-| `DC_DAILY_UPLOAD_CAP`, `DC_DAILY_IP_UPLOAD_CAP` | 5, 2 | Daily upload limits (whole site, per visitor). The 5 applies only with `DC_JOB_RUNNER=queue`; local runs have no site cap unless this is set. IPv6 visitors are grouped by /64 |
+| `DC_DAILY_JOB_CAP`, `DC_DAILY_IP_CAP` | 9, 6 (live site) | Daily job limits (whole site, per visitor). The per-visitor value never exceeds the site value |
+| `DC_DAILY_UPLOAD_CAP`, `DC_DAILY_IP_UPLOAD_CAP` | 3, 2 (live site) | Daily upload limits (whole site, per visitor). The code default of 5 applies only with `DC_JOB_RUNNER=queue`; local runs have no site cap unless this is set. IPv6 visitors are grouped by /64 |
 | `DC_STORAGE_LIMIT_MB` | 800 | New uploads are refused above this much stored data (Blob free store is 1 GB) |
 
 On Vercel (`VERCEL_ENV` production or preview) the app refuses to start unless `DC_STORAGE_BACKEND=blob`, `DC_JOB_RUNNER=queue` and `DATABASE_URL` are set, so SQLite and local disk are never used there. `.env.example` lists every name with a placeholder.
@@ -176,7 +176,7 @@ Measured at M5. In M6 the file is read once (a Parquet cache shared by profile a
 - **Live site upload limit: 4 MB per file.** Vercel limits a request body to 4.5 MB. Local runs accept up to 50 MB.
 - Latin-script files are read as Windows-1252. Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Category merging does not catch swapped letters in short words ("Wset").
-- **Live site daily limits:** 10 jobs and 20 uploads per visitor, 200 jobs and 5 uploads (interim) for the whole site, and 800 MB of stored files. Over a limit the site says so and asks you to try again tomorrow.
+- **Live site daily limits:** 3 uploads and 9 jobs for the whole site, 2 uploads and 6 jobs per visitor, and 800 MB of stored files. Formula: 75% of the Blob free plan's 2,000 advanced operations a month is 1,500; one visit costs about 16 (11 puts, 5 lists, measured 2026-11-17: 73 on the dashboard after 3 full visits plus test uploads); 1,500 / 16 / 30 = 3 uploads a day. Jobs: 3 uploads x 3 jobs a visit (1 profile, up to 2 cleans) = 9. Over a limit the site says so and asks you to try again tomorrow.
 - **Live site time limit:** 240 seconds per job.
 - Locally, jobs run inside the API process; two big files at once slow each other.
 - Change records are held in memory until written.
