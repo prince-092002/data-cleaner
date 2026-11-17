@@ -19,9 +19,18 @@ def test_vercel_function_wiring():
 
 
 def test_requirements_txt_is_exact_pins():
-    # The Python builder reads requirements.txt (its priority against pyproject.toml is not documented).
+    """requirements.txt is the exact pin list for local/dev installs; Vercel reads pyproject.toml, not this file."""
     assert all("==" in line for line in (ROOT / "requirements.txt").read_text().splitlines()
                if line and not line.startswith("#"))
+
+
+def test_backend_runtime_packages_are_project_dependencies():
+    # Vercel installs only [project].dependencies; the optional `backend` extra is never installed there.
+    deps = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["dependencies"]
+    names = " ".join(deps).lower()
+    for pkg in ("fastapi", "sqlmodel", "python-multipart", "vercel==", "psycopg[binary]"):
+        assert pkg in names, pkg
+    assert "uvicorn" not in names
 
 
 def test_vercelignore_keeps_dev_files_out_but_frontend_in():

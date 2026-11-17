@@ -12,11 +12,16 @@ dependencies = [
     "rapidfuzz>=3.9",
     "pyyaml>=6.0",
     "pydantic>=2.7",
+    # Backend runtime: Vercel installs only this list, never the extras below.
+    "fastapi>=0.111",
+    "sqlmodel>=0.0.19",
+    "python-multipart>=0.0.9",
+    "vercel==0.13.0",
+    "psycopg[binary]==3.3.9",
 ]
 
 [project.optional-dependencies]
-backend = ["fastapi>=0.111", "uvicorn[standard]>=0.30", "sqlmodel>=0.0.19", "python-multipart>=0.0.9",
-           "vercel==0.13.0", "psycopg[binary]==3.3.9"]
+backend = ["uvicorn[standard]>=0.30"]
 dev = ["pytest>=8.2", "httpx>=0.27"]
 
 [tool.pytest.ini_options]
