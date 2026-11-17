@@ -12,7 +12,7 @@ from fastapi import Request
 from backend import errors
 from backend.db import counter_add, counter_get, make_engine
 from backend.jobs import Context
-from backend.storage import make_storage
+from backend.storage import StorageBackend, make_storage
 
 BYTES_KEY = "stored_bytes"
 STORAGE_FULL = "The demo is full right now. Please try again tomorrow."
@@ -29,6 +29,7 @@ def utc_today() -> dt.date:
 def client_ip(request: Request) -> str | None:
     """First entry of x-forwarded-for, which Vercel sets to the client's public IP and overwrites
     so a caller cannot spoof it. No header (local development) means no per-IP cap."""
+    # shortcut: a request with no x-forwarded-for skips the per-IP cap, fine because Vercel always sets it, revisit if hosted elsewhere
     first = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
     return first or None
 
@@ -68,14 +69,15 @@ def check_storage_room(ctx: Context) -> None:
         raise errors.ApiError(503, "storage_full", STORAGE_FULL)
 
 
-class MeteredStorage:
+class MeteredStorage(StorageBackend):
     """Wraps a StorageBackend and keeps the stored_bytes counter: +size on every write, -size on every
     delete. Overwriting a key counts it again (the cron recomputes the exact total daily)."""
+    # shortcut: the stored-bytes total drifts between daily recounts, fine against an 800 MB guard on a 1 GB store, revisit if the drift blocks real uploads
 
     def __init__(self, inner, engine):
         self._inner, self._engine = inner, engine
 
-    def __getattr__(self, name):            # everything else (reads, listing, local helpers) passes through
+    def __getattr__(self, name):            # only what is not defined here: local helpers such as run_dir and root
         return getattr(self._inner, name)
 
     def put_file(self, key, path):
@@ -87,16 +89,28 @@ class MeteredStorage:
         counter_add(self._engine, BYTES_KEY, len(data))
 
     def delete_prefix(self, prefix):
-        size = self._inner.size_under(prefix)
-        self._inner.delete_prefix(prefix)
-        if size:
-            counter_add(self._engine, BYTES_KEY, -size)
+        freed = self._inner.delete_prefix(prefix)
+        if freed:
+            counter_add(self._engine, BYTES_KEY, -freed)
+        return freed
 
-    def upload_dir(self, directory, prefix, skip=frozenset()):     # must call our put_file
-        for path in sorted(directory.rglob("*")):
-            rel = path.relative_to(directory).as_posix()
-            if path.is_file() and rel not in skip:
-                self.put_file(prefix + rel, path)
+    def get_file(self, key, dest):
+        self._inner.get_file(key, dest)
+
+    def read_bytes(self, key):
+        return self._inner.read_bytes(key)
+
+    def open_stream(self, key):
+        return self._inner.open_stream(key)
+
+    def exists(self, key):
+        return self._inner.exists(key)
+
+    def list_keys(self, prefix):
+        return self._inner.list_keys(prefix)
+
+    def size_under(self, prefix):
+        return self._inner.size_under(prefix)
 
     def download_prefix(self, prefix, dest):
         self._inner.download_prefix(prefix, dest)

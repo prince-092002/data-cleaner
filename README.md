@@ -6,6 +6,7 @@ Upload a messy CSV or Excel file. Get back a clean file, a cleaning report, a re
 
 ## What it does
 1. **Upload** a `.csv` or `.xlsx` file (up to 50 MB).
+If you ran an earlier version, delete `storage/app.db` once: the old database layout is no longer migrated automatically.
 2. **Profile**: per-column statistics and a 0 to 100 quality score.
 3. **Suggest fixes**: safe fixes are applied automatically; judgment calls wait for your approval.
 4. **Clean** in the background with a progress bar.
@@ -71,7 +72,7 @@ Production settings (Vercel environment variables; never commit their values):
 | `CRON_SECRET` | a long random string | Protects the daily cleanup at `/api/cron/cleanup` |
 | `DC_IP_HASH_SALT` | a long random string | Salt for the hashed IP counters (falls back to `CRON_SECRET`) |
 | `DC_DAILY_JOB_CAP`, `DC_DAILY_IP_CAP` | 200, 10 | Daily job limits (whole site, per visitor) |
-| `DC_DAILY_UPLOAD_CAP`, `DC_DAILY_IP_UPLOAD_CAP` | 300, 20 | Daily upload limits |
+| `DC_DAILY_UPLOAD_CAP`, `DC_DAILY_IP_UPLOAD_CAP` | 5, 20 | Daily upload limits (the 5 is interim; Step 14 sets it from the measured Blob use per visit) |
 | `DC_STORAGE_LIMIT_MB` | 800 | New uploads are refused above this much stored data (Blob free store is 1 GB) |
 
 `vercel.json` schedules the cleanup once a day (Vercel Cron, Hobby plan). Each job has a 240 second limit; a slower file fails with "This file took too long to process. Try a smaller file." Results and uploads are deleted after 24 hours. A link with `?d=...&j=...` reopens a job or its results until then.
@@ -169,7 +170,7 @@ Measured at M5. In M6 the file is read once (a Parquet cache shared by profile a
 - **Live site upload limit: 4 MB per file.** Vercel limits a request body to 4.5 MB. Local runs accept up to 50 MB.
 - Latin-script files are read as Windows-1252. Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Category merging does not catch swapped letters in short words ("Wset").
-- **Live site daily limits:** 10 jobs and 20 uploads per visitor, 200 jobs and 300 uploads for the whole site, and 800 MB of stored files. Over a limit the site says so and asks you to try again tomorrow.
+- **Live site daily limits:** 10 jobs and 20 uploads per visitor, 200 jobs and 5 uploads (interim) for the whole site, and 800 MB of stored files. Over a limit the site says so and asks you to try again tomorrow.
 - **Live site time limit:** 240 seconds per job.
 - Locally, jobs run inside the API process; two big files at once slow each other.
 - Change records are held in memory until written.

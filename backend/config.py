@@ -73,7 +73,8 @@ class Settings:
     storage_limit_bytes: int = field(default_factory=lambda: _int_env("DC_STORAGE_LIMIT_MB", 800) * MB)
     daily_job_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_JOB_CAP", 200))
     daily_ip_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_CAP", 10))
-    daily_upload_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_UPLOAD_CAP", 300))
+    # Interim: Step 14 sets this from the measured Blob calls per visit (see tests/api/test_blob_calls.py).
+    daily_upload_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_UPLOAD_CAP", 5))
     daily_ip_upload_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_UPLOAD_CAP", 20))
     # "queue" (Vercel Queues, production) only when DC_JOB_RUNNER=queue; Vercel variables alone never select it.
     job_runner: str = field(default_factory=_job_runner)
