@@ -47,8 +47,7 @@ def test_env_example_lists_production_names_without_values():
             "DC_STORAGE_LIMIT_MB"} <= names
 
 
-def test_built_frontend_is_declared_as_static_output():
-    # Vercel FastAPI serves static files only from the declared output dir (or public/) it finds after buildCommand.
+def test_public_dir_stays_in_the_function_bundle():
+    # backend.main mounts public/ only if it exists at import time; Vercel then promotes the mount to the CDN.
     cfg = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
-    assert cfg["outputDirectory"] == "frontend/dist"
-    assert "frontend/dist" in cfg["buildCommand"]
+    assert "public" not in cfg["functions"]["backend/main.py"]["excludeFiles"]

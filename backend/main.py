@@ -5,9 +5,11 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from backend import errors
 from backend.cleanup import cleanup_loop
@@ -19,6 +21,7 @@ from backend.routes import router
 from backend.storage import StorageBackend
 
 log = logging.getLogger("data_cleaner")
+PUBLIC_DIR = Path(__file__).parents[1] / "public"     # the built frontend; only the Vercel build creates it
 _MULTIPART_OVERHEAD = MB      # form boundaries and headers around the file
 
 
@@ -117,6 +120,9 @@ def create_app(settings: Settings | None = None, storage: StorageBackend | None 
     @app.get("/api/health")
     def health():
         return {"status": "ok", "max_upload_mb": round(settings.max_upload_bytes / MB, 2)}
+
+    if PUBLIC_DIR.is_dir():      # last, so every /api route wins; Vercel promotes this mount to the CDN
+        app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True))
 
     return app
 
