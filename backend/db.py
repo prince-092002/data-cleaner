@@ -7,13 +7,10 @@ import datetime as dt
 import uuid
 from pathlib import Path
 
-import logging
-
-from sqlalchemy import DateTime, Engine, TypeDecorator, case, exists, inspect, update
+from sqlalchemy import DateTime, Engine, TypeDecorator, case, exists, update
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Column, Field, Session, SQLModel, create_engine, delete, select
 
-log = logging.getLogger("data_cleaner.db")
 
 
 def utcnow() -> dt.datetime:
@@ -114,11 +111,6 @@ def make_engine(target: Path | str) -> Engine:
     else:
         # prepare_threshold=None: Neon's pooled URL goes through PgBouncer, which cannot keep prepared statements.
         engine = create_engine(normalize_url(target), connect_args={"prepare_threshold": None}, pool_pre_ping=True)
-    tables = inspect(engine)
-    if tables.has_table("job") and "attempts" not in {c["name"] for c in tables.get_columns("job")}:
-        # Pre-M6 database. Its data lives at most 24 hours, so it is rebuilt rather than migrated.
-        log.warning("old database layout found; recreating tables")
-        SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     return engine
 
@@ -192,8 +184,8 @@ def fail_job(engine: Engine, job_id: str, code: str, message: str) -> None:
         session.commit()
 
 
-def expire_stuck_jobs(engine: Engine) -> int:
-    """Fail every queued or running job past its deadline; returns how many changed. Two conditional
+def expire_stuck_jobs(engine: Engine, job_id: str | None = None) -> int:
+    """Fail every queued or running job past its deadline (only job_id when given); returns how many changed. Two conditional
     UPDATEs, so it is safe to call from any instance at any time (GET /api/jobs and the cron route).
     A running job past its deadline lost its worker (out of memory, timeout): job_timeout. A queued one
     lost its message: expired."""
@@ -201,7 +193,7 @@ def expire_stuck_jobs(engine: Engine) -> int:
     with Session(engine) as session:
         for status, code in (("running", "job_timeout"), ("queued", "expired")):
             changed += session.execute(
-                update(Job).where(Job.status == status, Job.deadline_at <= now)
+                update(Job).where(Job.status == status, Job.deadline_at <= now, *([Job.id == job_id] if job_id else []))
                 .values(status="failed", error_code=code, error_message=TIMEOUT_MESSAGE, updated_at=now)
             ).rowcount
         session.commit()
@@ -274,8 +266,10 @@ def counter_set(engine: Engine, key: str, n: int) -> None:
         if session.execute(update(Counter).where(Counter.key == key).values(n=n)).rowcount == 0:
             try:
                 session.add(Counter(key=key, n=n))
-            except IntegrityError:
-                pass
+                session.commit()
+            except IntegrityError:          # a simultaneous first call won the insert; the value is a recount, either is fine
+                session.rollback()
+                return
         session.commit()
 
 

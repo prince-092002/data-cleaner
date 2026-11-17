@@ -157,6 +157,7 @@ def start_profile(
     if header_row < 0 or header_row >= max(sheet["row_count_estimate"], 1):
         raise errors.invalid_request("The header row is outside the file.")
 
+    count_job(ctx, request)       # first: a refused request must not change the dataset
     with Session(ctx.engine) as session:
         row = session.get(Dataset, dataset_id)
         row.sheet, row.header_row = sheet["name"], header_row
@@ -165,7 +166,6 @@ def start_profile(
     dataset.sheet, dataset.header_row = sheet["name"], header_row
 
     # A new profile replaces the old one and anything cleaned from it (a new generation).
-    count_job(ctx, request)
     job_id = _new_job(ctx, dataset_id, "profile")
     ctx.storage.delete_prefix(runs_prefix(dataset_id))      # the old results are gone now, not at 24 h
     if ctx.settings.job_runner == "queue":
@@ -178,7 +178,7 @@ def start_profile(
 @router.get("/jobs/{job_id}")
 def get_job(request: Request, job_id: str):
     ctx = _ctx(request)
-    expire_stuck_jobs(ctx.engine)            # a job past its deadline lost its worker: fail it now, never poll forever
+    expire_stuck_jobs(ctx.engine, job_id)    # a job past its deadline lost its worker: fail it now, never poll forever
     with Session(ctx.engine) as session:
         job = session.get(Job, job_id) if is_uuid(job_id) else None
         if job is None:
@@ -293,7 +293,7 @@ def _prepare_download(ctx: Context, dataset: Dataset, name: str) -> str:
         raise errors.not_ready("This file is not ready yet. Clean the file first.")
     key = run_key(dataset.id, dataset.results_run_id, name)
     try:
-        if name == "clean.xlsx" and ctx.storage.exists(run_key(dataset.id, dataset.results_run_id, "clean.csv")):
+        if name == "clean.xlsx":          # other files are not checked here: opening the stream finds a missing one
             try:
                 ensure_xlsx(ctx, dataset)
             except StorageNotFound:
@@ -304,8 +304,6 @@ def _prepare_download(ctx: Context, dataset: Dataset, name: str) -> str:
                     500, "excel_failed",
                     "The Excel file could not be built. The CSV file and the report are still available.",
                 )
-        elif not ctx.storage.exists(key):
-            raise errors.not_ready("This file is not ready yet. Clean the file first.")
     except StorageNotFound:
         raise errors.not_found("This dataset")
     return key
@@ -329,9 +327,9 @@ def download(request: Request, dataset_id: str, name: str):
     suffix, media_type = DOWNLOADS[name]
     filename = (Path(dataset.filename).stem or "data") + suffix
     try:
-        stream = ctx.storage.open_stream(key)       # opened now, so a missing file is a clean 404
+        stream = ctx.storage.open_stream(key)       # opened now, so a missing file is a clean error, not a broken stream
     except StorageNotFound:
-        raise errors.not_found("This dataset")
+        raise errors.not_ready("This file is not ready yet. Clean the file first.")
     quoted = urllib.parse.quote(filename)
     disposition = f'attachment; filename="{filename}"' if quoted == filename else f"attachment; filename*=utf-8''{quoted}"
     return StreamingResponse(stream, media_type=media_type, headers={"Content-Disposition": disposition})
