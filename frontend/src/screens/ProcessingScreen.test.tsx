@@ -101,6 +101,8 @@ describe('ProcessingScreen', () => {
     vi.mocked(getResults).mockImplementation(() => Promise.reject(new Error('Results unavailable')))
     setup()
     await tick()
+    await tick()
+    await tick()
     expect(screen.getByRole('alert').textContent).toBe('Results unavailable')
     expect(screen.getByRole('button', { name: 'Try another file' })).toBeTruthy()
   })
@@ -178,6 +180,30 @@ describe('ProcessingScreen', () => {
     setup()
     await tick()
     expect(screen.getByRole('alert').textContent).toMatch(/has expired/)
+  })
+
+  it('does not show an error after two failed polls followed by a success', async () => {
+    vi.mocked(getJob)
+      .mockRejectedValueOnce(new Error('blip'))
+      .mockRejectedValueOnce(new Error('blip'))
+      .mockResolvedValue(job({ progress_pct: 30, current_step: 'Working' }))
+    setup()
+    await tick()
+    await tick()
+    await tick()
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(screen.getByText('Working (30%)')).toBeTruthy()
+  })
+
+  it('shows the error after three failed polls in a row', async () => {
+    vi.mocked(getJob).mockRejectedValue(new Error('Server down'))
+    setup()
+    await tick()
+    await tick()
+    expect(screen.queryByRole('alert')).toBeNull()
+    await tick()
+    expect(screen.getByRole('alert').textContent).toBe('Server down')
+    expect(getJob).toHaveBeenCalledTimes(3)
   })
 
   it('polls every 2 s, then every 5 s after a minute', async () => {
