@@ -76,7 +76,7 @@ Production settings (Vercel environment variables; never commit their values):
 
 On Vercel (`VERCEL_ENV` production or preview) the app refuses to start unless `DC_STORAGE_BACKEND=blob`, `DC_JOB_RUNNER=queue` and `DATABASE_URL` are set, so SQLite and local disk are never used there. `.env.example` lists every name with a placeholder.
 
-One Vercel project serves everything: `vercel.json` builds `frontend/` into `public/`, which `backend.main` mounts at `/` (Vercel serves that mount from the CDN, `/api/*` stays on the function), `pyproject.toml` points Vercel at `backend.main:app` (the `/api/*` function, 300 s) and at the queue consumer `backend.worker`, `[project].dependencies` lists what the function installs, and `.vercelignore` keeps tests, docs, evaluation and sample generators out.
+One Vercel project serves everything: `vercel.json` builds `frontend/` into `site/`, which `backend.main` mounts at `/` behind every `/api/*` route (not `public/`: Vercel's Python builder leaves a build-made `public/` out of both the CDN and the function), `pyproject.toml` points Vercel at `backend.main:app` (the `/api/*` function, 300 s) and at the queue consumer `backend.worker`, `[project].dependencies` lists what the function installs, and `.vercelignore` keeps tests, docs, evaluation and sample generators out.
 
 The first CLI deploy of a new Vercel project is always a production deploy, even without `--prod`.
 

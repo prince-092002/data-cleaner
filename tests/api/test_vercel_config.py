@@ -47,7 +47,9 @@ def test_env_example_lists_production_names_without_values():
             "DC_STORAGE_LIMIT_MB"} <= names
 
 
-def test_public_dir_stays_in_the_function_bundle():
-    # backend.main mounts public/ only if it exists at import time; Vercel then promotes the mount to the CDN.
+def test_built_frontend_goes_to_site_dir_inside_the_function_bundle():
+    # Vercel's Python builder drops **/public/** from the function and serves public/ only if it is in the
+    # upload, so a public/ made by buildCommand is lost; backend.main serves site/ instead.
     cfg = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
-    assert "public" not in cfg["functions"]["backend/main.py"]["excludeFiles"]
+    assert cfg["buildCommand"].endswith("cp -r frontend/dist site")
+    assert "site" not in cfg["functions"]["backend/main.py"]["excludeFiles"]

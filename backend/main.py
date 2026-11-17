@@ -21,7 +21,7 @@ from backend.routes import router
 from backend.storage import StorageBackend
 
 log = logging.getLogger("data_cleaner")
-PUBLIC_DIR = Path(__file__).parents[1] / "public"     # the built frontend; only the Vercel build creates it
+SITE_DIR = Path(__file__).parents[1] / "site"     # the built frontend; only the Vercel build creates it (not public/: the Python builder drops it)
 _MULTIPART_OVERHEAD = MB      # form boundaries and headers around the file
 
 
@@ -121,8 +121,8 @@ def create_app(settings: Settings | None = None, storage: StorageBackend | None 
     def health():
         return {"status": "ok", "max_upload_mb": round(settings.max_upload_bytes / MB, 2)}
 
-    if PUBLIC_DIR.is_dir():      # last, so every /api route wins; Vercel promotes this mount to the CDN
-        app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True))
+    if SITE_DIR.is_dir():      # last, so every /api route wins
+        app.mount("/", StaticFiles(directory=SITE_DIR, html=True))
 
     return app
 
