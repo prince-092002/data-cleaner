@@ -45,3 +45,10 @@ def test_env_example_lists_production_names_without_values():
     assert {"DATABASE_URL", "DC_STORAGE_BACKEND", "DC_JOB_RUNNER", "DC_MAX_UPLOAD_MB", "CRON_SECRET", "DC_IP_HASH_SALT",
             "DC_DAILY_UPLOAD_CAP", "DC_DAILY_JOB_CAP", "DC_DAILY_IP_CAP", "DC_DAILY_IP_UPLOAD_CAP",
             "DC_STORAGE_LIMIT_MB"} <= names
+
+
+def test_built_frontend_is_declared_as_static_output():
+    # Vercel FastAPI serves static files only from the declared output dir (or public/) it finds after buildCommand.
+    cfg = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
+    assert cfg["outputDirectory"] == "frontend/dist"
+    assert "frontend/dist" in cfg["buildCommand"]
