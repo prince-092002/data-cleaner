@@ -6,7 +6,6 @@ Upload a messy CSV or Excel file. Get back a clean file, a cleaning report, a re
 
 ## What it does
 1. **Upload** a `.csv` or `.xlsx` file (up to 50 MB).
-If you ran an earlier version, delete `storage/app.db` once: the old database layout is no longer migrated automatically.
 2. **Profile**: per-column statistics and a 0 to 100 quality score.
 3. **Suggest fixes**: safe fixes are applied automatically; judgment calls wait for your approval.
 4. **Clean** in the background with a progress bar.
@@ -167,6 +166,7 @@ Measured at M5. In M6 the file is read once (a Parquet cache shared by profile a
 **Supported file size:** up to 50 MB when run locally (about 4 to 5 minutes and 1.8 GB of memory at the top end), and 4 MB on the live site (Vercel's request limit is 4.5 MB; a 4 MB file is about 75,000 rows and takes well under a minute).
 
 ## Known limitations
+- If you ran an earlier version locally, delete `storage/app.db` once: the old database layout is no longer migrated automatically.
 - **Live site upload limit: 4 MB per file.** Vercel limits a request body to 4.5 MB. Local runs accept up to 50 MB.
 - Latin-script files are read as Windows-1252. Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Category merging does not catch swapped letters in short words ("Wset").

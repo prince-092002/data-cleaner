@@ -422,7 +422,7 @@ Progress step labels:
 
 `display_name` is the file name as uploaded. The backend stores files under fixed names, so it passes this for `source.filename`, the report and the recipe.
 
-**Read-once cache (M6).** With `cache_dir`, `profile` saves the parsed all-text table as Parquet plus its own scores (`ingest-<key>.parquet`, `ingest-<key>.json`); `clean` with the same `cache_dir` reuses them instead of parsing the file and scoring "before" again. The key is the file's SHA-256 plus sheet, header row, engine version and a hash of the engine source code (`cache.ENGINE_FINGERPRINT`, worked out once at import), so any change to the file or to engine code misses. Profiling is never sampled and the dry run is never reused for the final clean. `clean` streams change records to `changelog.csv` after each step and keeps only counts and a 50-record sample in memory.
+**Read-once cache (M6).** With `cache_dir`, `profile` saves the parsed all-text table as Parquet plus its own scores (`ingest-<key>.parquet`, `ingest-<key>.json`); `clean` with the same `cache_dir` reuses them instead of parsing the file and scoring "before" again. The key is the file's SHA-256 (computed once per file) plus sheet, header row and a hash of the engine source code (`cache.ENGINE_FINGERPRINT`, worked out once at import), so any change to the file or to engine code misses. Profiling is never sampled and the dry run is never reused for the final clean. `clean` streams change records to `changelog.csv` after each step and keeps only counts and a 50-record sample in memory.
 
 Engine errors: `engine.errors.IngestError` (unreadable or empty file), `engine.errors.PlanError` (bad decisions). Both carry a user-safe `message`.
 

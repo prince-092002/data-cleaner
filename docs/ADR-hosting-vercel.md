@@ -93,3 +93,7 @@ All read on 2026-11-15.
 - Daily cleanup: `GET /api/cron/cleanup`, `Authorization: Bearer <CRON_SECRET>`, scheduled once a day in `vercel.json`. Vercel now calls Cron Jobs a legacy feature to be migrated to Schedules (beta), read 2026-11-16 at https://vercel.com/docs/cron-jobs. Cron still runs on Hobby once a day, anywhere within the scheduled hour, on production deployments only, with no retry. Revisit when Schedules leaves beta.
 - Limits so the free plans are never exceeded: new uploads refused above 800 MB stored (Blob free store 1 GB); daily caps of 200 jobs and 5 uploads (interim, Step 14 sets it from the Blob measurement) for the site, 10 jobs and 20 uploads per visitor (salted hash of the `x-forwarded-for` address; no header means no per-visitor cap).
 - Real Vercel Queues, Blob and Cron have only been exercised with fakes so far; the first real run is Step 14 on a preview deployment.
+
+## Update after the pre-deploy fixes (2026-11-16)
+- Blob pricing page re-read (https://vercel.com/docs/vercel-blob/usage-and-pricing, last updated 2026-09-23): uploads (put), list and copy are advanced operations; head and cache-miss reads are simple; delete is free. The Hobby numbers in the table above still match. Over a limit, Blob access is blocked for 30 days.
+- One full visit (upload, profile, clean, five downloads with the Excel build) makes about 32 Blob calls in the tests: 11 puts and 5 lists are the advanced ones (`tests/api/test_blob_calls.py`). The daily upload cap is an interim 5 until Step 14 measures the real figure.
