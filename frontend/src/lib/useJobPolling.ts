@@ -13,7 +13,8 @@ export function pollDelay(elapsedMs: number): number {
 
 /**
  * Polls GET /jobs/{id} until the job is done or failed, then stops. Stops on unmount or when
- * jobId changes. `onJob` runs for every answer; if it or the request throws, `onError` runs and polling stops.
+ * jobId changes. `onJob` runs for every answer; if it or the request throws 3 times in a row, `onError` runs and polling
+ * stops. A 404 (expired job) is not transient, so it fails at once.
  */
 export function useJobPolling(
   jobId: string | null,
@@ -29,15 +30,22 @@ export function useJobPolling(
     let alive = true
     const start = Date.now()
     let timer: ReturnType<typeof setTimeout>
+    let failures = 0
+    // shortcut: fixed 3-failure limit with no backoff, revisit if the API gets rate limiting
+    const MAX_FAILURES = 3
     const tick = async () => {
       try {
         const job = await getJob(jobId)
         if (!alive) return
         await cb.current.onJob(job)
+        failures = 0
         if (!alive || job.status === 'done' || job.status === 'failed') return
       } catch (e) {
-        if (alive) cb.current.onError(e)
-        return
+        if (!alive) return
+        if (++failures >= MAX_FAILURES || (e as { status?: number }).status === 404) {
+          cb.current.onError(e)
+          return
+        }
       }
       timer = setTimeout(tick, pollDelay(Date.now() - start))
     }

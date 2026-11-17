@@ -94,7 +94,7 @@ describe('ProfileScreen', () => {
     vi.mocked(getJob).mockResolvedValue(job({ status: 'done', progress_pct: 100 }))
     vi.mocked(getProfile).mockImplementation(() => Promise.reject(new Error('Profile unavailable')))
     setup()
-    await act(() => vi.advanceTimersByTimeAsync(2000))
+    await act(() => vi.advanceTimersByTimeAsync(6000))
     expect(screen.getByRole('alert').textContent).toBe('Profile unavailable')
     expect(screen.getByText('Back to upload')).toBeTruthy()
   })
