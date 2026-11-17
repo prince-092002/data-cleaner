@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
+import ipaddress
 import os
 
 from fastapi import Request
@@ -34,12 +35,26 @@ def client_ip(request: Request) -> str | None:
     return first or None
 
 
+def ip_group(ip: str) -> str:
+    """IPv6 clients are grouped by their /64 (one household or host owns a whole block); IPv4 is unchanged."""
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return ip
+    if addr.version == 4:
+        return ip
+    if addr.ipv4_mapped:                    # ::ffff:a.b.c.d is an IPv4 client, not a shared /64
+        return str(addr.ipv4_mapped)
+    return str(ipaddress.ip_network((addr, 64), strict=False).network_address)
+
+
 def _take_slot(ctx: Context, request: Request, keys: tuple[str, str], global_cap: int, ip_cap: int,
                code: str, global_msg: str, ip_msg: str) -> None:
     """Take one slot of today's caps or raise 429. The IP slot is taken first and handed back if the
     global cap refuses, so a refused request uses up nothing."""
     day = utc_today().isoformat()
     ip = client_ip(request)
+    ip = ip_group(ip) if ip else ip
     ip_key = None
     if ip is not None:
         # Only a hash is stored. Salted with a server secret when one is set (so the hash cannot be

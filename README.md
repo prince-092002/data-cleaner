@@ -70,9 +70,13 @@ Production settings (Vercel environment variables; never commit their values):
 | `DC_MAX_UPLOAD_MB` | `4` | Live upload limit (default 50 locally) |
 | `CRON_SECRET` | a long random string | Protects the daily cleanup at `/api/cron/cleanup` |
 | `DC_IP_HASH_SALT` | a long random string | Salt for the hashed IP counters (falls back to `CRON_SECRET`) |
-| `DC_DAILY_JOB_CAP`, `DC_DAILY_IP_CAP` | 200, 10 | Daily job limits (whole site, per visitor) |
-| `DC_DAILY_UPLOAD_CAP`, `DC_DAILY_IP_UPLOAD_CAP` | 5, 20 | Daily upload limits (the 5 is interim; Step 14 sets it from the measured Blob use per visit) |
+| `DC_DAILY_JOB_CAP`, `DC_DAILY_IP_CAP` | 200, 10 | Daily job limits (whole site, per visitor). The per-visitor value never exceeds the site value |
+| `DC_DAILY_UPLOAD_CAP`, `DC_DAILY_IP_UPLOAD_CAP` | 5, 2 | Daily upload limits (whole site, per visitor). The 5 applies only with `DC_JOB_RUNNER=queue`; local runs have no site cap unless this is set. IPv6 visitors are grouped by /64 |
 | `DC_STORAGE_LIMIT_MB` | 800 | New uploads are refused above this much stored data (Blob free store is 1 GB) |
+
+On Vercel (`VERCEL_ENV` production or preview) the app refuses to start unless `DC_STORAGE_BACKEND=blob`, `DC_JOB_RUNNER=queue` and `DATABASE_URL` are set, so SQLite and local disk are never used there. `.env.example` lists every name with a placeholder.
+
+One Vercel project serves everything: `vercel.json` builds `frontend/` into static files (`public/`), `pyproject.toml` points Vercel at `backend.main:app` (the `/api/*` function, 300 s) and at the queue consumer `backend.worker`, `requirements.txt` (identical to `requirements-vercel.txt`, checked by a test) gives the exact pins, and `.vercelignore` keeps tests, docs, evaluation and sample generators out.
 
 `vercel.json` schedules the cleanup once a day (Vercel Cron, Hobby plan). Each job has a 240 second limit; a slower file fails with "This file took too long to process. Try a smaller file." Results and uploads are deleted after 24 hours. A link with `?d=...&j=...` reopens a job or its results until then.
 

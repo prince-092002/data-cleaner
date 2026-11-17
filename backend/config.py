@@ -9,6 +9,10 @@ plus the adapter switches:
   used only when asked for explicitly, so a developer who has Vercel env vars never writes to
   Blob by accident. On Vercel, Blob authenticates through OIDC with BLOB_STORE_ID (no token).
 
+On Vercel (VERCEL_ENV production or preview) Settings refuses to start unless DC_STORAGE_BACKEND=blob,
+DC_JOB_RUNNER=queue and DATABASE_URL are set. Per-IP caps are clamped to the global caps; the interim
+global upload cap (5) applies only with DC_JOB_RUNNER=queue.
+
 CRON_SECRET (never kept in Settings) is read from the environment by backend/cron.py on each call.
 """
 
@@ -57,6 +61,14 @@ def _storage_backend() -> str:
     return raw
 
 
+def _upload_cap() -> int | None:
+    """The interim global daily upload cap protects the Blob budget, so it is on only with the queue
+    runner (production). Local runs have no cap unless DC_DAILY_UPLOAD_CAP is set."""
+    if os.environ.get("DC_DAILY_UPLOAD_CAP", "").strip() or _job_runner() == "queue":
+        return _int_env("DC_DAILY_UPLOAD_CAP", 5)
+    return None
+
+
 def _job_runner() -> str:
     raw = os.environ.get("DC_JOB_RUNNER", "inprocess").strip().lower() or "inprocess"
     if raw not in ("inprocess", "queue"):
@@ -74,8 +86,8 @@ class Settings:
     daily_job_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_JOB_CAP", 200))
     daily_ip_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_CAP", 10))
     # Interim: Step 14 sets this from the measured Blob calls per visit (see tests/api/test_blob_calls.py).
-    daily_upload_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_UPLOAD_CAP", 5))
-    daily_ip_upload_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_UPLOAD_CAP", 20))
+    daily_upload_cap: int | None = field(default_factory=_upload_cap)   # None: no global upload cap
+    daily_ip_upload_cap: int = field(default_factory=lambda: _int_env("DC_DAILY_IP_UPLOAD_CAP", 2))
     # "queue" (Vercel Queues, production) only when DC_JOB_RUNNER=queue; Vercel variables alone never select it.
     job_runner: str = field(default_factory=_job_runner)
     job_deadline_seconds: float = 240  # hard limit per attempt, inside the 300 s function limit
@@ -85,6 +97,18 @@ class Settings:
     ttl_hours: int = 24
     cleanup_interval_seconds: int = 3600
     cors_origins: list[str] = field(default_factory=_default_origins)
+
+    def __post_init__(self) -> None:
+        # A per-IP cap above its global cap would let one address use the whole day's allowance.
+        self.daily_ip_cap = min(self.daily_ip_cap, self.daily_job_cap)
+        if self.daily_upload_cap is not None:
+            self.daily_ip_upload_cap = min(self.daily_ip_upload_cap, self.daily_upload_cap)
+        if os.environ.get("VERCEL_ENV") in ("production", "preview"):    # never SQLite or local disk on Vercel
+            wrong = [name for name, ok in (("DC_STORAGE_BACKEND=blob", self.storage_backend == "blob"),
+                                           ("DC_JOB_RUNNER=queue", self.job_runner == "queue"),
+                                           ("DATABASE_URL (the pooled Postgres URL)", bool(self.database_url))) if not ok]
+            if wrong:
+                raise RuntimeError("Not started: on Vercel these must be set: " + ", ".join(wrong) + ".")
 
     @property
     def db_path(self) -> Path:

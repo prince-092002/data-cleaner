@@ -65,6 +65,7 @@ function ChangeLog({
   const [offset, setOffset] = useState(0)
   const [ruleId, setRuleId] = useState('')
   const [column, setColumn] = useState('')
+  const [columnQ, setColumnQ] = useState('')   // the column text the server is asked about, 300 ms after typing stops
   const [action, setAction] = useState<ChangeAction | ''>('')
   const [changeType, setChangeType] = useState<ChangeType | ''>('')
   const [loading, setLoading] = useState(false)
@@ -81,7 +82,7 @@ function ChangeLog({
     const id = ++reqId.current
     const q: ResultsQuery = { limit: pageSize, offset }
     if (ruleId) q.rule_id = ruleId
-    if (column) q.column = column
+    if (columnQ) q.column = columnQ
     if (action) q.action = action
     if (changeType) q.change_type = changeType
     setLoading(true)
@@ -96,7 +97,16 @@ function ChangeLog({
         if (id === reqId.current) setLoading(false)
       }
     })()
-  }, [datasetId, offset, pageSize, ruleId, column, action, changeType])
+  }, [datasetId, offset, pageSize, ruleId, columnQ, action, changeType])
+
+  useEffect(() => {
+    if (column === columnQ) return
+    const t = setTimeout(() => {
+      setColumnQ(column)
+      setOffset(0)
+    }, 300)
+    return () => clearTimeout(t)
+  }, [column, columnQ])
 
   const onFilter = (set: (v: string) => void) => (v: string) => {
     set(v)
@@ -129,7 +139,7 @@ function ChangeLog({
               id="f-column"
               list="f-column-list"
               value={column}
-              onChange={(e) => onFilter(setColumn)(e.target.value)}
+              onChange={(e) => setColumn(e.target.value)}
               placeholder="Any column"
             />
             <datalist id="f-column-list">

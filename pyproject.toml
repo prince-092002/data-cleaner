@@ -27,6 +27,10 @@ markers = ["slow: long-running test (about 1-2 minutes); still part of the defau
 [tool.setuptools.packages.find]
 include = ["engine*", "backend*"]
 
+# Vercel reads the FastAPI app from here (https://vercel.com/docs/functions/runtimes/python).
+[tool.vercel]
+entrypoint = "backend.main:app"
+
 # Vercel Queues push consumer for the job runner (DC_JOB_RUNNER=queue); see docs/CONTRACT.md 8.9.
 [[tool.vercel.subscribers]]
 entrypoint = "backend.worker"

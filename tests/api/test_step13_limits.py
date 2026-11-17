@@ -212,17 +212,18 @@ def test_ip_cap_is_per_address_and_stores_only_a_hash(tmp_path):
 
 
 def test_global_refusal_does_not_use_up_the_ip_allowance(tmp_path):
-    app, _ = make(tmp_path, daily_job_cap=1, daily_ip_cap=5)
-    h = {"x-forwarded-for": "203.0.113.7"}
+    # Per-IP caps never exceed the global cap (config clamp), so the hand-back shows with a second address.
+    app, _ = make(tmp_path, daily_job_cap=1, daily_ip_cap=1)
+    a, b = {"x-forwarded-for": "203.0.113.7"}, {"x-forwarded-for": "198.51.100.9"}
     with TestClient(app) as c:
         dataset_id = upload(c)
         url = f"/api/datasets/{dataset_id}/profile"
-        assert c.post(url, headers=h).status_code == 202
-        r = c.post(url, headers=h)
+        assert c.post(url, headers=a).status_code == 202
+        r = c.post(url, headers=b)
         assert r.status_code == 429 and r.json()["error"]["message"] == MSG_GLOBAL
         with Session(app.state.ctx.engine) as s:
-            ip_rows = [k.n for k in s.exec(select(Counter)).all() if k.key.startswith("ip:")]
-        assert ip_rows == [1]
+            ip_rows = sorted(k.n for k in s.exec(select(Counter)).all() if k.key.startswith("ip:"))
+        assert ip_rows == [0, 1]
 
 
 # ----------------------------------------------------------------------------- round 2

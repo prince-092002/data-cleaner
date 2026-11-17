@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useEffect, useState } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as client from '@/api/client'
@@ -110,6 +110,25 @@ describe('ResultsScreen', () => {
     await waitFor(() =>
       expect(getResults).toHaveBeenLastCalledWith('d1', { limit: 50, offset: 0, action: 'approved' }),
     )
+  })
+
+  it('waits 300 ms after the last keystroke before filtering by column', () => {
+    vi.useFakeTimers()
+    try {
+      getResults.mockResolvedValue(results({ changes: page(120) }))
+      setup()
+      const input = screen.getByLabelText('Column')
+      for (const v of ['p', 'pr', 'pri']) {
+        fireEvent.change(input, { target: { value: v } })
+        act(() => void vi.advanceTimersByTime(200))
+      }
+      expect(getResults).not.toHaveBeenCalled()
+      act(() => void vi.advanceTimersByTime(100))
+      expect(getResults).toHaveBeenCalledTimes(1)
+      expect(getResults).toHaveBeenCalledWith('d1', { limit: 50, offset: 0, column: 'pri' })
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('pages by the initial page limit so page 2 does not repeat rows', async () => {
