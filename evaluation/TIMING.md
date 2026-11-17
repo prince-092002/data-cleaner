@@ -26,8 +26,8 @@ At 100,000 rows (about 5 MB) the total is about 23 to 30 seconds, and time scale
 
 ## M6 Step 7: where the time and memory go, and what changed
 
-Measured with `evaluation/stage_timing.py`, which times each stage and reads the process's exact peak
-working set from Windows. This machine's speed varied by up to 4 times between runs (stages whose code
+Each stage was timed and the process's exact peak working set was read from Windows.
+This machine's speed varied by up to 4 times between runs (stages whose code
 did not change took 14 s in one run and 55 s in another), so old and new code were always run back to
 back, and only those pairs are compared. Every proposal is approved.
 
@@ -90,7 +90,5 @@ A change record costs about 200 bytes plus the old value it keeps alive.
 .venv/Scripts/python evaluation/timing.py --size-mb 48      # about 8 minutes; not part of pytest
 .venv/Scripts/python evaluation/timing.py --rows 100000 --no-api --out-dir <folder>
 ```
-
-Stage by stage (M6): `.venv/Scripts/python evaluation/stage_timing.py --rows 100000` or `--size-mb 48 --json <file>`.
 
 The 100k case also runs inside pytest as `tests/engine/test_timing.py` (marker `slow`, about 25 s).
