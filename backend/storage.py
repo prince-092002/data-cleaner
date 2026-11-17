@@ -223,7 +223,8 @@ class BlobStorage(StorageBackend):
     def put_file(self, key, path):
         with open(path, "rb") as fh:
             # The SDK takes bytes or an iterable of chunks; a chunk iterator keeps big files out of memory.
-            self.c.put_blob(key, _chunks(fh), access="private", allow_overwrite=True)
+            self.c.put_blob(key, _chunks(fh), access="private", allow_overwrite=True,
+                            content_length=Path(path).stat().st_size)
 
     def put_bytes(self, key, data):
         self.c.put_blob(key, data, access="private", allow_overwrite=True)

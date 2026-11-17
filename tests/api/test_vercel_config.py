@@ -45,3 +45,11 @@ def test_env_example_lists_production_names_without_values():
     assert {"DATABASE_URL", "DC_STORAGE_BACKEND", "DC_JOB_RUNNER", "DC_MAX_UPLOAD_MB", "CRON_SECRET", "DC_IP_HASH_SALT",
             "DC_DAILY_UPLOAD_CAP", "DC_DAILY_JOB_CAP", "DC_DAILY_IP_CAP", "DC_DAILY_IP_UPLOAD_CAP",
             "DC_STORAGE_LIMIT_MB"} <= names
+
+
+def test_built_frontend_goes_to_site_dir_inside_the_function_bundle():
+    # Vercel's Python builder drops **/public/** from the function and serves public/ only if it is in the
+    # upload, so a public/ made by buildCommand is lost; backend.main serves site/ instead.
+    cfg = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
+    assert cfg["buildCommand"].endswith("cp -r frontend/dist site")
+    assert "site" not in cfg["functions"]["backend/main.py"]["excludeFiles"]

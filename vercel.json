@@ -1,11 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "fastapi",
-  "buildCommand": "npm --prefix frontend ci && npm --prefix frontend run build && rm -rf public && cp -r frontend/dist public",
+  "buildCommand": "npm --prefix frontend ci && npm --prefix frontend run build && rm -rf site && cp -r frontend/dist site",
   "functions": {
     "backend/main.py": {
       "maxDuration": 300,
-      "excludeFiles": "{frontend/**,public/**,node_modules/**}"
+      "excludeFiles": "{frontend/**,node_modules/**}"
     }
   },
   "crons": [{ "path": "/api/cron/cleanup", "schedule": "0 4 * * *" }]

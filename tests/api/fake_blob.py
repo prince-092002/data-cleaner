@@ -16,8 +16,10 @@ class FakeBlobClient:
         self.puts: list[str] = []
         self.calls = collections.Counter()      # client calls by operation (put, get, stream, head, list, delete)
 
-    def put_blob(self, pathname, body, *, access, allow_overwrite=False, **_):
+    def put_blob(self, pathname, body, *, access, allow_overwrite=False, content_length=None, **_):
         self.calls["put"] += 1
+        if not isinstance(body, bytes) and content_length is None:     # mirrors vercel/blob/_internal/validation.py:117
+            raise TypeError("content_length is required for streaming bodies")
         assert access == "private"
         data = body if isinstance(body, bytes) else b"".join(body)
         self.blobs[pathname] = data
