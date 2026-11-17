@@ -53,7 +53,7 @@ Uploads are kept for 24 hours under `./storage` (change with `DC_STORAGE_DIR`). 
 For the demo with the sales sample, approve the Region suggestion on the fixes screen: west, WEST and West have no 80% majority spelling, so they become "West" only after you approve it.
 
 ## Deploying
-Live URL: coming soon. The site will run on Vercel's free (Hobby) plan with Neon Postgres and Vercel Blob; see [docs/ADR-hosting-vercel.md](docs/ADR-hosting-vercel.md).
+Live URL: https://data-cleaner-beta.vercel.app (Vercel Hobby, Neon Postgres, private Vercel Blob; pushes to `main` deploy to production, other branches make protected previews); see [docs/ADR-hosting-vercel.md](docs/ADR-hosting-vercel.md).
 
 Backends are chosen by environment variables. Without them everything runs locally (SQLite, files under `./storage`):
 - `DATABASE_URL` set: jobs and datasets live in Postgres.

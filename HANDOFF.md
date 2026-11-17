@@ -7,30 +7,25 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, openpyxl for Excel, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6, Part C. Step 13 and the pre-deploy fixes (audit findings, below) done. Not tagged.
-- **Repo:** https://github.com/prince-092002/data-cleaner (private, `main`). Branch `spike-vercel` is the throwaway spike, never merged.
-- **Vercel:** spike project `data-cleaner-spike` kept (Neon + private Blob, reused in Step 14), GitHub connection removed.
-- **Waiting for:** the owner's "go" for Step 14 (deploy through GitHub on Vercel). Do not start it before.
+- **Phase:** 1, milestone M6, Part C. Step 14 (deploy through GitHub on Vercel) done. Not tagged.
+- **Live:** https://data-cleaner-beta.vercel.app (production, public). Project `data-cleaner` is connected to GitHub (`main` is production; branch pushes make protected previews). Previews use Standard Deployment Protection.
+- **Repo:** https://github.com/prince-092002/data-cleaner (private, `main`). Branch `spike-vercel` and project `data-cleaner-spike` are kept; the spike shares the Neon database, so removing it must not delete that database.
+- **Waiting for:** the owner's "go" for Step 15. Do not start it before.
 
-## Last milestone summary (pre-deploy fixes from evaluation/PONYTAIL_AUDIT.md, 2026-11-16)
-- Closed (14 of 17, verified in evaluation/PONYTAIL_AUDIT_2.md): Blob calls per visit 38 to 32 (lists 14 to 5; guard test `tests/api/test_blob_calls.py`; `exists` uses `head_blob`); cleanup loop only for the in-process runner; cron stops after 200 s with `partial: true`; Excel wait is one lease; a refused profile request changes nothing; per-job expiry on status reads; `counter_set` race; zip expansion cap 60 MB; `MeteredStorage` subclasses `StorageBackend`; dead code deleted (drop_all migration, storage helpers, `stage_timing.py`, unused UI files and assets); polling tolerates 2 failed requests; cache key is the source fingerprint plus a content hash (hashed once per miss).
-- Deferred: finding 7 (slim `vercel` dependencies: only about 19 MiB saved, still over 250 MB, real Blob/Queue auth untested; try again in Step 14; the trimmed `requirements.txt` is commit aad5311 on the local, unpushed branch `pf-misc`), finding 9 (clean-run folder cleanup: deleting the runs prefix in `start_clean` breaks `test_newest_clean_wins_when_two_cleans_overlap`), finding 1d (monthly counter, not needed).
-- Interim: global daily upload cap default is 5 (it also applies to local runs; override with `DC_DAILY_UPLOAD_CAP`). Step 14 sets it from the measured Blob use. Vercel pricing page read 2026-11-16: puts, lists and copies are advanced operations; heads are simple; deletes are free; over a limit access is blocked for 30 days.
-- Correction: the audit said nothing imports `shadcn`; `src/index.css` imports `shadcn/tailwind.css`, so it stays (devDependency).
+## Last milestone summary (Step 14, deploy, 2026-11-17)
+- Vercel installs `pyproject.toml` `[project].dependencies` (not requirements.txt), so the backend runtime packages moved there; uvicorn stays in the `backend` extra. Bundle 285.4 MB; above 250 MB Vercel installs packages at cold start (about 1.9 s).
+- Fixes found live: Blob `put_blob` needs `content_length` for streamed bodies; the built frontend is copied to `site/` and mounted by the app (the static builder lists files before the build runs and the Python builder drops `public/`).
+- Preview smoke tests: 8 pass, 4 partial (queue redelivery not replayable from outside, idle timing spoiled, Blob per-op counts only on the dashboard, deleted blob still served for minutes), 1 skipped (dependency trim conflicts; not needed). Demo CSV output identical to local; Chicago 3,995 rows: warm profile 4.6 s, clean 5.3 s; cold queue wait 5.4 s.
+- Production: site, /api and cron (secret, idempotent, 401 otherwise) pass; cron registered at 0 4 * * *, first run 2026-11-18 04:00 to 04:59 UTC. Checks 2 and 3 on production wait for the daily caps to reset (testing used today's).
+- Caps from the Blob budget (owner chose to accept the low cap): 3 uploads and 9 jobs a day for the site, 2 and 6 per visitor. See README and ADR for the formula.
 
-Tests: **460 Python passed, 7 skipped without a database; with Neon (unpooled URL) 137 passed in tests/api plus cache concurrency, 102 frontend passed**, build OK. Evaluation and the 12 bundled data files' outputs unchanged.
+Tests: **481 Python passed, 7 skipped (fast suite), 104 frontend passed**, build OK. No engine change; outputs and evaluation unchanged.
 
 ## Decisions made
 - 2026-11-11 (M0, summarised) Repo root is the working folder. Change log has a `change_type` field. Auto fixes are listed and can be rejected; an unanswered suggestion is not applied. "Try a sample file" uses the normal upload endpoint. Added `engine/models.py`, `engine/rules/base.py`, `engine/errors.py`.
 - 2026-11-11 (M1, summarised) `engine/parsing.py` shares value parsers between profiler and rules. CONTRACT changes: category similarity 90 -> 85 (values whose digits differ never merge); key candidate = id, integer or text with distinct/non-null >= 0.95; conformity divides by non-null + null-token cells; empty cells are null at ingest, Excel values are text, headers stay as uploaded until `normalize_headers`; type inference order written out.
 - 2026-11-11 (M1, M2) M0 to M2 were built in the main session, not through the helper agents (agent files created mid-session load only in a new session).
-- 2026-11-11 (M2) CONTRACT change: `trigger(profile)` returns lightweight candidates, and rules get an optional `prepare(df, column, params)`. Why: some params need the data, not just the profile (date order, category mapping), and must be computed after earlier fixes such as trimming.
-- 2026-11-11 (M2) CONTRACT change: proposals come from a dry run of all candidates in rule order. Why: gives true `rows_affected` and before/after samples, and drops fixes that would change nothing.
-- 2026-11-11 (M2) CONTRACT change: `parse_dates` params are `{dayfirst}` only (dropped `formats`); `flag_outliers` `k` is editable; `normalize_headers` mapping is keyed by the current dataframe column.
-- 2026-11-11 (M2) Plan steps name columns by tidy name; if `normalize_headers` is rejected the pipeline maps names back, so other fixes still run.
-- 2026-11-11 (M2) ChangeRecord is a plain dataclass, not Pydantic. Why: a run can log millions of records.
-- 2026-11-11 (M2) ftfy runs in a conservative mode (repairs broken encoding only; curly quotes and ligatures are kept). Why: "auto" fixes must not change meaning or style.
-- 2026-11-11 (M2) `remove_exact_duplicate_rows` is always a candidate. Why: trimming and date fixes can reveal duplicates the raw profile cannot see.
+- 2026-11-11 (M2, summarised) CONTRACT: `trigger(profile)` returns candidates and rules may `prepare()` data-dependent params; proposals come from a dry run in rule order (true rows_affected); `parse_dates` params `{dayfirst}`, `flag_outliers` k editable, header mapping keyed by current column. Plan steps use tidy names. ChangeRecord is a dataclass (millions of records). ftfy conservative mode. Duplicate removal is always a candidate.
 - 2026-11-11 (M3) Engine `profile()` and `clean()` take an optional `display_name`. Why: the backend stores uploads as `original.csv`, but reports and recipes should show the uploaded name.
 - 2026-11-11 (M3) Upload size is checked twice (declared length, then while streaming); file type is checked by extension and content. Why: reject bad uploads before anything is queued.
 - 2026-11-11 (M3) Starting a new profile deletes the old profile, plan, results and outputs. Why: results must never describe a different sheet or header row.
@@ -83,6 +78,8 @@ Tests: **460 Python passed, 7 skipped without a database; with Neon (unpooled UR
 - 2026-11-16 (M6.13) Job runner chosen by `DC_JOB_RUNNER` (inprocess default, queue in production). Deadline 240 s per attempt, lease 270 s; retries counted by the attempts column, never by the queue's max_attempts.
 - 2026-11-16 (M6.13) Kept Vercel Cron (owner's spec) although Vercel now calls it legacy in favour of Schedules (beta). Daily caps count at POST profile/clean and upload; a missing x-forwarded-for means no per-visitor cap so nobody shares a bucket. IP hashes salted with DC_IP_HASH_SALT or CRON_SECRET.
 - 2026-11-16 (M6.14) Pre-deploy fixes done by Ponytail rules (smallest change, test first). The coordinator deferred finding 7 against the letter of the task (conditions held, but no threshold crossed and Step 14 is the first real auth test) and finding 9 (an existing test would have needed weakening). `CACHE_VERSION` and `ENGINE_VERSION` left the cache key (CONTRACT 425 updated). Global upload cap default 5 is interim.
+- 2026-11-17 (M6.15) Owner accepted daily caps of 3 uploads / 9 jobs (site) and 2 / 6 (per visitor) from 16 advanced Blob ops per visit; Postgres for small JSON and one output object were estimated at 4 to 5 uploads a day and not taken. The first CLI deploy of a new project is always production (it errored, nothing served).
+- 2026-11-17 (M6.15) Fixes escalated to Opus after two failed static-site attempts. Static files are served by the function from `site/` (shortcut comment in backend/main.py). The dependency trim (finding 7) is dropped: the bundle is under the 500 MB limit.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
@@ -101,16 +98,16 @@ Tests: **460 Python passed, 7 skipped without a database; with Neon (unpooled UR
 - Review (M6.9), low, not fixed: the id tokens "no" and "key" catch names like "Amount (no tax)".
 - Review (M6.12), not fixed: local put_file not atomic; Excel waiter polls Blob list every 0.2 s; one failing prefix delete aborts the sweep; post-save cleanup errors mark a saved job failed; local list_keys walks the whole root; streams can leak a handle on disconnect; two cold starts can race in create_all. (Sweep and stuck jobs were fixed in Step 13.)
 - Review (M6.13), medium, not fixed: a redelivery of a crashed job inside its 270 s lease is acknowledged, so a crashed worker is not retried (the job fails as job_timeout later); the global daily caps can be spent by one caller with many IPs, and a failed enqueue does not refund the slot.
-- Second audit (evaluation/PONYTAIL_AUDIT_2.md), open: N1 must fix in Step 14: set both daily caps from the measured Blob budget (about 16 advanced operations per visit; a script re-cleaning one upload can spend about 1,800 in a day against the 200 job cap); N2: each Results page or filter click downloads and parses the whole changelog; N3: the per-IP upload cap (20) is above the global one (5) and IPv6 addresses are not grouped; plus 3 nice-to-have items listed there.
-- Not verified yet: real Vercel Queues send and push delivery, Blob SDK calls (including `head_blob` for a missing file) and Cron (fakes only); Postgres tests need the unpooled URL and leave their schema behind if engine creation fails; the `counter_set` race test only runs on SQLite.
-- Shortcut ledger (5 markers, all with a ceiling and a trigger): `backend/limits.py:32` (no forwarded address, no per-IP cap), `limits.py:75` (stored-bytes drift), `backend/storage.py:306` (zip declared sizes trusted), `engine/cache.py:43` (hash memo trusts size and mtime), `frontend/src/lib/useJobPolling.ts:34` (fixed 3-failure limit).
+- Second audit (evaluation/PONYTAIL_AUDIT_2.md): N1, N2 and N3 closed in Step 14; 3 nice-to-have items remain listed there.
+- Not verified yet: queue redelivery on the live site, `head_blob` on a missing file (a deleted blob was still served for minutes), and a cron run that deletes expired data; Postgres tests need the unpooled URL and leave their schema behind if engine creation fails; the `counter_set` race test only runs on SQLite.
+- Shortcut ledger (7 markers): limits.py:33 (no forwarded address), limits.py:90 (stored-bytes drift), main.py:124 (function serves site files), routes.py:242 (per-instance change-log copy), storage.py:307 (zip sizes trusted), useJobPolling.ts:34 (3-failure limit), engine/cache.py:43 (no trigger named; engine left untouched in Step 14).
 - The `reason` is stored in changelog.csv only; the report and the UI table do not show it.
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Wait for the owner's "go". Then Step 14: deploy through GitHub on Vercel with the production variables listed in README (DC_JOB_RUNNER=queue, DC_STORAGE_BACKEND=blob, DC_MAX_UPLOAD_MB=4, CRON_SECRET, DC_IP_HASH_SALT); first real test of Queues, Blob and Cron on a preview; count the real Blob operations for one visit and set both daily caps from them (N1); `vercel.json` has only the cron entry and `backend/main.py` is not a default FastAPI entrypoint, so routing needs the spike's setup; retry the dependency trim (finding 7).
-2. Step 15: verify the live site. Later: show the `reason` column in the report and UI, narrow the "no"/"key" id tokens, move Cron to Schedules.
-3. After the real deployment works: `vercel project remove data-cleaner-spike`, remove its Neon database and Blob store, delete branch `spike-vercel`.
+1. Wait for the owner's "go" for Step 15: verify the live site, including production checks 2 (demo CSV) and 3 (Chicago) after the daily caps reset, and the first cron run on 2026-11-18.
+2. Later: show the `reason` column in the report and UI, narrow the "no"/"key" id tokens, move Cron to Schedules, add the trigger to the engine/cache.py shortcut.
+3. When the spike is no longer needed: remove project `data-cleaner-spike` without deleting the shared Neon database, then delete branch `spike-vercel`.
 
 ## How to run
 ```bash
@@ -147,3 +144,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-16 | M6 Step 12 Slim engine + adapters | Done. No DuckDB/pandas/numpy/pyarrow (284.8 MB, outputs identical, evaluation unchanged); Blob/Postgres adapters, claim, lease; 3 deferred + 2 HIGH review fixes. 411 Python + 60 frontend tests passing, CI green.
 - 2026-11-16 | M6 Step 13 Queue jobs, limits, cron | Done. Queue consumer with 240 s deadline and retries, cron cleanup, storage and daily caps, frontend states and URL resume, Chicago trimmed to 3,995 rows. 450 Python + 100 frontend tests, evaluation unchanged.
 - 2026-11-16 | M6 Pre-deploy fixes (Ponytail audit) | Done. 14 of 17 findings closed, 2 deferred; second audit adds 6 new (1 must fix for Step 14). 460 Python + 102 frontend tests, Postgres variants pass, outputs and evaluation unchanged.
+- 2026-11-17 | M6 Step 14 Deploy | Done. Live at data-cleaner-beta.vercel.app via GitHub; 3 fix loops (dependencies, Blob put, static site; one escalation to Opus); caps 3/9 from the Blob budget. 481 Python + 104 frontend tests, outputs and evaluation unchanged.
