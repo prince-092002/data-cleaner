@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import tempfile
+import time
 import urllib.parse
 import uuid
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -251,7 +252,10 @@ def _changelog_path(ctx: Context, dataset: Dataset) -> Path:
         part.unlink(missing_ok=True)
         raise errors.not_ready("The results are not ready yet. Start a clean job and wait for it to finish.")
     os.replace(part, path)
-    for old in sorted(cache.glob("*.csv"), key=lambda f: f.stat().st_mtime, reverse=True)[_CHANGELOG_CACHE_FILES:]:
+    # Copies older than the retention time go too: a deleted dataset's change log must not outlive the 24 h promise.
+    expired = time.time() - ctx.settings.ttl_hours * 3600
+    files = sorted(cache.glob("*.csv"), key=lambda f: f.stat().st_mtime, reverse=True)
+    for old in [f for f in files if f.stat().st_mtime < expired] + files[_CHANGELOG_CACHE_FILES:]:
         old.unlink(missing_ok=True)
     return path
 

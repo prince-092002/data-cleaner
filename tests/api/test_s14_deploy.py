@@ -120,3 +120,21 @@ def test_change_log_is_downloaded_once_per_run(tmp_path, monkeypatch):
         assert first["changes"]["total"] == second["changes"]["total"] > 5
         assert second["changes"]["items"] != first["changes"]["items"]
         assert third["changes"]["total"] < first["changes"]["total"]
+
+
+def test_old_change_log_copies_are_removed_after_the_ttl(tmp_path, monkeypatch):
+    import os, time
+    monkeypatch.setattr("tempfile.tempdir", str(tmp_path / "tmp"))
+    cache = tmp_path / "tmp" / "dc-changes"
+    cache.mkdir(parents=True)
+    old = cache / "gone-dataset-run.csv"
+    old.write_text("x")
+    age = time.time() - 25 * 3600
+    os.utime(old, (age, age))
+    app = create_app(Settings(storage_dir=tmp_path / "s"), storage=BlobStorage(FakeBlobClient()))
+    with TestClient(app) as c:
+        d = c.post("/api/datasets", files={"file": (SALES.name, io.BytesIO(SALES.read_bytes()))}).json()["dataset_id"]
+        c.post(f"/api/datasets/{d}/profile", json={})
+        c.post(f"/api/datasets/{d}/clean", json={})
+        assert c.get(f"/api/datasets/{d}/results").status_code == 200
+    assert not old.exists() and len(list(cache.glob("*.csv"))) == 1

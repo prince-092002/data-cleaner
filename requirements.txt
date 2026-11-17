@@ -1,4 +1,4 @@
-# Exact pins for the deployed Vercel function (engine + backend runtime, no pandas/numpy/duckdb/pyarrow).
+# Exact pins for the deployed Vercel function and the local backend (engine + backend runtime, no pandas/numpy/duckdb/pyarrow). Vercel reads this file.
 # Top-level: polars pydantic PyYAML RapidFuzz ftfy charset-normalizer clevercsv openpyxl fastapi sqlmodel python-multipart vercel psycopg[binary]
 annotated-doc==0.0.6
 annotated-types==0.8.0

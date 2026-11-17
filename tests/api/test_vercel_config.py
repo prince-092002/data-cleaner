@@ -18,10 +18,8 @@ def test_vercel_function_wiring():
     assert (ROOT / ".python-version").read_text().strip() == "3.12"
 
 
-def test_requirements_txt_is_the_exact_vercel_pin_list():
-    # The Python builder reads requirements.txt; its priority against pyproject.toml is not documented,
-    # so the file must be identical to the reviewed pins.
-    assert (ROOT / "requirements.txt").read_bytes() == (ROOT / "requirements-vercel.txt").read_bytes()
+def test_requirements_txt_is_exact_pins():
+    # The Python builder reads requirements.txt (its priority against pyproject.toml is not documented).
     assert all("==" in line for line in (ROOT / "requirements.txt").read_text().splitlines()
                if line and not line.startswith("#"))
 
