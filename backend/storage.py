@@ -23,6 +23,7 @@ DOWNLOADS = {
     "changelog.csv": ("_changelog.csv", "text/csv; charset=utf-8"),
 }
 _CHUNK = 1024 * 1024
+MAX_XLSX_UNCOMPRESSED = 60 * 1024 * 1024    # a 4 MB .xlsx must not expand into a table that exhausts memory
 
 
 class TooLarge(Exception):
@@ -102,7 +103,8 @@ class StorageBackend(ABC):
         """(key, last modified in UTC) of everything under prefix."""
 
     @abstractmethod
-    def delete_prefix(self, prefix: str) -> None: ...
+    def delete_prefix(self, prefix: str) -> int:
+        """Delete everything under prefix; returns the bytes freed (one listing at most, for the byte counter)."""
 
     @abstractmethod
     def size_under(self, prefix: str) -> int:
@@ -143,16 +145,7 @@ class LocalStorage(StorageBackend):
     def _path(self, key: str) -> Path:
         return self.root / key
 
-    # Path helpers (tests and local debugging)
-    def dataset_dir(self, dataset_id: str) -> Path:
-        return self._path(dataset_prefix(dataset_id).rstrip("/"))
-
-    def original(self, dataset_id: str, file_type: str) -> Path:
-        return self._path(original_key(dataset_id, file_type))
-
-    def file(self, dataset_id: str, name: str) -> Path:
-        return self._path(file_key(dataset_id, name))
-
+    # Path helper (tests and local debugging)
     def run_dir(self, dataset_id: str, run_id: str) -> Path:
         return self._path(run_prefix(dataset_id, run_id).rstrip("/"))
 
@@ -206,12 +199,14 @@ class LocalStorage(StorageBackend):
         return sum(self._path(key).stat().st_size for key, _ in self.list_keys(prefix) if self._path(key).exists())
 
     def delete_prefix(self, prefix):
+        freed = self.size_under(prefix)
         folder = self._path(prefix.rstrip("/"))
         if prefix.endswith("/") and folder.is_dir():
             shutil.rmtree(folder, ignore_errors=True)
         else:
             for key, _ in self.list_keys(prefix):
                 self._path(key).unlink(missing_ok=True)
+        return freed
 
 
 class BlobStorage(StorageBackend):
@@ -269,7 +264,11 @@ class BlobStorage(StorageBackend):
         return chunks()
 
     def exists(self, key):
-        return any(k == key for k, _ in self.list_keys(key))
+        try:
+            self.c.head_blob(key)           # one direct call, not a listing
+        except self._missing:
+            return False
+        return True
 
     def list_keys(self, prefix):
         return [(b.pathname, b.uploaded_at) for b in self.c.query_blobs(prefix=prefix or None)]
@@ -278,17 +277,17 @@ class BlobStorage(StorageBackend):
         return sum(b.size for b in self.c.query_blobs(prefix=prefix or None))
 
     def delete_prefix(self, prefix):
-        keys = [k for k, _ in self.list_keys(prefix)]
+        blobs = list(self.c.query_blobs(prefix=prefix or None))        # the one listing: keys and sizes
+        keys = [b.pathname for b in blobs]
         for i in range(0, len(keys), 1000):        # the API takes up to 1000 per call
             self.c.delete_blob(keys[i:i + 1000])
+        return sum(b.size for b in blobs)
 
 
 def _chunks(fh: BinaryIO) -> Iterator[bytes]:
     while chunk := fh.read(_CHUNK):
         yield chunk
 
-
-Storage = LocalStorage      # the pre-Step-12 name
 
 
 def make_storage(settings) -> StorageBackend:
@@ -304,6 +303,9 @@ def looks_like(path: Path, file_type: str) -> bool:
             return False
         with zipfile.ZipFile(path) as zf:
             names = set(zf.namelist())
+            # shortcut: trusts the sizes the zip declares (a lying header is not checked), revisit if a profile job still runs out of memory
+            if sum(i.file_size for i in zf.infolist()) > MAX_XLSX_UNCOMPRESSED:
+                return False
         return "[Content_Types].xml" in names and any(n.startswith("xl/") for n in names)
     # CSV: text. Reject known binary signatures and NUL bytes (UTF-16 text is allowed).
     if head.startswith((b"PK\x03\x04", b"%PDF", b"\xd0\xcf\x11\xe0", b"\x89PNG", b"\xff\xd8\xff", b"GIF8")):

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hmac
 import logging
 import os
+import time
 
 from fastapi import APIRouter, Request
 from sqlmodel import Session, delete
@@ -15,6 +16,7 @@ from backend.db import Counter, acquire_lease, counter_set, expire_stuck_jobs, r
 
 router = APIRouter(prefix="/api")
 log = logging.getLogger("data_cleaner.cron")
+BUDGET_SECONDS = 200      # stop well inside the 300 s function limit; tests set a tiny value
 LEASE_KEY = "cron:cleanup"     # held 600 s at most: a killed run never blocks the next daily run
 
 
@@ -34,8 +36,11 @@ def cron_cleanup(request: Request):
     holder = acquire_lease(ctx.engine, LEASE_KEY, "-", seconds=600)
     if holder is None:                                    # a run is already in progress (or Vercel delivered twice)
         return {"skipped": True}
+    deadline = time.monotonic() + BUDGET_SECONDS
     try:
-        removed = cleanup_expired(ctx)
+        removed = cleanup_expired(ctx, deadline=deadline)
+        if time.monotonic() >= deadline:      # out of time: the next run resumes where this one stopped
+            return {"skipped": False, "partial": True, "removed": removed}
         expired_jobs = expire_stuck_jobs(ctx.engine)
         today = limits.utc_today().isoformat()
         with Session(ctx.engine) as session:              # yesterday's counters are no longer needed
@@ -43,6 +48,6 @@ def cron_cleanup(request: Request):
             session.commit()
         stored = ctx.storage.size_under("")               # self-correct the running byte total
         counter_set(ctx.engine, limits.BYTES_KEY, stored)
-        return {"skipped": False, "removed": removed, "expired_jobs": expired_jobs, "stored_bytes": stored}
+        return {"skipped": False, "partial": False, "removed": removed, "expired_jobs": expired_jobs, "stored_bytes": stored}
     finally:
         release_lease(ctx.engine, LEASE_KEY, holder)

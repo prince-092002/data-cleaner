@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import datetime as dt
 import logging
+import time
 
 from sqlmodel import Session, delete, select
 
@@ -24,12 +25,15 @@ def delete_dataset(ctx: Context, session: Session, dataset: Dataset) -> None:
     ctx.storage.delete_prefix(dataset_prefix(dataset.id))
 
 
-def cleanup_expired(ctx: Context, now: dt.datetime | None = None) -> int:
-    """Remove expired datasets (files and rows) and folders with no dataset row. Returns the count."""
+def cleanup_expired(ctx: Context, now: dt.datetime | None = None, deadline: float | None = None) -> int:
+    """Remove expired datasets (files and rows) and folders with no dataset row. Returns the count.
+    Stops early once time.monotonic() passes deadline; the next run resumes (every step is idempotent)."""
     now = now or utcnow()
     removed = 0
     with Session(ctx.engine) as session:
         for dataset in session.exec(select(Dataset).where(Dataset.expires_at <= now)).all():
+            if deadline is not None and time.monotonic() >= deadline:
+                return removed
             delete_dataset(ctx, session, dataset)
             removed += 1
         session.commit()
@@ -42,6 +46,8 @@ def cleanup_expired(ctx: Context, now: dt.datetime | None = None) -> int:
         if is_uuid(folder) and folder not in known:
             newest[folder] = max(modified, newest.get(folder, modified))
     for folder, modified in newest.items():
+        if deadline is not None and time.monotonic() >= deadline:
+            break
         if modified < cutoff:
             ctx.storage.delete_prefix(dataset_prefix(folder))
             removed += 1

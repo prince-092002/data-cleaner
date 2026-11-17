@@ -89,13 +89,14 @@ def create_app(settings: Settings | None = None, storage: StorageBackend | None 
         if interrupted:
             log.warning("marked %s interrupted job(s) as failed", interrupted)
         # Development only: in production Vercel Cron calls /api/cron/cleanup (serverless has no long-lived loop).
-        task = asyncio.create_task(cleanup_loop(ctx))     # runs once now, then every hour
+        task = asyncio.create_task(cleanup_loop(ctx)) if settings.job_runner == "inprocess" else None   # once now, then hourly
         try:
             yield
         finally:
-            task.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
-                await task
+            if task:
+                task.cancel()
+                with contextlib.suppress(asyncio.CancelledError):
+                    await task
             ctx.engine.dispose()
 
     app = FastAPI(title="Data Cleaner API", version="0.1.0", lifespan=lifespan)

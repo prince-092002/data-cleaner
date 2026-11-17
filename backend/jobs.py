@@ -274,7 +274,7 @@ def ensure_xlsx(ctx: Context, dataset: Dataset) -> None:
     run_id = dataset.results_run_id
     target, csv_key = (run_key(dataset.id, run_id, n) for n in ("clean.xlsx", "clean.csv"))
     lease = f"xlsx:{run_id}"
-    give_up = time.monotonic() + 3 * XLSX_LEASE_SECONDS
+    give_up = time.monotonic() + XLSX_LEASE_SECONDS      # one lease: the request ends well inside the 300 s function limit
     while True:
         if ctx.storage.exists(target):
             return
