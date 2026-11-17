@@ -83,7 +83,7 @@ All read on 2026-11-15.
 
 ## Update after Step 12 (2026-11-16)
 - The engine no longer uses DuckDB, pandas, numpy or pyarrow. Outputs are byte-identical to the previous engine on all 14 bundled files (only ISO timestamps masked), and the evaluation numbers did not move.
-- The deployed function's requirements (`requirements.txt`, now including the backend, `vercel` and `psycopg`) install to 284.8 MB on Linux, against the 500 MB limit.
+- The deployed function's requirements (`pyproject.toml` `[project].dependencies`, pinned in `requirements.txt`, now including the backend, `vercel` and `psycopg`) install to 284.8 MB on Linux, against the 500 MB limit.
 - Postgres runs with prepared statements turned off (Neon's pooled URL goes through PgBouncer). The pooled URL also rejects the `search_path` startup option, so the Postgres tests, which use a throwaway schema, need the unpooled URL.
 - The spike project's GitHub connection was removed on 2026-11-16. A push to the repo had created a deployment on it by itself.
 
