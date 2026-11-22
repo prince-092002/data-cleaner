@@ -1,5 +1,11 @@
 # Keep development material out of the upload and the function bundle.
 # frontend/ stays: the build compiles it into the static site (frontend/public/samples included).
+# Static site: hide the Python app files so Vercel does not run its Python builder.
+# engine/ and browser/ stay: frontend/scripts/bundle-engine.mjs reads them at build time.
+pyproject.toml
+requirements.txt
+requirements-dev.txt
+backend/
 tests/
 evaluation/
 sample_data/
