@@ -41,6 +41,19 @@ describe('browser engine', () => {
     await expect(e.getHealth()).resolves.toEqual({ status: 'ok', max_upload_mb: 20 })
   })
 
+  it('starts booting the worker when the app asks for health', async () => {
+    const e = await load()
+    await e.getHealth()
+    expect(requests.map((r) => r.op)).toEqual(['warm'])
+  })
+
+  it('answers 404 at once, without the worker, for a dataset this page never saw', async () => {
+    const e = await load()
+    await expect(e.getResults('old-id')).rejects.toMatchObject({ status: 404, code: 'not_found' })
+    await expect(e.getProfile('old-id')).rejects.toMatchObject({ status: 404, code: 'not_found' })
+    expect(requests).toEqual([])
+  })
+
   it('uploads the file bytes to the worker', async () => {
     handler = (req, emit) => emit({ id: req.id, ok: true, result: upload })
     const e = await load()
@@ -83,10 +96,12 @@ describe('browser engine', () => {
   })
 
   it('maps worker errors to ApiError and answers 404 for unknown things', async () => {
-    handler = (req, emit) => emit({ id: req.id, ...err(404, 'not_found', 'This dataset was not found.') })
+    handler = (req, emit) =>
+      emit(req.op === 'upload' ? { id: req.id, ok: true, result: upload } : { id: req.id, ...err(404, 'not_found', 'This dataset was not found.') })
     const e = await load()
+    await e.uploadDataset(new File(['a'], 'a.csv')).catch(() => {})
     const { ApiError } = await import('./client')
-    const caught = await e.getResults('nope').catch((x) => x)
+    const caught = await e.getResults('d1').catch((x) => x)
     expect(caught).toBeInstanceOf(ApiError)
     expect(caught).toMatchObject({ status: 404, code: 'not_found' })
     await expect(e.getJob('nope')).rejects.toMatchObject({ status: 404, code: 'not_found' })
@@ -94,9 +109,11 @@ describe('browser engine', () => {
   })
 
   it('sends results queries as given', async () => {
+    handler = (req, emit) => emit({ id: req.id, ok: true, result: req.op === 'upload' ? upload : {} })
     const e = await load()
+    await e.uploadDataset(new File(['a'], 'a.csv'))
     await e.getResults('d1', { limit: 5, rule_id: 'r' })
-    expect(requests[0]).toMatchObject({ op: 'results', args: { dataset_id: 'd1', query: { limit: 5, rule_id: 'r' } } })
+    expect(requests[1]).toMatchObject({ op: 'results', args: { dataset_id: 'd1', query: { limit: 5, rule_id: 'r' } } })
   })
 
   it('after a clean job, downloads are ready as blob URLs; Excel is built on request', async () => {

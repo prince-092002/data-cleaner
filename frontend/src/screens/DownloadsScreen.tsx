@@ -55,6 +55,8 @@ export function DownloadsScreen() {
     )
   }
 
+  // Same names the server sends: the upload's name without its extension, then _clean.csv, _report.html and so on.
+  const stem = (upload?.filename ?? '').replace(/\.[^.]*$/, '') || 'data'
   const expires = upload?.expires_at ? new Date(upload.expires_at) : null
   const expiresText = expires && !isNaN(expires.getTime()) ? expires.toLocaleString() : null
 
@@ -62,7 +64,9 @@ export function DownloadsScreen() {
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Downloads</h2>
       <p className="text-sm text-slate-700">
-        Files are deleted 24 hours after upload{expiresText ? ` (expires ${expiresText})` : ''}.
+        {import.meta.env.VITE_ENGINE === 'browser'
+          ? 'These files exist only in this browser tab. Download what you need before you close or reload it.'
+          : `Files are deleted 24 hours after upload${expiresText ? ` (expires ${expiresText})` : ''}.`}
       </p>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {FILES.map((f) => (
@@ -86,7 +90,7 @@ export function DownloadsScreen() {
                 ) : (
                   <a
                     href={downloadUrl(datasetId, f.name)}
-                    download
+                    download={`${stem}_${f.name}`}
                     className={`${linkClass} bg-blue-600 text-white hover:bg-blue-700`}
                     aria-label={`Download ${f.name}`}
                   >

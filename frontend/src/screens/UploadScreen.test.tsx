@@ -48,6 +48,19 @@ beforeEach(() => {
 })
 
 describe('UploadScreen', () => {
+  it('says files are deleted after 24 hours on the server', () => {
+    setup()
+    expect(screen.getByText(/deleted after 24 hours/)).toBeTruthy()
+  })
+
+  it('says the file stays on the computer when cleaning runs in the browser', () => {
+    vi.stubEnv('VITE_ENGINE', 'browser')
+    setup()
+    expect(screen.getByText('Your file stays on your computer. Cleaning runs in your browser.')).toBeTruthy()
+    expect(screen.queryByText(/24 hours/)).toBeNull()
+    vi.unstubAllEnvs()
+  })
+
   it('rejects wrong type client-side', async () => {
     const user = setup()
     await user.upload(input(), new File(['x'], 'a.pdf'))

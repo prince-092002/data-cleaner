@@ -4,7 +4,7 @@
 
 const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v314.0.8/full/'
 
-export type WorkerOp = 'upload' | 'profile' | 'clean' | 'results' | 'build_xlsx' | 'file'
+export type WorkerOp = 'upload' | 'profile' | 'clean' | 'results' | 'build_xlsx' | 'file' | 'warm'
 export interface WorkerRequest {
   id: number
   op: WorkerOp
@@ -93,6 +93,7 @@ scope.onmessage = async (e) => {
       scope.postMessage({ id, progress: [0, 'Loading the cleaning engine'] })
       py = await (ready ??= boot())
     }
+    if (op === 'warm') return scope.postMessage({ id, ok: true, result: {} }) // only boots the engine
     if (op === 'upload') py.FS.writeFile('/tmp/in.bin', args.data as Uint8Array)
     const progress = (pct: number, step: string) => scope.postMessage({ id, progress: [pct, step] })
     const reply = JSON.parse(py.globals.get('call')(op, JSON.stringify(args), progress))

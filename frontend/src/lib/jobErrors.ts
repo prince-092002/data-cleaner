@@ -1,4 +1,7 @@
-export const EXPIRED_MESSAGE = 'This result has expired. Please upload the file again.'
+export const expiredMessage = () =>
+  import.meta.env.VITE_ENGINE === 'browser'
+    ? 'This result is no longer in this browser tab. Please choose the file again.'
+    : 'This result has expired. Please upload the file again.'
 
 const CODE_FALLBACKS: Record<string, string> = {
   job_timeout: 'This file took too long to process. Try a smaller file.',
@@ -14,6 +17,6 @@ export function friendlyJobError(code: string | undefined, message: string | und
   if (code === 'interrupted') {
     return 'The server restarted while your file was being processed. Your original file is safe; please try again.'
   }
-  if (code === 'expired') return EXPIRED_MESSAGE
+  if (code === 'expired') return expiredMessage()
   return message ?? (code ? CODE_FALLBACKS[code] : undefined) ?? fallback
 }

@@ -9,6 +9,7 @@ import type {
   ResultsResponse,
   UploadResponse,
 } from './types'
+// shortcut: imported statically, so the worker file is bundled in server mode too (unused there), revisit if its size matters
 import * as browser from './browserEngine'
 
 const BASE = '/api'

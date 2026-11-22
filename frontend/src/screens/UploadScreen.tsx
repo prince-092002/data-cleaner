@@ -149,7 +149,11 @@ export function UploadScreen() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <p className="text-sm text-slate-700">Files are deleted after 24 hours. Do not upload sensitive data.</p>
+        <p className="text-sm text-slate-700">
+          {import.meta.env.VITE_ENGINE === 'browser'
+            ? 'Your file stays on your computer. Cleaning runs in your browser.'
+            : 'Files are deleted after 24 hours. Do not upload sensitive data.'}
+        </p>
         <div
           data-testid="dropzone"
           onDragOver={(e) => {
