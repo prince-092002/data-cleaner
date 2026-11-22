@@ -124,6 +124,9 @@ def upload(name: str, data: bytes) -> dict[str, Any]:
     except AdapterError:
         shutil.rmtree(folder, ignore_errors=True)
         raise
+    for old in _datasets.values():  # one dataset at a time keeps the tab's memory flat
+        shutil.rmtree(old["dir"], ignore_errors=True)
+    _datasets.clear()
     expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=24)
     _datasets[dataset_id] = {
         "id": dataset_id, "filename": filename, "file_type": file_type, "dir": folder, "original": original,

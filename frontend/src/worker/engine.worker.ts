@@ -15,7 +15,7 @@ export type WorkerReply =
   | { id: number; ok: false; error: { status: number; code: string; message: string } }
   | { id: number; progress: [number, string] }
 
-interface Py {
+export interface Py {
   FS: {
     mkdirTree(p: string): void
     writeFile(p: string, data: string | Uint8Array): void
@@ -86,6 +86,13 @@ async function boot(): Promise<Py> {
 
 let ready: Promise<Py> | null = null
 
+/** Calls the Python glue. Upload bytes go through the file system, never through the JSON. */
+export function callPython(p: Py, op: WorkerOp, args: Record<string, unknown>, progress: (pct: number, step: string) => void) {
+  const { data, ...rest } = args
+  if (op === 'upload') p.FS.writeFile('/tmp/in.bin', data as Uint8Array)
+  return JSON.parse(p.globals.get('call')(op, JSON.stringify(rest), progress))
+}
+
 scope.onmessage = async (e) => {
   const { id, op, args } = e.data
   try {
@@ -94,9 +101,8 @@ scope.onmessage = async (e) => {
       py = await (ready ??= boot())
     }
     if (op === 'warm') return scope.postMessage({ id, ok: true, result: {} }) // only boots the engine
-    if (op === 'upload') py.FS.writeFile('/tmp/in.bin', args.data as Uint8Array)
     const progress = (pct: number, step: string) => scope.postMessage({ id, progress: [pct, step] })
-    const reply = JSON.parse(py.globals.get('call')(op, JSON.stringify(args), progress))
+    const reply = callPython(py, op, args, progress)
     if (!reply.ok) return scope.postMessage({ id, ...reply })
     const bytes = op === 'file' ? py.FS.readFile('/tmp/out.bin') : undefined
     scope.postMessage({ id, ...reply, bytes }, bytes ? [bytes.buffer] : [])

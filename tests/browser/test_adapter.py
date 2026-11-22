@@ -136,3 +136,12 @@ def test_progress_reported():
     seen = []
     adapter.profile(d, progress=lambda pct, step: seen.append((pct, step)))
     assert seen and seen[-1][0] == 100
+
+
+def test_new_upload_drops_earlier_datasets():
+    first = adapter.upload("o.csv", CSV.read_bytes())["dataset_id"]
+    folder = adapter._datasets[first]["dir"]
+    second = adapter.upload("o2.csv", CSV.read_bytes())["dataset_id"]
+    assert code_of(adapter.get_profile, first) == (404, "not_found")
+    assert not folder.exists()
+    assert list(adapter._datasets) == [second]
