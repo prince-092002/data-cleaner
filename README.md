@@ -53,7 +53,11 @@ Uploads are kept for 24 hours under `./storage` (change with `DC_STORAGE_DIR`). 
 For the demo with the sales sample, approve the Region suggestion on the fixes screen: west, WEST and West have no 80% majority spelling, so they become "West" only after you approve it.
 
 ## Deploying
-Live URL: https://data-cleaner-beta.vercel.app (Vercel Hobby, Neon Postgres, private Vercel Blob; pushes to `main` deploy to production, other branches make protected previews); see [docs/ADR-hosting-vercel.md](docs/ADR-hosting-vercel.md).
+Live URL: https://data-cleaner-beta.vercel.app (Vercel Hobby, static site; pushes to `main` deploy to production, other branches make protected previews); see [docs/ADR-hosting-vercel.md](docs/ADR-hosting-vercel.md).
+
+**The live site cleans files in the visitor's browser** (since Step 15). `npm run build:browser` packs `engine/`, `browser/adapter.py` and `browser/shims/` into `frontend/public/py/bundle.json` and builds the site with `VITE_ENGINE=browser`. A Web Worker loads Pyodide 314.0.8 from jsDelivr and runs the same engine; `frontend/src/api/client.ts` sends every call to it instead of the server. Files never leave the visitor's computer, there is no daily cap, the file limit is 20 MB, and results live only in the open tab. `vercel.json` is a static build; `.vercelignore` hides the Python app so Vercel does not build it.
+
+**Server mode** (local runs, and the Step 14 deployment) is unchanged and described below. The Neon database and Blob store from Step 14 are kept but not used by the live site.
 
 Backends are chosen by environment variables. Without them everything runs locally (SQLite, files under `./storage`):
 - `DATABASE_URL` set: jobs and datasets live in Postgres.
@@ -76,11 +80,11 @@ Production settings (Vercel environment variables; never commit their values):
 
 On Vercel (`VERCEL_ENV` production or preview) the app refuses to start unless `DC_STORAGE_BACKEND=blob`, `DC_JOB_RUNNER=queue` and `DATABASE_URL` are set, so SQLite and local disk are never used there. `.env.example` lists every name with a placeholder.
 
-One Vercel project serves everything: `vercel.json` builds `frontend/` into `site/`, which `backend.main` mounts at `/` behind every `/api/*` route (not `public/`: Vercel's Python builder leaves a build-made `public/` out of both the CDN and the function), `pyproject.toml` points Vercel at `backend.main:app` (the `/api/*` function, 300 s) and at the queue consumer `backend.worker`, `[project].dependencies` lists what the function installs, and `.vercelignore` keeps tests, docs, evaluation and sample generators out.
+In server mode one Vercel project served everything: `vercel.json` built `frontend/` into `site/`, which `backend.main` mounts at `/` behind every `/api/*` route (not `public/`: Vercel's Python builder leaves a build-made `public/` out of both the CDN and the function), `pyproject.toml` points Vercel at `backend.main:app` (the `/api/*` function, 300 s) and at the queue consumer `backend.worker`, `[project].dependencies` lists what the function installs, and `.vercelignore` keeps tests, docs, evaluation and sample generators out.
 
 The first CLI deploy of a new Vercel project is always a production deploy, even without `--prod`.
 
-`vercel.json` schedules the cleanup once a day (Vercel Cron, Hobby plan). Each job has a 240 second limit; a slower file fails with "This file took too long to process. Try a smaller file." Results and uploads are deleted after 24 hours. A link with `?d=...&j=...` reopens a job or its results until then.
+In server mode `vercel.json` scheduled the cleanup once a day (Vercel Cron, Hobby plan). Each job has a 240 second limit; a slower file fails with "This file took too long to process. Try a smaller file." Results and uploads are deleted after 24 hours. A link with `?d=...&j=...` reopens a job or its results until then.
 
 ## Screenshots
 | Upload (header-row check) | Profile |
@@ -169,14 +173,16 @@ The two fixes: a spelling used in 80% or more of its group now stays as written 
 
 Measured at M5. In M6 the file is read once (a Parquet cache shared by profile and clean), rules work on distinct values, and change records stream to disk: clean is 13 to 20% faster and the peak on a 47.5 MB file is 8% lower (1.8 GB). Writing clean.xlsx is still about half of the clean time. Details: [evaluation/TIMING.md](evaluation/TIMING.md).
 
-**Supported file size:** up to 50 MB when run locally (about 4 to 5 minutes and 1.8 GB of memory at the top end), and 4 MB on the live site (Vercel's request limit is 4.5 MB; a 4 MB file is about 75,000 rows and takes well under a minute).
+**Supported file size:** up to 50 MB when run locally (about 4 to 5 minutes and 1.8 GB of memory at the top end), and 20 MB on the live site, where it runs in the browser (a 19.5 MB file: profile 12 s, clean 26 s in Chrome on the test laptop).
 
 ## Known limitations
 - If you ran an earlier version locally, delete `storage/app.db` once: the old database layout is no longer migrated automatically.
-- **Live site upload limit: 4 MB per file.** Vercel limits a request body to 4.5 MB. Local runs accept up to 50 MB.
+- **Live site file limit: 20 MB.** The engine runs in the browser tab, whose memory is limited. Local runs accept up to 50 MB.
+- **First visit loads about 33 MB** (Python and Polars for the browser), a few seconds on a fast connection; later visits use the browser cache.
+- **Results live only in the open tab.** A reload or a closed tab loses them; download what you need first.
 - Latin-script files are read as Windows-1252. Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
 - Category merging does not catch swapped letters in short words ("Wset").
-- **Live site daily limits:** 3 uploads and 9 jobs for the whole site, 2 uploads and 6 jobs per visitor, and 800 MB of stored files. Formula: 75% of the Blob free plan's 2,000 advanced operations a month is 1,500; one visit costs about 16 (11 puts, 5 lists, measured 2026-11-17: 73 on the dashboard after 3 full visits plus test uploads); 1,500 / 16 / 30 = 3 uploads a day. Jobs: 3 uploads x 3 jobs a visit (1 profile, up to 2 cleans) = 9. Over a limit the site says so and asks you to try again tomorrow.
+- **Server-mode daily limits** (Step 14 deployment, not the live site any more): 3 uploads and 9 jobs for the whole site, 2 uploads and 6 jobs per visitor, from the Vercel Blob free plan (1,500 / 16 advanced operations per visit / 30 = 3). The live site has no daily limit.
 - **Live site time limit:** 240 seconds per job.
 - Locally, jobs run inside the API process; two big files at once slow each other.
 - Change records are held in memory until written.

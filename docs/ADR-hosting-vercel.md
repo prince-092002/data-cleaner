@@ -104,3 +104,8 @@ All read on 2026-11-15.
 - Static files: the `public/**` static builder lists files before the build command runs, and the Python builder leaves `public/` out of the function, so a frontend built into `public/` is never served. The build copies it to `site/` and the app mounts it at `/` after the API routes.
 - The first CLI deploy of a new project is always production, even without `--prod`.
 - Blob `put_blob` with a streamed body needs `content_length` (vercel-blob 0.6.0).
+
+## Update after Step 15 (2026-11-23)
+- The live site now runs the engine in the visitor's browser (Pyodide 314.0.8 in a Web Worker) and is deployed as a static site on the same Vercel project and URL. Reason: the Blob free plan capped the server deployment at 3 uploads a day, and no other free host without a card fitted (research 2026-11-22: Netlify has no Python functions, Hugging Face Docker Spaces need a paid plan, Cloud Run, AWS, Azure and Fly.io need a card, Render has about 512 MB and sleeps).
+- Measured in Chrome: first load about 33 MB; Sales sample profile 2.1 s, clean 2.4 s; Chicago 3,995 rows profile 4.2 s, clean 6.5 s; a 19.5 MB file profile 12.3 s, clean 26.4 s with the page responsive. clean.csv byte-identical to the local engine for both samples.
+- Kept, not deleted: the Neon database, the Blob store, the server code and its tests (server mode still runs locally). Environment variables and Deployment Protection settings are unchanged.
