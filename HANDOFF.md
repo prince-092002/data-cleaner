@@ -7,19 +7,18 @@ New session: read this file and CONTRACT.md first, before anything else.
 Data Cleaner is a website where a user uploads a messy CSV or Excel file; the system profiles it, cleans it in the background using 10 standard data-cleaning rules, and returns a clean file, an HTML cleaning report, a reusable YAML recipe and a change log. Stack: a pure-Python engine (Python 3.12, Polars, openpyxl for Excel, charset-normalizer, clevercsv, ftfy, rapidfuzz, pyyaml, pydantic), a FastAPI backend (BackgroundTasks, SQLite via SQLModel, files in `./storage` for 24 hours), and a React + TypeScript + Vite + Tailwind + shadcn/ui frontend. No login and no AI features in Phase 1. The owner is a Business Analyst who writes the BA documents in `docs/` personally.
 
 ## Current position
-- **Phase:** 1, milestone M6, Part C. Step 14 (deploy through GitHub on Vercel) done. Not tagged.
-- **Live:** https://data-cleaner-beta.vercel.app (production, public). Project `data-cleaner` is connected to GitHub (`main` is production; branch pushes make protected previews). Previews use Standard Deployment Protection.
-- **Repo:** https://github.com/prince-092002/data-cleaner (private, `main`). Branch `spike-vercel` and project `data-cleaner-spike` are kept; the spike shares the Neon database, so removing it must not delete that database.
-- **Waiting for:** the owner's "go" for Step 15. Do not start it before.
+- **Phase:** 1, milestone M6, Part C. Step 15 (live site cleans in the browser) done. Not tagged.
+- **Live:** https://data-cleaner-beta.vercel.app, now a static site: the engine runs in the visitor's browser (Pyodide). Project `data-cleaner` is connected to GitHub (`main` is production; branch pushes make protected previews).
+- **Repo:** https://github.com/prince-092002/data-cleaner (private, `main`). Server mode (FastAPI, queue, Postgres, Blob) still runs locally; the Neon database and Blob store are kept but unused by the live site. Branches `spike-vercel`, `spike-pyodide` and `pf-misc` are kept.
+- **Waiting for:** the owner's next instruction. Do not start new work before it.
 
-## Last milestone summary (Step 14, deploy, 2026-11-17)
-- Vercel installs `pyproject.toml` `[project].dependencies` (not requirements.txt), so the backend runtime packages moved there; uvicorn stays in the `backend` extra. Bundle 285.4 MB; above 250 MB Vercel installs packages at cold start (about 1.9 s).
-- Fixes found live: Blob `put_blob` needs `content_length` for streamed bodies; the built frontend is copied to `site/` and mounted by the app (the static builder lists files before the build runs and the Python builder drops `public/`).
-- Preview smoke tests: 8 pass, 4 partial (queue redelivery not replayable from outside, idle timing spoiled, Blob per-op counts only on the dashboard, deleted blob still served for minutes), 1 skipped (dependency trim conflicts; not needed). Demo CSV output identical to local; Chicago 3,995 rows: warm profile 4.6 s, clean 5.3 s; cold queue wait 5.4 s.
-- Production: site, /api and cron (secret, idempotent, 401 otherwise) pass; cron registered at 0 4 * * *, first run 2026-11-18 04:00 to 04:59 UTC. Checks 2 and 3 on production wait for the daily caps to reset (testing used today's).
-- Caps from the Blob budget (owner chose to accept the low cap): 3 uploads and 9 jobs a day for the site, 2 and 6 per visitor. See README and ADR for the formula.
+## Last milestone summary (Step 15, in-browser cleaning, 2026-11-22 to 2026-11-23)
+- Why: the Blob free plan capped the server deployment at 3 uploads a day; four research agents found no free host without a card that fits. A Pyodide spike (branch `spike-pyodide`) showed the unchanged engine gives byte-identical outputs in the browser (12 of 12 files).
+- Built: `browser/adapter.py` (same JSON and error codes as the routes), `browser/shims/` (pure OSA; clevercsv stub, so csv.Sniffer is used), `frontend/src/worker/engine.worker.ts`, `frontend/src/api/browserEngine.ts`, the `VITE_ENGINE=browser` switch in `client.ts`, `frontend/scripts/bundle-engine.mjs`, `npm run build:browser`, static `vercel.json`. Screens unchanged except download file names and three browser-mode texts.
+- Checked in Chrome (built-in browser, local build of the same code): Sales and Chicago clean.csv byte-identical to the local engine; 19.5 MB file profile 12.3 s, clean 26.4 s; 25 MB refused; reload shows the "no longer in this browser tab" card in 1.4 s; no upload or /api request. Preview build was static (no Python builder).
+- Review loop: W1 3 rounds, W2 1 round, W3 (fresh agent) fixed two review findings (upload bytes kept out of JSON; one dataset per tab). Claude in Chrome was not connected, so Agent T could not run; the coordinator ran the checks.
 
-Tests: **481 Python passed, 7 skipped (fast suite), 104 frontend passed**, build OK. No engine change; outputs and evaluation unchanged.
+Tests: **495 Python passed, 7 skipped (fast suite), 124 frontend passed**, both builds OK. No engine change.
 
 ## Decisions made
 - 2026-11-11 (M0, summarised) Repo root is the working folder. Change log has a `change_type` field. Auto fixes are listed and can be rejected; an unanswered suggestion is not applied. "Try a sample file" uses the normal upload endpoint. Added `engine/models.py`, `engine/rules/base.py`, `engine/errors.py`.
@@ -80,6 +79,7 @@ Tests: **481 Python passed, 7 skipped (fast suite), 104 frontend passed**, build
 - 2026-11-16 (M6.14) Pre-deploy fixes done by Ponytail rules (smallest change, test first). The coordinator deferred finding 7 against the letter of the task (conditions held, but no threshold crossed and Step 14 is the first real auth test) and finding 9 (an existing test would have needed weakening). `CACHE_VERSION` and `ENGINE_VERSION` left the cache key (CONTRACT 425 updated). Global upload cap default 5 is interim.
 - 2026-11-17 (M6.15) Owner accepted daily caps of 3 uploads / 9 jobs (site) and 2 / 6 (per visitor) from 16 advanced Blob ops per visit; Postgres for small JSON and one output object were estimated at 4 to 5 uploads a day and not taken. The first CLI deploy of a new project is always production (it errored, nothing served).
 - 2026-11-17 (M6.15) Fixes escalated to Opus after two failed static-site attempts. Static files are served by the function from `site/` (shortcut comment in backend/main.py). The dependency trim (finding 7) is dropped: the bundle is under the 500 MB limit.
+- 2026-11-23 (M6.16) Owner decision: the live site runs the engine in the browser (Pyodide), static on Vercel, no daily cap, 20 MB limit, results only in the open tab. CONTRACT 8.12 added. Server mode kept for local use; Neon and Blob kept, not deleted. Option A (fewer Blob operations, about 16 uploads a day) was not taken.
 
 ## Open questions and known issues
 - **Encoding:** Latin-script files are read as windows-1252, so Central European files (Polish, Czech) may show wrong accented letters. The profile screen shows the detected encoding.
@@ -105,8 +105,8 @@ Tests: **481 Python passed, 7 skipped (fast suite), 104 frontend passed**, build
 - Clean files keep unparseable values as text ("abc", "31/02/2024") by design.
 
 ## Next steps
-1. Wait for the owner's "go" for Step 15: verify the live site, including production checks 2 (demo CSV) and 3 (Chicago) after the daily caps reset, and the first cron run on 2026-11-18.
-2. Later: show the `reason` column in the report and UI, narrow the "no"/"key" id tokens, move Cron to Schedules, add the trigger to the engine/cache.py shortcut.
+1. Wait for the owner. Open items: first-load time on a slow phone; clevercsv-only CSV dialects now use csv.Sniffer in the browser; Polars 1.33 (browser) vs 2.1 (local) only checked on the bundled files.
+2. Later: show the `reason` column in the report and UI, narrow the "no"/"key" id tokens, add the trigger to the engine/cache.py shortcut, decide whether to remove the unused Vercel env vars, Neon and Blob.
 3. When the spike is no longer needed: remove project `data-cleaner-spike` without deleting the shared Neon database, then delete branch `spike-vercel`.
 
 ## How to run
@@ -145,3 +145,4 @@ The existing `.venv` has all Python dependencies. Storage location can be change
 - 2026-11-16 | M6 Step 13 Queue jobs, limits, cron | Done. Queue consumer with 240 s deadline and retries, cron cleanup, storage and daily caps, frontend states and URL resume, Chicago trimmed to 3,995 rows. 450 Python + 100 frontend tests, evaluation unchanged.
 - 2026-11-16 | M6 Pre-deploy fixes (Ponytail audit) | Done. 14 of 17 findings closed, 2 deferred; second audit adds 6 new (1 must fix for Step 14). 460 Python + 102 frontend tests, Postgres variants pass, outputs and evaluation unchanged.
 - 2026-11-17 | M6 Step 14 Deploy | Done. Live at data-cleaner-beta.vercel.app via GitHub; 3 fix loops (dependencies, Blob put, static site; one escalation to Opus); caps 3/9 from the Blob budget. 481 Python + 104 frontend tests, outputs and evaluation unchanged.
+- 2026-11-23 | M6 Step 15 In-browser cleaning | Done. Live site is static; engine runs in the browser via Pyodide, outputs byte-identical, no daily cap, 20 MB limit. 495 Python + 124 frontend tests.

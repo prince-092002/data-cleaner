@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:browser": "node scripts/bundle-engine.mjs && tsc -b && vite build --mode browser",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run"

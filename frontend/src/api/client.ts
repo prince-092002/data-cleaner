@@ -9,8 +9,13 @@ import type {
   ResultsResponse,
   UploadResponse,
 } from './types'
+// shortcut: imported statically, so the worker file is bundled in server mode too (unused there), revisit if its size matters
+import * as browser from './browserEngine'
 
 const BASE = '/api'
+
+// Read per call so tests can switch it; Vite inlines it at build time.
+const inBrowser = () => import.meta.env.VITE_ENGINE === 'browser'
 
 // Used only when the server sends no message of its own.
 const STATUS_FALLBACKS: Record<number, string> = {
@@ -68,28 +73,34 @@ const enc = encodeURIComponent
 
 /** GET /api/health: also tells the website the upload limit. */
 export function getHealth(): Promise<{ status: string; max_upload_mb: number }> {
+  if (inBrowser()) return browser.getHealth()
   return request('/health')
 }
 
 export function uploadDataset(file: File): Promise<UploadResponse> {
+  if (inBrowser()) return browser.uploadDataset(file)
   const form = new FormData()
   form.append('file', file)
   return request<UploadResponse>('/datasets', { method: 'POST', body: form })
 }
 
 export function startProfile(datasetId: string, body: ProfileRequest = {}): Promise<JobCreated> {
+  if (inBrowser()) return browser.startProfile(datasetId, body)
   return jsonPost<JobCreated>(`/datasets/${enc(datasetId)}/profile`, body)
 }
 
 export function getJob(jobId: string): Promise<JobStatus> {
+  if (inBrowser()) return browser.getJob(jobId)
   return request<JobStatus>(`/jobs/${enc(jobId)}`)
 }
 
 export function getProfile(datasetId: string): Promise<ProfileResponse> {
+  if (inBrowser()) return browser.getProfile(datasetId)
   return request<ProfileResponse>(`/datasets/${enc(datasetId)}/profile`)
 }
 
 export function startClean(datasetId: string, decisions: Decisions): Promise<JobCreated> {
+  if (inBrowser()) return browser.startClean(datasetId, decisions)
   return jsonPost<JobCreated>(`/datasets/${enc(datasetId)}/clean`, decisions)
 }
 
@@ -105,11 +116,13 @@ export function resultsQueryString(q: ResultsQuery = {}): string {
 }
 
 export function getResults(datasetId: string, query: ResultsQuery = {}): Promise<ResultsResponse> {
+  if (inBrowser()) return browser.getResults(datasetId, query)
   return request<ResultsResponse>(`/datasets/${enc(datasetId)}/results${resultsQueryString(query)}`)
 }
 
 /** Builds clean.xlsx on the server if it is not there yet (it is made on first download). */
 export function prepareExcel(datasetId: string): Promise<{ ready: boolean }> {
+  if (inBrowser()) return browser.prepareExcel(datasetId)
   return request(`/datasets/${enc(datasetId)}/downloads/clean.xlsx/prepare`, { method: 'POST' })
 }
 
@@ -117,12 +130,13 @@ export function prepareExcel(datasetId: string): Promise<{ ready: boolean }> {
 export function startDownload(url: string): void {
   const a = document.createElement('a')
   a.href = url
-  a.download = ''
+  a.download = inBrowser() ? browser.downloadName(url) : '' // a blob: URL has no file name of its own
   document.body.appendChild(a)
   a.click()
   a.remove()
 }
 
 export function downloadUrl(datasetId: string, name: string): string {
+  if (inBrowser()) return browser.downloadUrl(datasetId, name)
   return `${BASE}/datasets/${enc(datasetId)}/downloads/${enc(name)}`
 }

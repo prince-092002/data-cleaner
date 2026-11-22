@@ -575,6 +575,12 @@ It takes the `Lease` row `cron:cleanup` (10 minutes); if another run holds it th
 
 ---
 
+### 8.12 Browser mode (Step 15, the live site)
+- The live site is a static build (`npm run build:browser`, `VITE_ENGINE=browser`). Every function in `frontend/src/api/client.ts` keeps its signature and, in browser mode, is answered by `frontend/src/api/browserEngine.ts`, which talks to a Web Worker (`frontend/src/worker/engine.worker.ts`) running Pyodide 314.0.8.
+- The worker runs the unchanged `engine/` through `browser/adapter.py`, which returns the same JSON shapes and error codes as sections 8.1 to 8.7 (checked against the backend in `tests/browser/test_adapter.py`). Pyodide lacks rapidfuzz and clevercsv: `browser/shims/` gives a pure-Python `rapidfuzz.distance.OSA` and a `clevercsv` stub that makes `engine/ingest.py` use `csv.Sniffer`.
+- No file leaves the browser. Limits: 20 MB per file, one dataset per tab (a new upload drops the earlier one), results kept only in the open tab (a reload answers 404 and the expired card shows). No jobs table, queue, cron, Blob or daily caps in this mode.
+- Outputs are byte-identical to the server engine on the bundled files (Pyodide polars 1.33.1 against local 2.1.0; text files are written with LF line endings, as on Linux).
+
 ## 9. Storage and cleanup
 
 ```
