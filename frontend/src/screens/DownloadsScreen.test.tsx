@@ -16,7 +16,7 @@ function Seed() {
   const { dispatch } = useAppState()
   const [ready, setReady] = useState(false)
   useEffect(() => {
-    dispatch({ type: 'uploaded', upload: { dataset_id: 'd1', expires_at: '2030-01-02T03:04:05Z' } as UploadResponse })
+    dispatch({ type: 'uploaded', upload: { dataset_id: 'd1', filename: 'sales_orders_messy.csv', expires_at: '2030-01-02T03:04:05Z' } as UploadResponse })
     setReady(true)
   }, [dispatch])
   return ready ? <DownloadsScreen /> : null
@@ -41,7 +41,7 @@ describe('DownloadsScreen', () => {
     for (const n of ['clean.csv', 'report.html', 'recipe.yaml', 'changelog.csv']) {
       const a = screen.getByRole('link', { name: `Download ${n}` })
       expect(a.getAttribute('href')).toBe(`/api/datasets/d1/downloads/${n}`)
-      expect(a.hasAttribute('download')).toBe(true)
+      expect(a.getAttribute('download')).toBe(`sales_orders_messy_${n}`)
     }
     expect(excelButton()).toBeEnabled()
     const open = screen.getByRole('link', { name: 'Open in new tab' })

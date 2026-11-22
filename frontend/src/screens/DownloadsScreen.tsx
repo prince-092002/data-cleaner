@@ -55,6 +55,8 @@ export function DownloadsScreen() {
     )
   }
 
+  // Same names the server sends: the upload's name without its extension, then _clean.csv, _report.html and so on.
+  const stem = (upload?.filename ?? '').replace(/\.[^.]*$/, '') || 'data'
   const expires = upload?.expires_at ? new Date(upload.expires_at) : null
   const expiresText = expires && !isNaN(expires.getTime()) ? expires.toLocaleString() : null
 
@@ -86,7 +88,7 @@ export function DownloadsScreen() {
                 ) : (
                   <a
                     href={downloadUrl(datasetId, f.name)}
-                    download
+                    download={`${stem}_${f.name}`}
                     className={`${linkClass} bg-blue-600 text-white hover:bg-blue-700`}
                     aria-label={`Download ${f.name}`}
                   >

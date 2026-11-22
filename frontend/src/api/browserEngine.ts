@@ -82,6 +82,8 @@ async function fetchFile(datasetId: string, name: DownloadName) {
 }
 
 export async function getHealth(): Promise<{ status: string; max_upload_mb: number }> {
+  // The upload screen asks on mount: use that moment to boot the engine before a file is picked.
+  call('warm', {}).catch(() => {})
   return { status: 'ok', max_upload_mb: 20 }
 }
 
@@ -109,12 +111,18 @@ export async function getJob(jobId: string): Promise<JobStatus> {
   return { ...job }
 }
 
-export async function getProfile(datasetId: string): Promise<ProfileResponse> {
-  const profile = profiles.get(datasetId)
-  if (profile) return profile
+function requireKnown(datasetId: string) {
+  // A page reload forgets every dataset: answer at once instead of waiting for the engine to boot.
   if (!datasets.has(datasetId)) {
     throw new ApiError(404, 'not_found', 'This dataset was not found. Files are deleted 24 hours after upload.')
   }
+}
+
+export async function getProfile(datasetId: string): Promise<ProfileResponse> {
+  // shortcut: the profile is kept only in this page (the worker has no get-profile call), a reload loses it, revisit if reloads must restore
+  const profile = profiles.get(datasetId)
+  if (profile) return profile
+  requireKnown(datasetId)
   throw new ApiError(409, 'not_ready', 'The profile is not ready yet. Start a profile job and wait for it to finish.')
 }
 
@@ -128,6 +136,7 @@ export async function startClean(datasetId: string, decisions: Decisions) {
 }
 
 export async function getResults(datasetId: string, query: ResultsQuery = {}) {
+  requireKnown(datasetId)
   const r = await call('results', { dataset_id: datasetId, query })
   return r.result as ResultsResponse
 }
