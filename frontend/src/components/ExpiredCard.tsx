@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useFocusOnMount } from '@/lib/useFocusOnMount'
-import { EXPIRED_MESSAGE } from '@/lib/jobErrors'
+import { expiredMessage } from '@/lib/jobErrors'
 import { useAppState } from '@/state/AppState'
 
-/** Shown when the server no longer knows the dataset or job (it is deleted after 24 hours). */
+/** Shown when the server no longer knows the dataset or job (on the server it is deleted after 24 hours; in the browser it is gone when the tab reloads). */
 export function ExpiredCard() {
   const { dispatch } = useAppState()
   const msg = useFocusOnMount<HTMLParagraphElement>()
@@ -12,7 +12,7 @@ export function ExpiredCard() {
     <Card>
       <CardContent className="space-y-4 pt-6">
         <p ref={msg} tabIndex={-1} role="alert" className="text-red-700 outline-none">
-          {EXPIRED_MESSAGE}
+          {expiredMessage()}
         </p>
         <Button onClick={() => dispatch({ type: 'reset' })}>Upload another file</Button>
       </CardContent>

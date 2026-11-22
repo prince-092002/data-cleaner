@@ -64,7 +64,9 @@ export function DownloadsScreen() {
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Downloads</h2>
       <p className="text-sm text-slate-700">
-        Files are deleted 24 hours after upload{expiresText ? ` (expires ${expiresText})` : ''}.
+        {import.meta.env.VITE_ENGINE === 'browser'
+          ? 'These files exist only in this browser tab. Download what you need before you close or reload it.'
+          : `Files are deleted 24 hours after upload${expiresText ? ` (expires ${expiresText})` : ''}.`}
       </p>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {FILES.map((f) => (

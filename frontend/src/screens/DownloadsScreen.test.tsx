@@ -50,6 +50,16 @@ describe('DownloadsScreen', () => {
     expect(screen.getByText(/24 hours after upload \(expires/)).toBeTruthy()
   })
 
+  it('says the files only live in this tab in browser mode', () => {
+    vi.stubEnv('VITE_ENGINE', 'browser')
+    setup()
+    expect(
+      screen.getByText('These files exist only in this browser tab. Download what you need before you close or reload it.'),
+    ).toBeTruthy()
+    expect(screen.queryByText(/24 hours/)).toBeNull()
+    vi.unstubAllEnvs()
+  })
+
   it('shows "Preparing your Excel file" and then starts the download', async () => {
     let finish: (v: { ready: boolean }) => void = () => {}
     vi.mocked(prepareExcel).mockReturnValue(new Promise((resolve) => (finish = resolve)))
