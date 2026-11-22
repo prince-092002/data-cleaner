@@ -91,6 +91,12 @@ export async function uploadDataset(file: File): Promise<UploadResponse> {
   const data = new Uint8Array(await file.arrayBuffer())
   const r = await call('upload', { name: file.name, data }, undefined, [data.buffer])
   const up = r.result as UploadResponse
+  for (const old of datasets) { // the worker keeps one dataset only, so earlier ones are gone
+    forget(old)
+    profiles.delete(old)
+    for (const [id, job] of jobs) if (job.dataset_id === old) jobs.delete(id)
+  }
+  datasets.clear()
   datasets.add(up.dataset_id)
   return up
 }

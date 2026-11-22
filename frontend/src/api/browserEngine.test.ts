@@ -139,6 +139,26 @@ describe('browser engine', () => {
     expect(e.downloadName(e.downloadUrl('d1', 'clean.csv'))).toBe('a_x')
   })
 
+  it('a new upload revokes earlier blob URLs and forgets the earlier dataset', async () => {
+    let n = 0
+    handler = (req, emit) => {
+      if (req.op === 'upload') return emit({ id: req.id, ok: true, result: { ...upload, dataset_id: `d${++n}` } })
+      if (req.op === 'file') return emit({ id: req.id, ok: true, result: { filename: 'a_x', mime: 'text/csv' }, bytes: new Uint8Array([1]) })
+      emit({ id: req.id, ok: true, result: {} })
+    }
+    const e = await load()
+    await e.uploadDataset(new File(['a'], 'a.csv'))
+    await e.startClean('d1', { approved: [], rejected: [], edited: [] })
+    await flush()
+    await flush()
+    const url = e.downloadUrl('d1', 'clean.csv')
+    expect(url).toMatch(/^blob:/)
+    await e.uploadDataset(new File(['b'], 'b.csv'))
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith(url)
+    expect(e.downloadUrl('d1', 'clean.csv')).toBe('#')
+    await expect(e.getResults('d1')).rejects.toMatchObject({ status: 404 })
+  })
+
   it('a clean job stays failed when its files cannot be fetched', async () => {
     handler = (req, emit) =>
       emit(req.op === 'file' ? { id: req.id, ...err(500, 'internal_error', 'boom') } : { id: req.id, ok: true, result: {} })
