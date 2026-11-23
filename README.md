@@ -55,7 +55,7 @@ For the demo with the sales sample, approve the Region suggestion on the fixes s
 ## Deploying
 Live URL: https://data-cleaner-beta.vercel.app (Vercel Hobby, static site; pushes to `main` deploy to production, other branches make protected previews); see [docs/ADR-hosting-vercel.md](docs/ADR-hosting-vercel.md).
 
-**The live site cleans files in the visitor's browser** (since Step 15). `npm run build:browser` packs `engine/`, `browser/adapter.py` and `browser/shims/` into `frontend/public/py/bundle.json` and builds the site with `VITE_ENGINE=browser`. A Web Worker loads Pyodide 314.0.8 from jsDelivr and runs the same engine; `frontend/src/api/client.ts` sends every call to it instead of the server. Files never leave the visitor's computer, there is no daily cap, the file limit is 20 MB, and results live only in the open tab. `vercel.json` is a static build; `.vercelignore` hides the Python app so Vercel does not build it.
+**The live site cleans files in the visitor's browser**. `npm run build:browser` packs `engine/`, `browser/adapter.py` and `browser/shims/` into `frontend/public/py/bundle.json` and builds the site with `VITE_ENGINE=browser`. A Web Worker loads Pyodide 314.0.8 from jsDelivr and runs the same engine; `frontend/src/api/client.ts` sends every call to it instead of the server. Files never leave the visitor's computer, there is no daily cap, the file limit is 20 MB, and results live only in the open tab. `vercel.json` is a static build; `.vercelignore` hides the Python app so Vercel does not build it.
 
 **Server mode** (local runs, and the Step 14 deployment) is unchanged and described below. The Neon database and Blob store from Step 14 are kept but not used by the live site.
 
