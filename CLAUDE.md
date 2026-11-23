@@ -61,7 +61,7 @@ Each agent works alone on one task, reads CONTRACT.md first, reads only the file
 ```bash
 python -m venv .venv && .venv/Scripts/activate      # Windows
 pip install -e ".[backend,dev]"
-pytest -q                                           # engine + API tests (~384; some are marked slow but still run by default)
+pytest -q                                           # engine + API tests (~500; some are marked slow but still run by default)
 pytest tests/engine/test_rules.py -q                # one file
 pytest tests/engine/test_rules.py::test_name -q     # one test
 pytest -q -m "not slow"                             # skip the 1-2 minute tests
@@ -72,8 +72,9 @@ cd frontend && npm install && npm run dev           # port 5173, proxies /api to
 cd frontend && npm test                             # Vitest, already "vitest run" (one file: npm test -- src/screens/FixesScreen.test.tsx)
 cd frontend && npm run lint                         # oxlint
 cd frontend && npm run build                        # tsc -b && vite build
+cd frontend && npm run build:browser                # live-site build: bundles engine/ + browser/ into public/py/bundle.json, VITE_ENGINE=browser
 ```
-Env vars: `DC_STORAGE_DIR` (default `./storage`), `DC_CORS_ORIGINS`.
+Env vars: `DC_STORAGE_DIR` (default `./storage`), `DC_CORS_ORIGINS`. Server-mode deploy vars (`DATABASE_URL`, `DC_STORAGE_BACKEND`, `DC_JOB_RUNNER`, caps) are listed in README "Deploying" and `.env.example`.
 
 ## Architecture (the parts that span files)
 - **Pipeline is the only engine surface.** `engine/pipeline.py` exposes `inspect` → `profile` → `build_plan` → `clean` (CONTRACT section 7). `backend/routes.py` and `backend/jobs.py` call only these.
@@ -83,5 +84,6 @@ Env vars: `DC_STORAGE_DIR` (default `./storage`), `DC_CORS_ORIGINS`.
 - **Rules** live one per file in `engine/rules/`, share `engine/rules/base.py`, and may define an optional `prepare(df, column, params)` for params that depend on data (date order, category mapping).
 - **Data conventions:** empty cells are null at ingest, Excel values are read as text, and columns keep the uploaded header until `normalize_headers` runs.
 - **Backend:** upload → `POST /profile` job → `POST /clean` job; jobs are rows in SQLite polled via `GET /api/jobs/{id}`. Starting a new profile deletes the dataset's old results; expired datasets (24 h) return 404.
+- **Two runtimes, one engine.** The live site (Vercel, static `vercel.json`) runs the unchanged engine in the visitor's browser: `frontend/src/worker/engine.worker.ts` loads Pyodide and calls `browser/adapter.py`, which must return the same JSON and error codes as `backend/routes.py`; `browser/shims/` replaces clevercsv and rapidfuzz. `api/client.ts` routes every call to `api/browserEngine.ts` when `VITE_ENGINE=browser`, otherwise to the server. A change to the route contract must be mirrored in the adapter. Server mode (local; SQLite/disk by default, Postgres/Vercel Blob/Queues via env vars) is unchanged. Details: README "Deploying", CONTRACT 8.12.
 - **Frontend:** six screens in `frontend/src/screens/` driven by `state/AppState.tsx`; all HTTP goes through `api/client.ts` with types in `api/types.ts`. Bundled "Try a sample file" copies in `frontend/public/samples/` must match `sample_data/` (guarded by `tests/engine/test_frontend_samples.py`).
 - **CONTRACT changes:** when a contract decision changes, record it under "Decisions made" in HANDOFF.md with the reason.
